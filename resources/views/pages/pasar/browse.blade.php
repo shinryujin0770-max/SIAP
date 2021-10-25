@@ -3,9 +3,10 @@
 @section('title', 'Pasar')
 
 @section('content_header')
-<h1 class="m-0 text-dark">
-    {{$page_title}}
-</h1>
+<div class="m-0 text-dark">
+    <h1 class="d-inline">{{$page_title}}</h1>
+    <h6 class="d-inline text-muted">{{$page_subtitle}}</h6>
+</div>
 @stop
 
 @section('content')

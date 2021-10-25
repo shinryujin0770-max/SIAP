@@ -11,6 +11,7 @@ use App\Models\Situ;
 use App\Services\CertificatesService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
@@ -23,6 +24,7 @@ class SituController extends Controller
     {
         $this->middleware('auth');
 
+        Carbon::setLocale('id');
         $this->certificateService = new CertificatesService();
     }
 
@@ -45,10 +47,10 @@ class SituController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->editColumn('kode', function ($row) {
-                    return $this->generateKodeSitu($row['id'], $row['id_pasar'], $row['created_at']);
+                    return $this->generateKodeSitu($row['id'], $row['id_pasar'], $row['tanggal_terbit']);
                 })
                 ->editColumn('tanggal_terbit', function ($row) {
-                    return Carbon::parse($row['tanggal_terbit'])->formatLocalized('%d %B %Y') . ' s/d ' . Carbon::parse($row['berlaku_sampai'])->formatLocalized('%d %B %Y');
+                    return Carbon::parse($row['tanggal_terbit'])->isoFormat('DD MMMM YYYY') . ' s/d ' . Carbon::parse($row['berlaku_sampai'])->isoFormat('DD MMMM YYYY');
                 })
                 ->addColumn('action', function ($row) {
                     $id = $row['id'];
@@ -244,13 +246,59 @@ class SituController extends Controller
         return redirect('situ');
     }
 
+    public function modalSignature($id)
+    {
+        $data['page_title'] = "SITU";
+        $data['page_subtitle'] = "Tanda Tangani SITU";
+        $data['situ'] = Situ::findOrFail($id);
+
+        return view('pages/situ/signature', $data);
+    }
+
+    public function signature($id)
+    {
+        $situ = Situ::find('id', $id);
+        $situ->is_signatured = true;
+        $situ->id_signature = Auth::id();
+        $store = $situ->save();
+
+        if (!$store) {
+            toastr()->error('Gagal melakukan tanda tangan');
+            return redirect('situ');
+        }
+
+        toastr()->success('Berhasil melakukan tanda tangan');
+        return redirect('situ');
+    }
+
     public function previewCertificates($id)
     {
-        $data = Situ::select('situ.*', 'pasar.nama as nama_pasar', 'kios.nomor as nama_kios', 'jenis_dagangan.nama as nama_jenis_dagangan', 'pedagang.nik as nik_pedagang', 'pedagang.nama as nama_pedagang')->orderBy('id', 'desc')
+        $data = Situ::select(
+            'situ.*',
+            'pasar.id as id_pasar',
+            'pasar.nama as nama_pasar',
+            'kios.nomor as nama_kios',
+            'kios.ukuran as ukuran_kios',
+            'jenis_dagangan.nama as nama_jenis_dagangan',
+            'pedagang.nik as nik_pedagang',
+            'pedagang.nama as nama_pedagang',
+            'pedagang.alamat as alamat_pedagang',
+            'pedagang.tempat_lahir as tempat_lahir_pedagang',
+            'pedagang.tanggal_lahir as tanggal_lahir_pedagang',
+        )
             ->leftJoin('pasar', 'situ.id_pasar', '=', 'pasar.id', 'left')
             ->leftJoin('kios', 'situ.id_kios', '=', 'kios.id', 'left')
             ->leftJoin('jenis_dagangan', 'situ.id_jenis_dagangan', '=', 'jenis_dagangan.id', 'left')
             ->leftJoin('pedagang', 'situ.id_pedagang', '=', 'pedagang.id', 'left')->where('situ.id', $id)->first();
+
+        $data['nomor_situ'] = $this->generateKodeSitu($data['id'], $data['id_pasar'], $data['tanggal_terbit']);
+        $data['tanggal_lahir_pedagang'] = Carbon::parse($data['tanggal_lahir_pedagang'])->isoFormat('DD MMMM YYYY');
+        $data['berlaku_sampai'] = Carbon::parse($data['berlaku_sampai'])->isoFormat('DD MMMM YYYY');
+        $data['tanggal_terbit'] = Carbon::parse($data['tanggal_terbit'])->isoFormat('DD MMMM YYYY');
+        if (count($data->getMedia('foto')) > 0) {
+            $data['foto'] = $data->getMedia('foto')->pop()->getFullUrl();
+        }
+        // dd($data);
 
         return $this->certificateService->getSurat($data);
     }

@@ -24,7 +24,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 
 
-// Jenis Dagangan
+// SITU
 Route::get('/situ', [App\Http\Controllers\SituController::class, 'index'])->name('situ');
 Route::get('/situ/browse', [App\Http\Controllers\SituController::class, 'browse'])->name('situ.browse');
 Route::get('/situ/add', [App\Http\Controllers\SituController::class, 'add'])->name('situ.add');
@@ -35,6 +35,8 @@ Route::post('/situ/store', [App\Http\Controllers\SituController::class, 'store']
 Route::post('/situ/update', [App\Http\Controllers\SituController::class, 'update'])->name('situ.update');
 Route::get('/situ/modalDelete/{id}', [App\Http\Controllers\SituController::class, 'modalDelete'])->name('situ.modalDelete');
 Route::post('/situ/delete/{id}', [App\Http\Controllers\SituController::class, 'delete'])->name('situ.delete');
+Route::get('/situ_reregistration', [App\Http\Controllers\SituReregistrationController::class, 'index'])->name('situ.reregistration');
+Route::get('/situ_reregistration/browse', [App\Http\Controllers\SituReregistrationController::class, 'browse'])->name('situ.reregistration.browse');
 
 // Jenis Dagangan
 Route::get('/jenis_dagangan', [App\Http\Controllers\JenisDaganganController::class, 'index'])->name('jenis_dagangan');

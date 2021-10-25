@@ -36,17 +36,35 @@ class EventServiceProvider extends ServiceProvider
             ]);
             $event->menu->add('MENU UTAMA');
             $event->menu->add([
+                'key'         => 'situ',
                 'text'        => 'SITU',
                 'url'         => 'situ',
                 'icon'        => 'fas fa-fw fa-book',
                 'active'      => ['situ', 'situ' . '*', 'regex:@^' . 'situ' . '/[a-zA-Z]/[0-9]+$@'],
+            ]);
+            $event->menu->addIn('situ', [
+                'text'        => 'SITU',
+                'url'         => 'situ',
+                'icon'        => 'fas fa-fw fa-paste',
+                'active'      => ['situ', 'regex:@^' . 'situ' . '/[0-9]+$@'],
+            ]);
+            $event->menu->addIn('situ', [
+                'text'        => 'Registrasi Ulang',
+                'url'         => 'situ_reregistration',
+                'icon'        => 'fas fa-fw fa-retweet',
+                'active'      => ['situ_reregistration', 'situ_reregistration' . '*', 'regex:@^' . 'situ_reregistration' . '/[a-zA-Z]/[0-9]+$@'],
             ]);
             $event->menu->add([
                 'text'        => 'Pedagang',
                 'url'         => 'pedagang',
                 'icon'        => 'fas fa-fw fa-person-booth',
             ]);
-            $event->menu->add('SETTINGS');
+            $event->menu->add('PENGATURAN');
+            $event->menu->add([
+                'text'        => 'Pengguna',
+                'url'         => 'users',
+                'icon'        => 'fas fa-fw fa-users',
+            ]);
             $event->menu->add([
                 'key' => 'data_master',
                 'text'        => 'Data Master',

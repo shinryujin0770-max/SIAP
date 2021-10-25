@@ -1,95 +1,195 @@
-@include('certificates.top')
+<style>
+    @page {
+        margin: 0px;
+        size: 21.9cm 34.4cm portrait;
+    }
 
-<div class="text-center" style="padding: 0px 100px;">
-    <b style="14pt">SURAT IZIN TEMPAT USAHA (SITU)</b>
-    <br>
-    <b style="14pt">KIOS PASAR NGEMPLAK</b>
-    <hr style="margin: 0">
-    <b style="14pt">Nomor : 511/0911/105/2016</b>
+    body {
+        margin: 0px;
+    }
+
+    .container-mail {
+        font-family: Times, serif;
+        width: 100%;
+        height: 100vh;
+        background-image: url("front.jpg");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 100%;
+    }
+
+    .table {
+        border: none;
+        width: 100%;
+    }
+
+    .table-bordered,
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    .table-border,
+    .table-border th.border,
+    .table-border td.border {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    .col {
+        border: 1px solid black;
+    }
+
+    p {
+        margin: 12px 0px
+    }
+
+    .isi p {
+        margin: 0px 0px;
+    }
+
+    .no-margin p {
+        margin: 0px 0px;
+    }
+
+    .text-uppercase {
+        text-transform: uppercase;
+    }
+
+    .text-capitalize {
+        text-transform: capitalize;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .text-left {
+        text-align: left;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    .text-justify {
+        text-align: justify;
+        line-height: 1.6;
+    }
+
+    .float-right {
+        float: right;
+    }
+
+    .text-top {
+        vertical-align: text-top;
+    }
+
+    .text-bottom {
+        vertical-align: text-bottom;
+    }
+
+    .kop-surat p {
+        /* font-size: 12.1px; */
+        color: rgb(0, 0, 0);
+        /* font-weight: bold; */
+        font-style: normal;
+        text-decoration: none
+    }
+
+    .paragraph {
+        padding-left: 40px;
+    }
+
+    .isi {
+        /* padding-left: 85px; */
+        margin-top: 1rem;
+    }
+
+    .ttd {
+        width: 8.15cm;
+    }
+
+    .catatan {
+        width: 5.15cm;
+        margin-top: 230px;
+    }
+
+    .d-inline {
+        display: inline;
+    }
+
+    .keep-together {
+        page-break-inside: avoid;
+    }
+
+    .page-break-before {
+        page-break-before: always;
+    }
+
+    .page-break-after {
+        page-break-after: always;
+    }
+
+    ol {
+        padding-left: 20px;
+    }
+
+    ol li::before {
+        text-align: justify;
+        line-height: 1.6;
+        display: block;
+        float: left;
+        margin-top: -0.25em;
+    }
+</style>
+<div class="container-mail page-break-after">
+
+    <div class="text-center" style="position: absolute; top: 300px; padding: 0px 220px;">
+        <b class="text-uppercase">{{$nama_pasar}}</b>
+        <hr style="margin: 0">
+        <b>Nomor : {{$nomor_situ}}</b>
+    </div>
+
+    <div class="text-uppercase" style="position: absolute; top: 440px; left: 360px;">
+        <div style="font-size: 11pt; margin-bottom: 1.2px; margin-top: 1px;">{{$nama_pedagang}}</div>
+        <div style="font-size: 11pt; margin-bottom: 1.2px; margin-top: 1px;">
+            {{$tempat_lahir_pedagang}}, {{$tanggal_lahir_pedagang}}
+        </div>
+        <div style="font-size: 11pt; margin-bottom: 1.2px; margin-top: 1px;">{{$nik_pedagang}}</div>
+        <div style="font-size: 11pt; margin-bottom: 1.2px; margin-top: 1px;">{{$alamat_pedagang}}
+        </div>
+        <div style="font-size: 11pt; margin-bottom: 1.2px; margin-top: 1px;">{{$nama_kios}}</div>
+        <div style="font-size: 11pt; margin-bottom: 1.2px; margin-top: 1px;">{{$ukuran_kios}}</div>
+        <div style="font-size: 11pt; margin-bottom: 1.2px; margin-top: 1px;">{{$nama_jenis_dagangan}}
+        </div>
+        <div style="font-size: 11pt; margin-bottom: 1.2px; margin-top: 1px;">{{$berlaku_sampai}}
+        </div>
+    </div>
+
+    <div class="text-capitalize" style="position: absolute; bottom: 311px; left: 572px;">
+        <div style="font-size: 11pt; margin-bottom: 1.2px; margin-top: 1px;">{{$tanggal_terbit}}</div>
+    </div>
+    <div class="text-capitalize text-center" style="position: absolute; bottom: 160px; left: 190px;">
+        <img src="{{url($foto)}}" alt="pedagang" style="width: 3cm; height: 4cm; object-fit: cover;">
+    </div>
+    <div class="text-capitalize text-center" style="position: absolute; bottom: 100px; left: 352px;">
+        <p class="text-capitalize" style="font-size: 10pt;">
+            Kepala Bidang Pengendalian dan Evaluasi <br>
+            Kabupaten Tulungagung
+        </p>
+        <div style="height: 20mm"></div>
+        <div style="font-size: 10pt;">
+            <u>NURWENI ASTUTI, S.H.,M.M.</u>
+        </div>
+        <div style="font-size: 10pt;">
+            Pembina
+        </div>
+        <div style="font-size: 10pt;">
+            NIP. 19660509 199003 2 010
+        </div>
+    </div>
 </div>
 
-<div class="isi text-justify">
-    Berdasarkan Ketentuan Pasal 3 Ayat (1) Peraturan Daerah Kabupaten Tulungagung Nomor 12 tahun 2014 Tentang Perubahan
-    Atas Peraturan Daerah Kabupaten Tulungagung Nomor 2 tahun 2021 Tentang Penyelenggaraan dan Pelayanan Pasar, Kepala
-    Dinas Pendapatan Kabupaten Tulungagung memberikan Surat Izin Tempat Usaha (SITU) kepada:
-</div>
-
-<table class="isi table">
-    <tr>
-        <td style="width: 4%">1.</td>
-        <td style="width: 30%">Nama Pedagang</td>
-        <td style="width: 1%">:</td>
-        <td style="font-weight: 100">SUTIKNO, MM. DRS</td>
-    </tr>
-    <tr>
-        <td>2.</td>
-        <td>Tempat/Tanggal Lahir (Usia)</td>
-        <td>:</td>
-        <td style="font-weight: bold">TULUNGAGUNG, 31 Maret 1956</td>
-    </tr>
-    <tr>
-        <td>3.</td>
-        <td>NIK</td>
-        <td>:</td>
-        <td style="font-weight: bold"></td>
-    </tr>
-    <tr>
-        <td>4.</td>
-        <td>Alamat</td>
-        <td>:</td>
-        <td style="font-weight: bold"></td>
-    </tr>
-    <tr>
-        <td>5.</td>
-        <td>Nomor KIOS</td>
-        <td>:</td>
-        <td style="font-weight: bold"></td>
-    </tr>
-    <tr>
-        <td>6.</td>
-        <td>Ukuran/Luas</td>
-        <td>:</td>
-        <td style="font-weight: bold"></td>
-    </tr>
-    <tr>
-        <td>7.</td>
-        <td>Jenis Dagangan</td>
-        <td>:</td>
-        <td style="font-weight: bold"></td>
-    </tr>
-    <tr>
-        <td>8.</td>
-        <td>Berlaku sampai dengan</td>
-        <td>:</td>
-        <td style="font-weight: bold"></td>
-    </tr>
-</table>
-
-<div class="isi text-justify">
-    Pemegang SITU wajib:
-    <ul type="a">
-        <li>Memanfaatkan tempat usaha sesuai jenis usaha yang telah ditetapkan dalam SITU;</li>
-        <li>Membayar retribusi tepat waktu;</li>
-        <li>Menjaga ketertiban, kesopanan, keamanan, dan kebersihan lingkungan pasar/pertokoan;</li>
-        <li>Membayar tanggungan listrik, air bersih dan pajak-pajak yang berlaku atas biaya sendiri;</li>
-        <li>Bertanggungjawab atas terjadinya kerusakan dan/atau kebakaran pasar yang diakibatkan oleh kelalaian pemegang
-            SITU;</li>
-        <li>Mengembalikan SITU kepada Dinas apabila sudah tidak dipergunakan lagi.</li>
-    </ul>
-</div>
-
-<div class="isi text-justify">
-    Pemegang SITU dilarang:
-    <ul type="a">
-        <li>Menambah atau merubah bangunan yang telah ada tanpa persetujuan dari Kepala Dinas;</li>
-        <li>Menggunakan tempat usaha sebagai tempat tinggal;</li>
-        <li>Memperjual belikan barang/usaha yang dilarang oleh peraturan perundang-undangang yang berlaku;</li>
-        <li>Berbuat onar atau kegaduhan yang mengganggu ketertiban umum;</li>
-        <li>Memindahtangankan atau mengalihkan SITU kepada pihak lain.</li>
-    </ul>
-</div>
-
-<div class="paragraph text-justify">
-    SITU ini berlaku selama 5 (lima) tahun, dan setiap tahun dilakukan daftar ulang.
-</div>
-@include('certificates.bottom')
+@include('certificates.back')

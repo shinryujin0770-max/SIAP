@@ -1,11 +1,21 @@
 <style>
-    .container-mail {
+    @page {
+        margin: 0px;
+        size: 21.9cm 34.4cm portrait;
+    }
+
+    body {
+        margin: 0px;
+    }
+
+    .container-back {
         font-family: Times, serif;
         width: 100%;
-        padding-top: 2mm;
-        padding-bottom: 2mm;
-        padding-right: 2mm;
-        padding-left: 2mm;
+        height: 100vh;
+        background-image: url("back.jpg");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 100%;
     }
 
     .table {
@@ -41,6 +51,10 @@
 
     .no-margin p {
         margin: 0px 0px;
+    }
+
+    .text-lowercase {
+        text-transform: lowercase;
     }
 
     .text-uppercase {
@@ -134,29 +148,11 @@
         margin-top: -0.25em;
     }
 </style>
-<div class="container-mail">
-    <table class="table">
-        <tr>
-            <td style="width: 13%">
-                <img src="{{ url('logo-tulungagung.png')}}" width="125" height="145">
-            </td>
-            <td>
-                <div class="text-center kop-surat">
-                    <p style="margin-bottom: -10px; font-size: 16pt; font-weight: bold">PEMERINTAH KABUPATEN
-                        TULUNGAGUNG</p>
-                    <p style="margin-bottom: -10px; font-size: 28pt; font-weight: bold">DINAS PENDAPATAN</p>
-                    <p style="margin-bottom: -10px; font-size: 10pt">Jl. Ahmad Yani Timur No. 37 Telp. (0355) 320098 Kode
-                        Pos 66217</p>
-                    <p style="margin-bottom: 1px; font-size: 11pt;">TULUNGAGUNG</p>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <p>
-                    <hr style="border: 1px solid black;">
-                    <hr style="border: 0.1px solid black; margin-top: -6px">
-                </p>
-            </td>
-        </tr>
-    </table>
+<div class="container-back">
+    <div class="text-left" style="position: absolute; top: 210px; left: 10px; padding: 0px 105px;">
+        @include('certificates.daful')
+    </div>
+    <div class="text-center" style="position: absolute; top: 210px; left: 320px; padding: 0px 105px;">
+        @include('certificates.stamp')
+    </div>
+</div>

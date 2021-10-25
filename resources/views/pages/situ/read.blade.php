@@ -3,9 +3,10 @@
 @section('title', 'SITU')
 
 @section('content_header')
-<h1 class="m-0 text-dark">
-    {{$page_title}}
-</h1>
+<div class="m-0 text-dark">
+    <h1 class="d-inline">{{$page_title}}</h1>
+    <h6 class="d-inline text-muted">{{$page_subtitle}}</h6>
+</div>
 @stop
 
 @section('content')
@@ -32,6 +33,7 @@
                 <div class="row">
                     <div class="col-12 scrolling-wrapper">
                         <div class="row justify-content-center">
+                            {{-- {!!$certificate!!} --}}
                             <iframe src="{{ url('situ/'.$situ['id'].'/certificate') }}" width="100%" height="1000">
                                 This browser does not support PDFs. Please download the PDF to view it: <a
                                     href="{{ url('situ/'.$situ['id'].'/certificate') }}">Download PDF</a>
