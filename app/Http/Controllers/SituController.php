@@ -8,6 +8,7 @@ use App\Models\Kios;
 use App\Models\Pasar;
 use App\Models\Pedagang;
 use App\Models\Situ;
+use App\Models\User;
 use App\Services\CertificatesService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -152,7 +153,7 @@ class SituController extends Controller
 
         if (!$store) {
             toastr()->error('Gagal Menambah');
-            return redirect('situ');
+            return;
         }
 
         if (isset($attr['foto'])) {
@@ -162,7 +163,7 @@ class SituController extends Controller
         }
 
         toastr()->success('Berhasil Menambah');
-        return redirect('situ');
+        return 'true';
     }
 
     public function edit($id)
@@ -178,6 +179,10 @@ class SituController extends Controller
         $data['kioss'] = Kios::all();
         $data['pedagangs'] = Pedagang::all();
         $data['jenis_dagangans'] = Jenis_dagangan::all();
+
+        if (count($data['situ']->getMedia('foto')) > 0) {
+            $data['foto'] = $data['situ']->getMedia('foto')->pop()->getFullUrl();
+        }
 
         return view('pages/situ/edit', $data);
     }
@@ -211,7 +216,7 @@ class SituController extends Controller
 
         if (!$store) {
             toastr()->error('Gagal Mengubah');
-            return redirect('situ');
+            return;
         }
 
         if (isset($attr['foto'])) {
@@ -221,7 +226,7 @@ class SituController extends Controller
         }
 
         toastr()->success('Berhasil Mengubah');
-        return redirect('situ');
+        return 'true';
     }
 
     public function modalDelete($id)
@@ -257,7 +262,7 @@ class SituController extends Controller
 
     public function signature($id)
     {
-        $situ = Situ::find('id', $id);
+        $situ = Situ::find($id);
         $situ->is_signatured = true;
         $situ->id_signature = Auth::id();
         $store = $situ->save();
@@ -298,7 +303,10 @@ class SituController extends Controller
         if (count($data->getMedia('foto')) > 0) {
             $data['foto'] = $data->getMedia('foto')->pop()->getFullUrl();
         }
-        // dd($data);
+        $data['user'] = User::find($data['id_signature']);
+        if (count($data['user']->getMedia('signature')) > 0) {
+            $data['signature'] = $data['user']->getMedia('signature')->pop()->getFullUrl();
+        }
 
         return $this->certificateService->getSurat($data);
     }

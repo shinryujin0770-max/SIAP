@@ -12,7 +12,13 @@
         <br>
         Kabupaten Tulungagung
     </div>
+    @if ($is_signatured)
+    <div style="position: relative; height: 25mm; display: flex; justify-content: center; align-items: center">
+        <img src="{{$signature}}" style="height: 25mm; align-self: center;">
+    </div>
+    @else
     <div style="height: 25mm"></div>
+    @endif
     <div>
         <u>NURWENI ASTUTI, S.H.,M.M.</u>
     </div>

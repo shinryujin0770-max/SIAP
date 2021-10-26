@@ -79,6 +79,9 @@
                             </div>
                             <div class="form-group">
                                 <label>Foto Pemilik</label>
+                                <div class="my-2">
+                                    <img src="{{$foto}}" alt="foto" style="width: 150px;">
+                                </div>
                                 <input type="file" name="foto" class="form-control" id="foto">
                             </div>
                             <hr>

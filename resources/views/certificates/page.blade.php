@@ -176,18 +176,24 @@
     </div>
     <div class="text-capitalize text-center" style="position: absolute; bottom: 100px; left: 352px;">
         <p class="text-capitalize" style="font-size: 10pt;">
-            Kepala Bidang Pengendalian dan Evaluasi <br>
+            {{$user->jabatan}} <br>
             Kabupaten Tulungagung
         </p>
+        @if ($is_signatured)
+        <div style="position: relative; height: 20mm; display: flex; justify-content: center; align-items: center">
+            <img src="{{$signature}}" style="height: 20mm; align-self: center;">
+        </div>
+        @else
         <div style="height: 20mm"></div>
+        @endif
         <div style="font-size: 10pt;">
-            <u>NURWENI ASTUTI, S.H.,M.M.</u>
+            <u>{{$user->name}}</u>
         </div>
         <div style="font-size: 10pt;">
-            Pembina
+            {{$user->pangkat}}
         </div>
         <div style="font-size: 10pt;">
-            NIP. 19660509 199003 2 010
+            NIP. {{$user->nip}}
         </div>
     </div>
 </div>

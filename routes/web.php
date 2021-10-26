@@ -35,6 +35,8 @@ Route::post('/situ/store', [App\Http\Controllers\SituController::class, 'store']
 Route::post('/situ/update', [App\Http\Controllers\SituController::class, 'update'])->name('situ.update');
 Route::get('/situ/modalDelete/{id}', [App\Http\Controllers\SituController::class, 'modalDelete'])->name('situ.modalDelete');
 Route::post('/situ/delete/{id}', [App\Http\Controllers\SituController::class, 'delete'])->name('situ.delete');
+Route::get('/situ/modalSignature/{id}', [App\Http\Controllers\SituController::class, 'modalSignature'])->name('situ.modalSignature');
+Route::post('/situ/signature/{id}', [App\Http\Controllers\SituController::class, 'signature'])->name('situ.signature');
 Route::get('/situ_reregistration', [App\Http\Controllers\SituReregistrationController::class, 'index'])->name('situ.reregistration');
 Route::get('/situ_reregistration/browse', [App\Http\Controllers\SituReregistrationController::class, 'browse'])->name('situ.reregistration.browse');
 
@@ -75,3 +77,14 @@ Route::get('/pedagang/browse', [App\Http\Controllers\PedagangController::class, 
 Route::get('/pedagang/edit/{id}', [App\Http\Controllers\PedagangController::class, 'edit'])->name('pedagang.edit');
 Route::post('/pedagang/update', [App\Http\Controllers\PedagangController::class, 'update'])->name('pedagang.update');
 Route::get('/pedagang/ajax/{id}', [App\Http\Controllers\PedagangController::class, 'ajax'])->name('pedagang.ajax');
+
+// Users
+Route::get('/user', [App\Http\Controllers\UserController::class, 'index'])->name('user');
+Route::get('/user/browse', [App\Http\Controllers\UserController::class, 'browse'])->name('user.browse');
+Route::get('/user/add', [App\Http\Controllers\UserController::class, 'add'])->name('user.add');
+Route::get('/user/{id}', [App\Http\Controllers\UserController::class, 'edit'])->name('user.edit');
+Route::post('/user/store', [App\Http\Controllers\UserController::class, 'store'])->name('user.store');
+Route::post('/user/update', [App\Http\Controllers\UserController::class, 'update'])->name('user.update');
+Route::get('/user/modalDelete/{id}', [App\Http\Controllers\UserController::class, 'modalDelete'])->name('user.modalDelete');
+Route::post('/user/delete/{id}', [App\Http\Controllers\UserController::class, 'delete'])->name('user.delete');
+Route::get('/user/ajax/{id}', [App\Http\Controllers\UserController::class, 'ajax'])->name('user.ajax');

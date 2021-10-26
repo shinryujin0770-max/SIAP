@@ -44,7 +44,8 @@ class UserController extends Controller
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
                     $id = $row['id'];
-                    $btn = "<button onclick='read($id)' class='edit btn btn-block btn-info btn-sm'><i class='fa fa-eye'></i> Detail</button>";
+                    $btn = "<button onclick='read($id)' class='edit btn btn-block btn-info btn-sm'><i class='fa fa-edit'></i> Edit</button>";
+                    $btn .= "<button onclick='hapus($id)' class='edit btn btn-block btn-danger btn-sm'><i class='fa fa-trash'></i> Delete</button>";
                     return $btn;
                 })
                 ->rawColumns(['action'])
@@ -119,7 +120,7 @@ class UserController extends Controller
         }
 
         toastr()->success('Berhasil Menambah');
-        return redirect('user');
+        return 'true';
     }
 
     public function edit($id)
@@ -128,21 +129,31 @@ class UserController extends Controller
         $data['page_subtitle'] = "Ubah SITU";
         $data['user'] = User::findOrFail($id);
 
+        if (count($data['user']->getMedia('signature')) > 0) {
+            $data['signature'] = $data['user']->getMedia('signature')->pop()->getFullUrl();
+        }
+
         return view('pages/user/edit', $data);
     }
 
     public function update(Request $request)
     {
         $attr = $request->all();
-        $validator = Validator::make(array_merge($attr['dt'], $attr), [
+        $id = $attr['id'];
+        $data = $attr['dt'];
+
+        $findUser = User::find($id);
+        $dataValidation = $attr['password'] ? array_merge($attr['dt'], $attr) : $attr['dt'];
+        $validationEmail = [
+            'email' => $findUser['email'] != $data['email'] ? ['required', 'string', 'email', 'max:255', 'unique:users'] : ['required', 'string', 'email', 'max:255']
+        ];
+        $validator = Validator::make($dataValidation, array_merge($validationEmail, [
             'nip' => 'required',
             'name' => 'required',
             'jabatan' => 'required',
             'pangkat' => 'required',
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'signature' => 'required',
-        ], [
+            'password' => ['string', 'min:8', 'confirmed'],
+        ]), [
             'required' => ':attribute harus diisi.',
         ]);
         if ($validator->fails()) {
@@ -159,10 +170,6 @@ class UserController extends Controller
             ), 400); // 400 being the HTTP code for an invalid request.
         }
 
-        $id = $attr['id'];
-        $data = $attr['dt'];
-
-        $findUser = User::find($id);
         $store = $findUser->update($data);
 
         if (!$store) {
@@ -177,7 +184,7 @@ class UserController extends Controller
         }
 
         toastr()->success('Berhasil Mengubah');
-        return redirect('user');
+        return 'true';
     }
 
     public function modalDelete($id)

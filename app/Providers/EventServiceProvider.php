@@ -62,7 +62,7 @@ class EventServiceProvider extends ServiceProvider
             $event->menu->add('PENGATURAN');
             $event->menu->add([
                 'text'        => 'Pengguna',
-                'url'         => 'users',
+                'url'         => 'user',
                 'icon'        => 'fas fa-fw fa-users',
             ]);
             $event->menu->add([
