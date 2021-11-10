@@ -6,12 +6,12 @@ use Barryvdh\DomPDF\Facade as PDF;
 
 class CertificatesService
 {
-    public function getSurat($data = [])
+    public function getSurat($data = [], $template = 'certificates.page')
     {
         // $file = file_get_contents(app_path("Services/Mails/template/$name.php"));
         // $pdf = PDF::loadHTML($file)->setPaper('a4', 'portrait');
         // ->setOptions(['debugLayout' => true, 'debugLayoutPaddingBox' => true])
-        $pdf = PDF::loadView('certificates.page', $data)->setPaper('legal', 'portrait');
+        $pdf = PDF::loadView($template, $data)->setPaper('legal', 'portrait');
         return $pdf->stream();
     }
 

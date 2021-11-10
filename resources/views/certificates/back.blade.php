@@ -12,7 +12,7 @@
         font-family: Times, serif;
         width: 100%;
         height: 100vh;
-        background-image: url("back.jpg");
+        background-image: url({{'certificates/' . $kategori_kios . '-back.jpg'}});
         background-position: center;
         background-repeat: no-repeat;
         background-size: 100%;

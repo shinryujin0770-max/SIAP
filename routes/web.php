@@ -30,6 +30,7 @@ Route::get('/situ/browse', [App\Http\Controllers\SituController::class, 'browse'
 Route::get('/situ/add', [App\Http\Controllers\SituController::class, 'add'])->name('situ.add');
 Route::get('/situ/{id}', [App\Http\Controllers\SituController::class, 'read'])->name('situ.read');
 Route::get('/situ/{id}/certificate', [App\Http\Controllers\SituController::class, 'previewCertificates'])->name('situ.certificate');
+Route::get('/situ/{id}/skrd', [App\Http\Controllers\SituController::class, 'previewSKRD'])->name('situ.skrd');
 Route::get('/situ/edit/{id}', [App\Http\Controllers\SituController::class, 'edit'])->name('situ.edit');
 Route::post('/situ/store', [App\Http\Controllers\SituController::class, 'store'])->name('situ.store');
 Route::post('/situ/update', [App\Http\Controllers\SituController::class, 'update'])->name('situ.update');
@@ -39,6 +40,12 @@ Route::get('/situ/modalSignature/{id}', [App\Http\Controllers\SituController::cl
 Route::post('/situ/signature/{id}', [App\Http\Controllers\SituController::class, 'signature'])->name('situ.signature');
 Route::get('/situ_reregistration', [App\Http\Controllers\SituReregistrationController::class, 'index'])->name('situ.reregistration');
 Route::get('/situ_reregistration/browse', [App\Http\Controllers\SituReregistrationController::class, 'browse'])->name('situ.reregistration.browse');
+Route::get('/situ_reregistration/modalRequest/{id}', [App\Http\Controllers\SituReregistrationController::class, 'modalRequestReregistration'])->name('situ.reregistration.modalRequestReregistration');
+Route::post('/situ_reregistration/requestReregistration/{id}', [App\Http\Controllers\SituReregistrationController::class, 'requestReregistration'])->name('situ.reregistration.requestReregistration');
+Route::get('/situ_reregistration/modalSignature/{id}', [App\Http\Controllers\SituReregistrationController::class, 'modalSignature'])->name('situ.reregistration.modalSignature');
+Route::post('/situ_reregistration/signature/{id}', [App\Http\Controllers\SituReregistrationController::class, 'signature'])->name('situ.reregistration.signature');
+Route::get('/situ_reregistration/modalDelete/{id}', [App\Http\Controllers\SituReregistrationController::class, 'modalDelete'])->name('situ.reregistration.modalDelete');
+Route::post('/situ_reregistration/delete/{id}', [App\Http\Controllers\SituReregistrationController::class, 'delete'])->name('situ.reregistration.delete');
 
 // Jenis Dagangan
 Route::get('/jenis_dagangan', [App\Http\Controllers\JenisDaganganController::class, 'index'])->name('jenis_dagangan');

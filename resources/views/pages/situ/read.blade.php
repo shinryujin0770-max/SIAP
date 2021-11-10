@@ -29,6 +29,13 @@
                 Tanda tangani
             </button>
             @endif
+
+            @if ($situ['is_skrd'])
+            <a href="{{ url('situ') . '/' . $situ['id'] . '/skrd' }}" target="_blank"
+                class="btn btn-warning btn-sm float-right mr-1 text-white"><i class="fas fa-fw fa-file"></i>
+                SKRD
+            </a>
+            @endif
         </div>
     </div>
     <div class="col-12">

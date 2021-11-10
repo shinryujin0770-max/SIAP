@@ -18,10 +18,18 @@
                     </div>
                     <div class="form-group">
                         <label>Kategori Kios</label>
-                        <select class="form-control select2" id="kategori" name="dt[kategori]" style="width: 100%">
+                        <select class="form-control select2" id="kategori" name="dt[kategori]" onchange="hadnleChangeKios(this.value)" style="width: 100%">
                             <option value="kios">KIOS</option>
                             <option value="los">LOS</option>
                             <option value="pelataran">PELATARAN</option>
+                            <option value="grosir">GROSIR</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Menghadap ke</label>
+                        <select class="form-control select2" id="id_kios_type" name="dt[hadap]" style="width: 100%">
+                            <option value="ml">Menghadap Luar</option>
+                            <option value="md">Menghadap Dalam</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -39,4 +47,14 @@
 
 <script>
     $('.select2').select2();
+
+    function hadnleChangeKios(kios) {
+            $("#id_kios_type").empty();
+        if (kios === 'kios') {
+            $("#id_kios_type").append('<option value="ml">ML</option>');
+            $("#id_kios_type").append('<option value="md">MD</option>');
+        } else {
+            $("#id_kios_type").append('<option value="">Data Tidak Tersedia</option>');
+        }
+    }
 </script>

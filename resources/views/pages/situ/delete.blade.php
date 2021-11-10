@@ -1,7 +1,7 @@
-<form action="{{url('/jenis_dagangan/delete/') . '/' . $jenis_dagangan['id']}}" method="post">
+<form action="{{url('/situ/delete/') . '/' . $situ['id']}}" method="post">
     @csrf
     <div class="form-group">
-        <label for="catatan">Hapus Jenis Dagangan ini ? </label>
+        <label for="catatan">Hapus Situ ini ? </label>
     </div>
     <hr>
     <button type="button" data-dismiss="modal" class="btn btn-secondary float-right ml-1">Tidak</button>

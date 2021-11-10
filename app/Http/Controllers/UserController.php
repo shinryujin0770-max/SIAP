@@ -3,16 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Jenis_dagangan;
-use App\Models\Kios;
-use App\Models\Pasar;
-use App\Models\Pedagang;
-use App\Models\Situ;
 use App\Models\User;
-use App\Services\CertificatesService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
@@ -30,7 +23,7 @@ class UserController extends Controller
 
     public function index()
     {
-        $data['page_title'] = "SITU";
+        $data['page_title'] = "Pengguna";
         $data['page_subtitle'] = "";
 
         return view('pages/user/browse', $data);
@@ -57,8 +50,8 @@ class UserController extends Controller
 
     public function read($id)
     {
-        $data['page_title'] = "SITU";
-        $data['page_subtitle'] = "Detail SITU";
+        $data['page_title'] = "Pengguna";
+        $data['page_subtitle'] = "Detail Pengguna";
         $data['user'] = User::findOrFail($id);
 
         return view('pages/user/read', $data);
@@ -66,12 +59,8 @@ class UserController extends Controller
 
     public function add()
     {
-        $data['page_title'] = "SITU";
-        $data['page_subtitle'] = "Tambah SITU";
-        $data['pasars'] = Pasar::all();
-        $data['kioss'] = Kios::all();
-        $data['pedagangs'] = Pedagang::all();
-        $data['jenis_dagangans'] = Jenis_dagangan::all();
+        $data['page_title'] = "Pengguna";
+        $data['page_subtitle'] = "Tambah Pengguna";
 
         return view('pages/user/add', $data);
     }
@@ -113,10 +102,10 @@ class UserController extends Controller
             return;
         }
 
-        if (isset($attr['foto'])) {
-            $store->addMedia($attr['foto'])
-                ->usingFileName('foto-' . $store['id'] . '.' . pathinfo($attr['foto']->getClientOriginalName(), PATHINFO_EXTENSION))
-                ->toMediaCollection('foto');
+        if (isset($attr['signature'])) {
+            $store->addMedia($attr['signature'])
+                ->usingFileName('signature-' . $store['id'] . '.' . pathinfo($attr['signature']->getClientOriginalName(), PATHINFO_EXTENSION))
+                ->toMediaCollection('signature');
         }
 
         toastr()->success('Berhasil Menambah');
@@ -125,10 +114,11 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $data['page_title'] = "SITU";
-        $data['page_subtitle'] = "Ubah SITU";
+        $data['page_title'] = "Pengguna";
+        $data['page_subtitle'] = "Ubah Pengguna";
         $data['user'] = User::findOrFail($id);
 
+        $data['signature'] = '';
         if (count($data['user']->getMedia('signature')) > 0) {
             $data['signature'] = $data['user']->getMedia('signature')->pop()->getFullUrl();
         }
@@ -189,8 +179,8 @@ class UserController extends Controller
 
     public function modalDelete($id)
     {
-        $data['page_title'] = "SITU";
-        $data['page_subtitle'] = "Hapus SITU";
+        $data['page_title'] = "Pengguna";
+        $data['page_subtitle'] = "Hapus Pengguna";
         $data['user'] = User::findOrFail($id);
 
         return view('pages/user/delete', $data);
@@ -206,6 +196,6 @@ class UserController extends Controller
         }
 
         toastr()->success('Berhasil Menghapus');
-        return redirect('situ');
+        return redirect('Pengguna');
     }
 }

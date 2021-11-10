@@ -27,6 +27,7 @@
                             <option value="los" {{$kios['kategori']=='los' ? 'selected' : '' }}>LOS</option>
                             <option value="pelataran" {{$kios['kategori']=='pelataran' ? 'selected' : '' }}>PELATARAN
                             </option>
+                            <option value="grosir" {{$kios['kategori']=='grosir' ? 'selected' : '' }}>GROSIR</option>
                         </select>
                     </div>
                     <div class="form-group">

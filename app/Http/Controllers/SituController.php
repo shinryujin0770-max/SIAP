@@ -8,11 +8,13 @@ use App\Models\Kios;
 use App\Models\Pasar;
 use App\Models\Pedagang;
 use App\Models\Situ;
+use App\Models\Situ_registration;
 use App\Models\User;
 use App\Services\CertificatesService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
@@ -262,18 +264,29 @@ class SituController extends Controller
 
     public function signature($id)
     {
-        $situ = Situ::find($id);
-        $situ->is_signatured = true;
-        $situ->id_signature = Auth::id();
-        $store = $situ->save();
+        DB::beginTransaction();
+        try {
+            $situ = Situ::find($id);
+            $situ->is_signatured = true;
+            $situ->id_signature = Auth::id();
+            $situ->save();
 
-        if (!$store) {
+            $data = [];
+            for ($i = 0; $i < 4; $i++) {
+                $data[] = ['id_situ' => $id, 'registration' => $i + 1, 'is_registered' => false];
+            }
+            Situ_registration::insert($data);
+            // dd($data);
+            DB::commit();
+
+            toastr()->success('Berhasil melakukan tanda tangan');
+            return redirect('situ');
+        } catch (\Exception $e) {
+            DB::rollback();
+
             toastr()->error('Gagal melakukan tanda tangan');
             return redirect('situ');
         }
-
-        toastr()->success('Berhasil melakukan tanda tangan');
-        return redirect('situ');
     }
 
     public function previewCertificates($id)
@@ -284,6 +297,7 @@ class SituController extends Controller
             'pasar.nama as nama_pasar',
             'kios.nomor as nama_kios',
             'kios.ukuran as ukuran_kios',
+            'kios.kategori as kategori_kios',
             'jenis_dagangan.nama as nama_jenis_dagangan',
             'pedagang.nik as nik_pedagang',
             'pedagang.nama as nama_pedagang',
@@ -303,12 +317,59 @@ class SituController extends Controller
         if (count($data->getMedia('foto')) > 0) {
             $data['foto'] = $data->getMedia('foto')->pop()->getFullUrl();
         }
-        $data['user'] = User::find($data['id_signature']);
-        if (count($data['user']->getMedia('signature')) > 0) {
-            $data['signature'] = $data['user']->getMedia('signature')->pop()->getFullUrl();
+
+        if ($data['is_signatured']) {
+            $data['user'] = User::find($data['id_signature']);
+            if (count($data['user']->getMedia('signature')) > 0) {
+                $data['signature'] = $data['user']->getMedia('signature')->pop()->getFullUrl();
+            }
         }
 
         return $this->certificateService->getSurat($data);
+    }
+
+    public function previewSKRD($id)
+    {
+        $data = Situ::select(
+            'situ.*',
+            'pasar.id as id_pasar',
+            'pasar.nama as nama_pasar',
+            'kios.nomor as nama_kios',
+            'kios.ukuran as ukuran_kios',
+            'kios.kategori as kategori_kios',
+            'jenis_dagangan.nama as nama_jenis_dagangan',
+            'pedagang.nik as nik_pedagang',
+            'pedagang.nama as nama_pedagang',
+            'pedagang.alamat as alamat_pedagang',
+            'pedagang.tempat_lahir as tempat_lahir_pedagang',
+            'pedagang.tanggal_lahir as tanggal_lahir_pedagang',
+        )
+            ->leftJoin('pasar', 'situ.id_pasar', '=', 'pasar.id', 'left')
+            ->leftJoin('kios', 'situ.id_kios', '=', 'kios.id', 'left')
+            ->leftJoin('jenis_dagangan', 'situ.id_jenis_dagangan', '=', 'jenis_dagangan.id', 'left')
+            ->leftJoin('pedagang', 'situ.id_pedagang', '=', 'pedagang.id', 'left')->where('situ.id', $id)->first();
+
+        $data['nomor_situ'] = $this->generateKodeSitu($data['id'], $data['id_pasar'], $data['tanggal_terbit']);
+        $data['tanggal_lahir_pedagang'] = Carbon::parse($data['tanggal_lahir_pedagang'])->isoFormat('DD MMMM YYYY');
+        $data['berlaku_sampai'] = Carbon::parse($data['berlaku_sampai'])->isoFormat('DD MMMM YYYY');
+        $data['tanggal_terbit'] = Carbon::parse($data['tanggal_terbit'])->isoFormat('DD MMMM YYYY');
+        if (count($data->getMedia('foto')) > 0) {
+            $data['foto'] = $data->getMedia('foto')->pop()->getFullUrl();
+        }
+
+        if (!$data['is_skrd']) {
+            toastr()->error('SITU ini tidak memilik SKRD');
+            return redirect('situ');
+        }
+
+        if ($data['is_signatured']) {
+            $data['user'] = User::find($data['id_signature']);
+            if (count($data['user']->getMedia('signature')) > 0) {
+                $data['signature'] = $data['user']->getMedia('signature')->pop()->getFullUrl();
+            }
+        }
+
+        return $this->certificateService->getSurat($data, 'certificates.skrd.page');
     }
 
     public function generateKodeSitu($id_situ, $id_pasar, $tahun)

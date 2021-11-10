@@ -44,13 +44,13 @@
                 </div>
             </div>
             <!-- End Preloader -->
-            <div class="modal-header">
+            <div class="modal-header border-0">
                 <h5 class="modal-title" id="modal-label"></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body px-5 pb-5">
                 <div id="load-form"></div>
             </div>
         </div>
@@ -60,8 +60,32 @@
 
 @section('js')
 <script>
-    function read(id) {
-        location.href = "<?= url('situ') . '/' ?>" + id;
+    function ajukan(id) {
+        $("#modal-form").modal();
+        // $("#modal-label").html("Mengajukan daftar ulang")
+        $('#modal-form').on('shown.bs.modal', function () {
+            $("#modal-preloader").delay(500).fadeOut(300);
+        });
+
+        // reset loading display when modal is closed
+        $('#modal-form').on('hidden.bs.modal', function (e) {
+            $("#modal-preloader").show();
+        })
+        $("#load-form").load("<?= url('situ_reregistration/modalRequest') . '/' ?>" + id)
+    }
+
+    function signature(id) {
+        $("#modal-form").modal();
+        // $("#modal-label").html("Mengajukan daftar ulang")
+        $('#modal-form').on('shown.bs.modal', function () {
+            $("#modal-preloader").delay(500).fadeOut(300);
+        });
+
+        // reset loading display when modal is closed
+        $('#modal-form').on('hidden.bs.modal', function (e) {
+            $("#modal-preloader").show();
+        })
+        $("#load-form").load("<?= url('situ_reregistration/modalSignature') . '/' ?>" + id)
     }
 
     $(function() {

@@ -91,7 +91,11 @@
                                 <input type="file" name="foto" class="form-control" id="foto">
                                 <div class="invalid-feedback text-capitalize error-foto"></div>
                             </div>
-                            <hr>
+                            <div class="custom-control custom-checkbox">
+                                <input class="custom-control-input" name="situ[is_skrd]" type="checkbox" id="is_skrd"
+                                    value="option1">
+                                <label for="is_skrd" class="custom-control-label">SITU SKRD</label>
+                            </div>
                             <button type="button" data-dismiss="modal"
                                 class="btn btn-secondary float-right ml-1">Batal</button>
                             <button type="submit" class="btn btn-primary float-right" id="btn-simpan">Simpan</button>

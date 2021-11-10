@@ -12,7 +12,7 @@
         font-family: Times, serif;
         width: 100%;
         height: 100vh;
-        background-image: url("front.jpg");
+        background-image: url({{'certificates/' . $kategori_kios . '-front.jpg'}});
         background-position: center;
         background-repeat: no-repeat;
         background-size: 100%;
@@ -175,17 +175,18 @@
         <img src="{{url($foto)}}" alt="pedagang" style="width: 3cm; height: 4cm; object-fit: cover;">
     </div>
     <div class="text-capitalize text-center" style="position: absolute; bottom: 100px; left: 352px;">
+        @if ($is_signatured)
         <p class="text-capitalize" style="font-size: 10pt;">
             {{$user->jabatan}} <br>
             Kabupaten Tulungagung
         </p>
-        @if ($is_signatured)
         <div style="position: relative; height: 20mm; display: flex; justify-content: center; align-items: center">
             <img src="{{$signature}}" style="height: 20mm; align-self: center;">
         </div>
         @else
         <div style="height: 20mm"></div>
         @endif
+        @if ($is_signatured)
         <div style="font-size: 10pt;">
             <u>{{$user->name}}</u>
         </div>
@@ -195,6 +196,7 @@
         <div style="font-size: 10pt;">
             NIP. {{$user->nip}}
         </div>
+        @endif
     </div>
 </div>
 
