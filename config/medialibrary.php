@@ -1,7 +1,5 @@
 <?php
 
-use App\CustomPathGenerator;
-
 return [
 
     /*
@@ -23,14 +21,16 @@ return [
     'queue_name' => '',
 
     /*
-     * By default all conversions will be performed on a queue.
-     */
-    'queue_conversions_by_default' => env('QUEUE_CONVERSIONS_BY_DEFAULT', true),
-
-    /*
      * The fully qualified class name of the media model.
      */
-    'media_model' => Spatie\MediaLibrary\MediaCollections\Models\Media::class,
+    'media_model' => Spatie\MediaLibrary\Models\Media::class,
+
+    's3' => [
+        /*
+         * The domain that should be prepended when generating urls.
+         */
+        'domain' => 'https://'.env('AWS_BUCKET').'.s3.amazonaws.com',
+    ],
 
     'remote' => [
         /*
@@ -53,7 +53,7 @@ return [
          * images. By default we optimize for filesize and create variations that each are 20%
          * smaller than the previous one. More info in the documentation.
          *
-         * https://docs.spatie.be/laravel-medialibrary/v8/advanced-usage/generating-responsive-images
+         * https://docs.spatie.be/laravel-medialibrary/v7/advanced-usage/generating-responsive-images
          */
         'width_calculator' => Spatie\MediaLibrary\ResponsiveImages\WidthCalculator\FileSizeOptimizedWidthCalculator::class,
 
@@ -65,38 +65,16 @@ return [
 
         /*
          * This class will generate the tiny placeholder used for progressive image loading. By default
-         * the media library will use a tiny blurred jpg image.
+         * the medialibrary will use a tiny blurred jpg image.
          */
         'tiny_placeholder_generator' => Spatie\MediaLibrary\ResponsiveImages\TinyPlaceholderGenerator\Blurred::class,
     ],
 
     /*
-     * When converting Media instances to response the media library will add
-     * a `loading` attribute to the `img` tag. Here you can set the default
-     * value of that attribute.
-     *
-     * Possible values: 'lazy', 'eager', 'auto' or null if you don't want to set any loading instruction.
-     *
-     * More info: https://css-tricks.com/native-lazy-loading/
-     */
-    'default_loading_attribute_value' => null,
-
-    /*
-     * This is the class that is responsible for naming conversion files. By default,
-     * it will use the filename of the original and concatenate the conversion name to it.
-     */
-    'conversion_file_namer' => Spatie\MediaLibrary\Conversions\DefaultConversionFileNamer::class,
-
-    /*
-     * The class that contains the strategy for determining a media file's path.
-     */
-    'path_generator' => CustomPathGenerator::class,
-
-    /*
-     * When urls to files get generated, this class will be called. Use the default
+     * When urls to files get generated, this class will be called. Leave empty
      * if your files are stored locally above the site root or on s3.
      */
-    'url_generator' => Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator::class,
+    'url_generator' => null,
 
     /*
      * Whether to activate versioning when urls to files get generated.
@@ -105,7 +83,12 @@ return [
     'version_urls' => false,
 
     /*
-     * The media library will try to optimize all converted images by removing
+     * The class that contains the strategy for determining a media file's path.
+     */
+    'path_generator' => null,
+
+    /*
+     * Medialibrary will try to optimize all converted images by removing
      * metadata and applying a little bit of compression. These are
      * the optimizers that will be used by default.
      */
@@ -135,11 +118,11 @@ return [
      * These generators will be used to create an image of media files.
      */
     'image_generators' => [
-        Spatie\MediaLibrary\Conversions\ImageGenerators\Image::class,
-        Spatie\MediaLibrary\Conversions\ImageGenerators\Webp::class,
-        Spatie\MediaLibrary\Conversions\ImageGenerators\Pdf::class,
-        Spatie\MediaLibrary\Conversions\ImageGenerators\Svg::class,
-        Spatie\MediaLibrary\Conversions\ImageGenerators\Video::class,
+        Spatie\MediaLibrary\ImageGenerators\FileTypes\Image::class,
+        Spatie\MediaLibrary\ImageGenerators\FileTypes\Webp::class,
+        Spatie\MediaLibrary\ImageGenerators\FileTypes\Pdf::class,
+        Spatie\MediaLibrary\ImageGenerators\FileTypes\Svg::class,
+        Spatie\MediaLibrary\ImageGenerators\FileTypes\Video::class,
     ],
 
     /*
@@ -158,7 +141,7 @@ return [
 
     /*
      * The path where to store temporary files while performing image conversions.
-     * If set to null, storage_path('media-library/temp') will be used.
+     * If set to null, storage_path('medialibrary/temp') will be used.
      */
     'temporary_directory_path' => null,
 
@@ -167,15 +150,7 @@ return [
      * your custom jobs extend the ones provided by the package.
      */
     'jobs' => [
-        'perform_conversions' => Spatie\MediaLibrary\Conversions\Jobs\PerformConversionsJob::class,
-        'generate_responsive_images' => Spatie\MediaLibrary\ResponsiveImages\Jobs\GenerateResponsiveImagesJob::class,
+        'perform_conversions' => Spatie\MediaLibrary\Jobs\PerformConversions::class,
+        'generate_responsive_images' => Spatie\MediaLibrary\Jobs\GenerateResponsiveImages::class,
     ],
-
-    /*
-     * When using the addMediaFromUrl method you may want to replace the default downloader.
-     * This is particularly useful when the url of the image is behind a firewall and
-     * need to add additional flags, possibly using curl.
-     */
-    'media_downloader' => Spatie\MediaLibrary\Downloaders\DefaultDownloader::class,
-
 ];

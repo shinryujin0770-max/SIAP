@@ -182,6 +182,7 @@ class SituController extends Controller
         $data['pedagangs'] = Pedagang::all();
         $data['jenis_dagangans'] = Jenis_dagangan::all();
 
+        $data['foto'] = '';
         if (count($data['situ']->getMedia('foto')) > 0) {
             $data['foto'] = $data['situ']->getMedia('foto')->pop()->getFullUrl();
         }
@@ -314,6 +315,7 @@ class SituController extends Controller
         $data['tanggal_lahir_pedagang'] = Carbon::parse($data['tanggal_lahir_pedagang'])->isoFormat('DD MMMM YYYY');
         $data['berlaku_sampai'] = Carbon::parse($data['berlaku_sampai'])->isoFormat('DD MMMM YYYY');
         $data['tanggal_terbit'] = Carbon::parse($data['tanggal_terbit'])->isoFormat('DD MMMM YYYY');
+        $data['foto'] = '';
         if (count($data->getMedia('foto')) > 0) {
             $data['foto'] = $data->getMedia('foto')->pop()->getFullUrl();
         }
@@ -353,6 +355,7 @@ class SituController extends Controller
         $data['tanggal_lahir_pedagang'] = Carbon::parse($data['tanggal_lahir_pedagang'])->isoFormat('DD MMMM YYYY');
         $data['berlaku_sampai'] = Carbon::parse($data['berlaku_sampai'])->isoFormat('DD MMMM YYYY');
         $data['tanggal_terbit'] = Carbon::parse($data['tanggal_terbit'])->isoFormat('DD MMMM YYYY');
+        $data['foto'] = '';
         if (count($data->getMedia('foto')) > 0) {
             $data['foto'] = $data->getMedia('foto')->pop()->getFullUrl();
         }
