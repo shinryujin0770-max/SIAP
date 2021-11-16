@@ -26,10 +26,10 @@
                                 <div class="invalid-feedback text-capitalize error-email"></div>
                             </div>
                             <div class="form-group">
-                                <label>NIP Pengguna</label>
-                                <input type="text" name="dt[nip]" class="form-control" id="nip"
-                                    placeholder="Masukkan NIP Pengguna..." value="{{$user['nip']}}">
-                                <div class="invalid-feedback text-capitalize error-nip"></div>
+                                <label>Username Pengguna</label>
+                                <input type="text" name="dt[username]" class="form-control" id="username"
+                                    placeholder="Masukkan Username Pengguna..." value="{{$user['username']}}">
+                                <div class="invalid-feedback text-capitalize error-username"></div>
                             </div>
                             <div class="form-group">
                                 <label>Nama Pengguna</label>
@@ -38,26 +38,22 @@
                                 <div class="invalid-feedback text-capitalize error-name"></div>
                             </div>
                             <div class="form-group">
-                                <label>Jabatan Pengguna</label>
-                                <input type="text" name="dt[jabatan]" class="form-control" id="jabatan"
-                                    placeholder="Masukkan Jabatan Pengguna..." value="{{$user['jabatan']}}">
-                                <div class="invalid-feedback text-capitalize error-jabatan"></div>
-                            </div>
-                            <div class="form-group">
-                                <label>Pangkat Pengguna</label>
-                                <input type="text" name="dt[pangkat]" class="form-control" id="pangkat"
-                                    placeholder="Masukkan Pangkat Pengguna..." value="{{$user['pangkat']}}">
-                                <div class="invalid-feedback text-capitalize error-pangkat"></div>
-                            </div>
-                            <div class="form-group">
                                 <label>Role pengguna</label>
                                 <select class="form-control select2" id="role" name="role" style="width: 100%">
                                     <option value="superadmin" {{$user['role']=='superadmin' ? 'selected' : '' }}>
                                         Superadmin</option>
-                                    <option value="admin_situ" {{$user['role']=='admin_situ' ? 'selected' : '' }}>Admin
-                                        SITU</option>
-                                    <option value="koordinator" {{$user['role']=='koordinator' ? 'selected' : '' }}>
-                                        Koordinator</option>
+                                    <option value="admin_opd" {{$user['role']=='admin_opd' ? 'selected' : '' }}>Admin
+                                        OPD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>OPD</label>
+                                <select class="form-control select2" id="id_opd" name="dt[id_opd]"
+                                    style="width: 100%">
+                                    @foreach ($opds as $opd)
+                                    <option value="{{$opd['id']}}" {{$user['id_opd']==$opd['id'] ? 'selected' : ''
+                                        }}>{{$opd['name']}}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
@@ -91,14 +87,6 @@
                                     </div>
                                     <div class="invalid-feedback text-capitalize error-password_confirmation"></div>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Tanda Tangan Pengguna</label>
-                                <div class="my-2">
-                                    <img src="{{$signature}}" alt="signature" style="width: 150px;">
-                                </div>
-                                <input type="file" name="signature" class="form-control" id="signature">
-                                <div class="invalid-feedback text-capitalize error-signature"></div>
                             </div>
                             <hr>
                             <button type="button" data-dismiss="modal"

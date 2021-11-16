@@ -22,22 +22,16 @@ class RoleSeeder extends Seeder
         DB::table('role_has_permissions')->truncate();
         $roles = [
             ['name' => 'superadmin'],
-            ['name' => 'admin_situ'],
-            ['name' => 'koordinator'],
+            ['name' => 'admin_opd'],
         ];
 
         $permissions = [
             ['name' => 'pengaturan-all'],
-            ['name' => 'situ-read'],
-            ['name' => 'situ-write'],
-            ['name' => 'situ-print'],
-            ['name' => 'situ-verify'],
-            ['name' => 'situ-skrd-print'],
-            ['name' => 'situ-reregistration'],
-            ['name' => 'pedagang-read'],
-            ['name' => 'pedagang-write'],
-            ['name' => 'kios-read'],
-            ['name' => 'kios-write'],
+            ['name' => 'project-read'],
+            ['name' => 'project-write'],
+            ['name' => 'project-print'],
+            ['name' => 'project-verify'],
+            ['name' => 'project-payment'],
         ];
         foreach ($permissions as $p) {
             Permission::create($p);
@@ -47,23 +41,11 @@ class RoleSeeder extends Seeder
             $role = Role::create($r);
             $role = Role::find($role->id);
 
-            if ($r['name'] == 'admin_situ') {
+            if ($r['name'] == 'admin_project') {
                 $role->syncPermissions([
-                    ['name' => 'situ-read'],
-                    ['name' => 'situ-write'],
-                    ['name' => 'situ-print'],
-                    ['name' => 'situ-skrd-print'],
-                    ['name' => 'pedagang-read'],
-                    ['name' => 'pedagang-write'],
-                    ['name' => 'kios-read'],
-                    ['name' => 'kios-write'],
-                ]);
-            } elseif ($r['name'] == 'koordinator') {
-                $role->syncPermissions([
-                    ['name' => 'situ-read'],
-                    ['name' => 'situ-write'],
-                    ['name' => 'pedagang-read'],
-                    ['name' => 'kios-read'],
+                    ['name' => 'project-read'],
+                    ['name' => 'project-write'],
+                    ['name' => 'project-print'],
                 ]);
             } else {
                 $role->syncPermissions($permissions);

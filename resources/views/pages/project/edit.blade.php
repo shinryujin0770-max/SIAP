@@ -127,7 +127,7 @@
             });
         } else {
             $("#id_kios").empty();
-            $("#id_kios").append('<option value="">-Mohon Pilih SKPD Terlebih Dahulu-</option>');
+            $("#id_kios").append('<option value="">-Mohon Pilih OPD Terlebih Dahulu-</option>');
         }
     }
     $("#id_pasar").val("<?= $situ['id_pasar'] ?>").trigger('change');

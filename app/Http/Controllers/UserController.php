@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Opd;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -32,7 +33,10 @@ class UserController extends Controller
     public function browse(Request $request)
     {
         if ($request->ajax()) {
-            $data = User::all();
+            $data = User::select('users.*', 'roles.name as role_name', 'opd.name as opd_name')->orderBy('id', 'desc')
+                ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id', 'left')
+                ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id', 'left')
+                ->leftJoin('opd', 'users.id_opd', '=', 'opd.id', 'left');
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
@@ -61,6 +65,7 @@ class UserController extends Controller
     {
         $data['page_title'] = "Pengguna";
         $data['page_subtitle'] = "Tambah Pengguna";
+        $data['opds'] = Opd::all();
 
         return view('pages/user/add', $data);
     }
@@ -69,13 +74,11 @@ class UserController extends Controller
     {
         $attr = $request->all();
         $validator = Validator::make(array_merge($attr['dt'], $attr), [
-            'nip' => 'required',
+            'username' => ['required', 'string', 'unique:users'],
             'name' => 'required',
-            'jabatan' => 'required',
-            'pangkat' => 'required',
+            'id_opd' => 'required',
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'signature' => 'required',
         ], [
             'required' => ':attribute harus diisi.',
         ]);
@@ -105,12 +108,6 @@ class UserController extends Controller
             return;
         }
 
-        if (isset($attr['signature'])) {
-            $store->addMedia($attr['signature'])
-                ->usingFileName('signature-' . $store['id'] . '.' . pathinfo($attr['signature']->getClientOriginalName(), PATHINFO_EXTENSION))
-                ->toMediaCollection('signature');
-        }
-
         toastr()->success('Berhasil Menambah');
         return 'true';
     }
@@ -120,11 +117,8 @@ class UserController extends Controller
         $data['page_title'] = "Pengguna";
         $data['page_subtitle'] = "Ubah Pengguna";
         $data['user'] = User::findOrFail($id);
+        $data['opds'] = Opd::all();
 
-        $data['signature'] = '';
-        if (count($data['user']->getMedia('signature')) > 0) {
-            $data['signature'] = $data['user']->getMedia('signature')->pop()->getFullUrl();
-        }
         $data['user']['role'] = count($data['user']->roles()->get()) ? $data['user']->roles()->get()[0]->name : 'superadmin';
 
         return view('pages/user/edit', $data);
@@ -138,15 +132,16 @@ class UserController extends Controller
 
         $findUser = User::find($id);
         $dataValidation = $attr['password'] ? array_merge($attr['dt'], $attr) : $attr['dt'];
+        $validationUsername = [
+            'username' => $findUser['username'] != $data['username'] ? ['required', 'string', 'unique:users'] : ['required', 'string']
+        ];
         $validationEmail = [
             'email' => $findUser['email'] != $data['email'] ? ['required', 'string', 'email', 'max:255', 'unique:users'] : ['required', 'string', 'email', 'max:255']
         ];
-        $validator = Validator::make($dataValidation, array_merge($validationEmail, [
-            'nip' => 'required',
+        $validator = Validator::make($dataValidation, array_merge($validationEmail, $validationUsername, [
             'name' => 'required',
-            'jabatan' => 'required',
-            'pangkat' => 'required',
-            'password' => ['string', 'min:8', 'confirmed'],
+            'id_opd' => 'required',
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]), [
             'required' => ':attribute harus diisi.',
         ]);
@@ -172,12 +167,6 @@ class UserController extends Controller
         if (!$store) {
             toastr()->error('Gagal Mengubah');
             return;
-        }
-
-        if (isset($attr['signature'])) {
-            $findUser->addMedia($attr['signature'])
-                ->usingFileName('signature-' . $id . '.' . pathinfo($attr['signature']->getClientOriginalName(), PATHINFO_EXTENSION))
-                ->toMediaCollection('signature');
         }
 
         toastr()->success('Berhasil Mengubah');

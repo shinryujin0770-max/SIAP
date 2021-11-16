@@ -13,7 +13,7 @@ class DbInit extends Migration
      */
     public function up()
     {
-        Schema::create('skpd', function (Blueprint $table) {
+        Schema::create('opd', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->timestamps();
@@ -29,7 +29,7 @@ class DbInit extends Migration
 
         Schema::create('projects', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('id_skpd')->index();
+            $table->unsignedBigInteger('id_opd')->index();
             $table->enum('type', ['perencanaan' . 'kontruksi', 'pengawasan']);
             $table->string('name');
             $table->date('spk_date');
@@ -48,7 +48,7 @@ class DbInit extends Migration
             $table->string('lokasi');
             $table->timestamps();
 
-            $table->foreign('id_skpd')->references('id')->on('skpd')
+            $table->foreign('id_opd')->references('id')->on('opd')
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('id_partner')->references('id')->on('partners')
                 ->onUpdate('cascade')->onDelete('cascade');
@@ -87,7 +87,7 @@ class DbInit extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('skpd');
+        Schema::dropIfExists('opd');
         Schema::dropIfExists('partners');
         Schema::dropIfExists('projects');
         Schema::dropIfExists('project_payments');

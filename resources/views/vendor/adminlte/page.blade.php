@@ -55,8 +55,8 @@
         $('.select2').select2({
             placeholder: "Pilih salah satu..."
         });
-        $('.select-pedagang').select2({
-            placeholder: "Cari Pemilik Lama / Buat Pemilik Baru...",
+        $('.select-partner').select2({
+            placeholder: "Cari Pelaksana Lama / Buat Pelaksana Baru...",
             tags: true,
         });
     });

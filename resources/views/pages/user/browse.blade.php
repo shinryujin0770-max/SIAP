@@ -23,10 +23,9 @@
                 <table id="example1" class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <th>NIP</th>
                             <th>Nama</th>
-                            <th>Jabatan</th>
-                            <th>Pangkat</th>
+                            <th>Role</th>
+                            <th>OPD</th>
                             <th width="100px"></th>
                         </tr>
                     </thead>
@@ -94,20 +93,16 @@
             ajax: "{{ route('user.browse') }}",
             columns: [
                 {
-                    data: 'nip',
-                    name: 'nip'
-                },
-                {
                     data: 'name',
                     name: 'name'
                 },
                 {
-                    data: 'jabatan',
-                    name: 'jabatan'
+                    data: 'role_name',
+                    name: 'role_name'
                 },
                 {
-                    data: 'pangkat',
-                    name: 'pangkat'
+                    data: 'opd_name',
+                    name: 'opd_name'
                 },
                 {
                     data: 'action',

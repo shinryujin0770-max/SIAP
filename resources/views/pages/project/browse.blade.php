@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'SITU')
+@section('title', 'Project')
 
 @section('content_header')
 <div class="m-0 text-dark">
@@ -13,16 +13,22 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"></h3>
+                <h3 class="card-tools">
+                    <button onclick="add()" class="right btn btn-md btn-primary">Tambah</button>
+                </h3>
+            </div>
             <div class="card-body">
                 <table id="example1" class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <th>Kode</th>
-                            <th>Pasar</th>
-                            <th>Kios</th>
-                            <th>Pedagang</th>
-                            <th>Tanggal Terbit dan Berlaku Sampai</th>
-                            <th>Registrasi Ulang ke</th>
+                            <th>Nomor SPK</th>
+                            <th>Nama Pekerjaan</th>
+                            <th>Tanggal SPK</th>
+                            <th>OPD</th>
+                            <th>CV/PT Pelaksana</th>
+                            <th>Lokasi</th>
                             <th width="100px"></th>
                         </tr>
                     </thead>
@@ -44,13 +50,13 @@
                 </div>
             </div>
             <!-- End Preloader -->
-            <div class="modal-header border-0">
+            <div class="modal-header">
                 <h5 class="modal-title" id="modal-label"></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body px-5 pb-5">
+            <div class="modal-body">
                 <div id="load-form"></div>
             </div>
         </div>
@@ -60,32 +66,12 @@
 
 @section('js')
 <script>
-    function ajukan(id) {
-        $("#modal-form").modal();
-        // $("#modal-label").html("Mengajukan daftar ulang")
-        $('#modal-form').on('shown.bs.modal', function () {
-            $("#modal-preloader").delay(500).fadeOut(300);
-        });
-
-        // reset loading display when modal is closed
-        $('#modal-form').on('hidden.bs.modal', function (e) {
-            $("#modal-preloader").show();
-        })
-        $("#load-form").load("<?= url('situ_reregistration/modalRequest') . '/' ?>" + id)
+    function add() {
+        location.href = "<?= route('project.add') ?>";
     }
 
-    function signature(id) {
-        $("#modal-form").modal();
-        // $("#modal-label").html("Mengajukan daftar ulang")
-        $('#modal-form').on('shown.bs.modal', function () {
-            $("#modal-preloader").delay(500).fadeOut(300);
-        });
-
-        // reset loading display when modal is closed
-        $('#modal-form').on('hidden.bs.modal', function (e) {
-            $("#modal-preloader").show();
-        })
-        $("#load-form").load("<?= url('situ_reregistration/modalSignature') . '/' ?>" + id)
+    function read(id) {
+        location.href = "<?= url('project') . '/' ?>" + id;
     }
 
     $(function() {
@@ -94,31 +80,31 @@
             serverSide: true,
             responsive: true,
             autoWidth: false,
-            ajax: "{{ route('situ.reregistration.browse') }}",
+            ajax: "{{ route('project.browse') }}",
             columns: [
                 {
-                    data: 'kode',
-                    name: 'kode'
+                    data: 'spk_number',
+                    name: 'spk_number'
                 },
                 {
-                    data: 'nama_pasar',
-                    name: 'nama_pasar'
+                    data: 'name',
+                    name: 'name'
                 },
                 {
-                    data: 'nama_kios',
-                    name: 'nama_kios'
+                    data: 'spk_date',
+                    name: 'spk_date'
                 },
                 {
-                    data: 'nama_pedagang',
-                    name: 'nama_pedagang'
+                    data: 'opd_name',
+                    name: 'opd_name'
                 },
                 {
-                    data: 'tanggal_terbit',
-                    name: 'tanggal_terbit',
+                    data: 'partner_name',
+                    name: 'partner_name',
                 },
                 {
-                    data: 'ke',
-                    name: 'ke',
+                    data: 'lokasi',
+                    name: 'lokasi',
                 },
                 {
                     data: 'action',

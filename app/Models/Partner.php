@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia\HasMedia;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 
-class Situ extends Model implements HasMedia
+class Partner extends Model implements HasMedia
 {
     use HasMediaTrait;
 
-    protected $table = 'situ';
+    protected $table = 'partners';
     public $guarded = [];
 }

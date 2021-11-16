@@ -1,7 +1,7 @@
 {
-    "name": "laravel/disperindag",
+    "name": "laravel/pembangunan",
     "type": "project",
-    "description": "Dinas Perdagangan Tulungagung",
+    "description": "Pembangunan Tulungagung",
     "keywords": [
         "framework",
         "laravel"
