@@ -12,7 +12,7 @@
         font-family: Times, serif;
         width: 100%;
         height: 100vh;
-        background-image: url({{'certificates/' . $kategori_kios . '-front.jpg'}});
+        background-image: url({{$cetak ? '' : 'certificates/' . $kategori_kios . '-front.jpg'}});
         background-position: center;
         background-repeat: no-repeat;
         background-size: 100%;
@@ -145,9 +145,11 @@
     }
 </style>
 <div class="container-mail page-break-after">
-
+    <div style="position: absolute; top: 275px; left: 120px">
+        <img src="data:image/svg+xml;base64, {{$qrcode}}" />
+    </div>
     <div class="text-center" style="position: absolute; top: 300px; padding: 0px 220px;">
-        <b class="text-uppercase">{{$nama_pasar}}</b>
+        <b class="text-uppercase">{{$kategori_kios}} {{$nama_pasar}}</b>
         <hr style="margin: 0">
         <b>Nomor : {{$nomor_situ}}</b>
     </div>

@@ -5,7 +5,7 @@
 
     @page {
         margin: 0px;
-        size: 21.9cm 34.4cm portrait;
+        size: 24.13cm 27.94cm portrait;
     }
 
     body {
@@ -149,11 +149,11 @@
                         </td>
                         <td>
                             <div class="text-center">
-                                <p style="margin-bottom: -10px; font-size: 11pt;">PEMERINTAH KABUPATEN
+                                <p style="margin-top: -10px; margin-bottom: -10px; font-size: 10pt;">PEMERINTAH KABUPATEN
                                     TULUNGAGUNG</p>
-                                <p style="margin-bottom: -10px; font-size: 14pt; font-weight: bold">DINAS PERINDUSTRIAN
+                                <p style="margin-bottom: -10px; font-size: 13pt; font-weight: bold">DINAS PERINDUSTRIAN
                                     DAN PERDAGANGAN</p>
-                                <p style="font-size: 12pt">
+                                <p style="margin-bottom: -10px; font-size: 10pt">
                                     Jl. Ahmad Yani Timur No. 37 Tulungagung
                                     <br>
                                     Telp. (0355) 320098 Kode Pos 66217
@@ -165,23 +165,23 @@
             </td>
             <td style="width: 35%">
                 <div class="text-center kop-surat">
-                    <p style="margin-bottom: -10px; font-size: 16pt; font-weight: bold">SKRD</p>
-                    <p style="margin-bottom: -10px; font-size: 11pt;">(SURAT KETETAPAN RETRIBUSI
+                    <p style="margin-bottom: -10px; font-size: 14pt; font-weight: bold">SKRD</p>
+                    <p style="margin-bottom: -10px; font-size: 10pt;">(SURAT KETETAPAN RETRIBUSI
                         DAERAH) </p>
-                    <p style="margin-bottom: -10px; font-size: 11pt">Masa Retribusi : NOVEMBER</p>
-                    <p style="margin-bottom: -10px; font-size: 11pt">Tahun : 2021</p>
+                    <p style="margin-bottom: -10px; font-size: 10pt">Masa Retribusi : NOVEMBER</p>
+                    <p style="font-size: 10pt">Tahun : 2021</p>
                 </div>
             </td>
             <td class="text-center" style="width: 12%;">
-                No. Urut
-                <div style="border: 1px solid black; width: 50px; height: 50px; margin-left: 25px; margin-top: 5px;">
+                <p style="margin-bottom: -5px; font-size: 10pt">No. Urut</p>
+                <div style="border: 1px solid black; width: 50px; height: 50px; margin-left: 32px; margin-top: 5px;">
                     <div style="margin-top: 13px">675</div>
                 </div>
             </td>
         </tr>
         <tr>
             <td colspan="3">
-                <table class="isi table" style="margin-bottom: 10px">
+                <table border="0" cellspacing="0" cellpadding="0" class="isi table" style="margin-top: 3px; margin-bottom: 5px; margin-left: 5px; font-size: 10pt;">
                     <tr>
                         <td style="width: 30%">Nama Pedagang</td>
                         <td style="width: 1%">:</td>
@@ -202,7 +202,7 @@
         </tr>
         <tr>
             <td colspan="3">
-                <table class="table" border="1" cellspacing="0" cellpadding="0" style="margin-bottom: 10px">
+                <table class="table" border="1" cellspacing="0" cellpadding="0" style="margin-bottom: 0px; font-size: 10pt;">
                     <tr>
                         <td class="text-center" style="width: 5%;">No.</td>
                         <td class="text-center" style="width: 15%;">Rekening</td>
@@ -212,12 +212,12 @@
                     <tr>
                         <td class="text-center">1.</td>
                         <td class="text-center">4.1.2.01.06</td>
-                        <td style="padding: 1rem;">
+                        <td style="padding: 0 0.5rem;">
                             <div>Retribusi Kios Pasar</div>
                             <div>Luas</div>
                             <div>Lokasi</div>
                         </td>
-                        <td style="padding: 1rem;">
+                        <td style="padding: 0.5rem;">
                             <div style="display: flex;">
                                 <div>Rp</div>
                                 <div style="text-align: right;">58.500,00</div>
@@ -226,7 +226,7 @@
                     </tr>
                     <tr>
                         <td colspan="2" style="border: 0"></td>
-                        <td style="padding: 1rem;">
+                        <td style="padding: 0 0.3rem;">
                             <table>
                                 <tr>
                                     <td>
@@ -250,7 +250,7 @@
                                 </tr>
                             </table>
                         </td>
-                        <td style="padding: 0 1rem;">
+                        <td style="padding: 0 0.3rem;">
                             <table style="width: 100%;">
                                 <tr>
                                     <td style="width: 5%">
@@ -292,7 +292,7 @@
                             Dengan huruf :
                         </td>
                         <td colspan="2" style="border: 0">
-                            <div style="width: 100%; border: 1px solid #000; margin-top: 5px; padding: 0.5rem 1rem">
+                            <div style="width: 100%; border: 1px solid #000; margin-top: 5px; padding: 0.1rem 0.5rem">
                                 Lima Ratus Ribu Rupiah
                             </div>
                         </td>
@@ -302,9 +302,9 @@
         </tr>
         <tr>
             <td colspan="3">
-                <div style="text-decoration: underline; margin-left: 3px;">PERHATIAN :</div>
-                <div style="margin-top: 5px; margin-left: 25px; margin-bottom: -25px;">
-                    <div style="display: flex;">
+                <div style="font-size: 11pt; text-decoration: underline; margin-left: 3px;">PERHATIAN :</div>
+                <div style="margin-top: 5px; margin-left: 25px; font-size: 10pt; margin-bottom: -25px;">
+                    <div style="display: flex; margin-bottom: -10px">
                         <div>1.</div>
                         <div style="margin-left: 20px">
                             Harap penyetoran dilakukan melalui Bendahara Penerimaan (BP) Dinas Perindustrian dan
@@ -324,24 +324,25 @@
         </tr>
         <tr>
             <td colspan="3">
-                <table class="table">
+                <table class="table" style="font-size: 10pt;">
                     <tr>
                         <td style="width: 50%" class="ttd text-center">&nbsp;</td>
                         <td style="width: 50%" class="ttd text-center">
-                            <div id="signature_jabatan" class="text-uppercase" style="font-size: 12pt;">
-                                a.n. Kepala Bidang Pengendalian dan Evaluasi Kabupaten Tulungagung
+                            <div id="signature_jabatan" class="text-uppercase" style="font-size: 10pt;">
+                                a.n. Kepala Bidang Pengendalian dan Evaluasi
+                                <br> Kabupaten Tulungagung
                             </div>
-                            <div class="text-capitalize" style="font-size: 12pt;">
+                            <div class="text-capitalize" style="font-size: 10pt;">
                                 Kepala Bidang Pengelolaan Pasar
                             </div>
                             <div style="height: 10mm"></div>
-                            <div style="font-size: 12pt;">
+                            <div style="font-size: 10pt;">
                                 <u>NURWENI ASTUTI, S.H.,M.M.</u>
                             </div>
-                            <div style="font-size: 12pt;">
+                            <div style="font-size: 10pt;">
                                 Pembina
                             </div>
-                            <div style="font-size: 12pt;">
+                            <div style="font-size: 10pt;">
                                 NIP. 19660509 199003 2 010
                             </div>
                         </td>
@@ -357,21 +358,21 @@
                             <table class="table">
                                 <tr>
                                     <td style="width: 100%" class="text-center">
-                                        <div class="text-capitalize" style="font-size: 12pt;">
+                                        <div class="text-capitalize" style="font-size: 10pt;">
                                             Ruang Teraan Bendahara Penerima
                                         </div>
                                         <div style="height: 10mm"></div>
-                                        <div style="font-size: 12pt;">
+                                        <div style="font-size: 10pt;">
                                             <u>SUSWANTI, S.Pd</u>
                                         </div>
-                                        <div style="font-size: 12pt;">
+                                        <div style="font-size: 10pt;">
                                             NIP. 19660509 199003 2 010
                                         </div>
                                     </td>
                                 </tr>
                             </table>
                         </td>
-                        <td style="width: 33%; padding: 0.1rem">
+                        <td style="width: 33%; padding: 0.1rem; font-size: 10pt;">
                             <div>Diterima oleh,</div>
                             <div>Petugas Tempat Pembayaran</div>
                             <div>Tanggal :</div>
@@ -382,11 +383,11 @@
                             <table class="table">
                                 <tr>
                                     <td style="width: 100%" class="text-center">
-                                        <div class="text-capitalize" style="font-size: 12pt;">
+                                        <div class="text-capitalize" style="font-size: 10pt;">
                                             Penyetor
                                         </div>
                                         <div style="height: 10mm"></div>
-                                        <div style="font-size: 12pt;">
+                                        <div style="font-size: 10pt;">
                                             (.............................)
                                         </div>
                                     </td>

@@ -92,9 +92,9 @@
                                 <div class="invalid-feedback text-capitalize error-foto"></div>
                             </div>
                             <div class="custom-control custom-checkbox">
-                                <input class="custom-control-input" name="situ[is_skrd]" type="checkbox" id="is_skrd"
+                                <input class="custom-control-input" name="skrd" type="checkbox" id="skrd"
                                     value="option1">
-                                <label for="is_skrd" class="custom-control-label">SITU SKRD</label>
+                                <label for="skrd" class="custom-control-label">SITU SKRD</label>
                             </div>
                             <button type="button" data-dismiss="modal"
                                 class="btn btn-secondary float-right ml-1">Batal</button>

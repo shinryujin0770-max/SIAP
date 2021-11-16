@@ -48,6 +48,14 @@
                                     placeholder="Masukkan Pangkat Pengguna...">
                                 <div class="invalid-feedback text-capitalize error-pangkat"></div>
                             </div>
+                            <div class="form-group">
+                                <label>Role pengguna</label>
+                                <select class="form-control select2" id="role" name="role" style="width: 100%">
+                                    <option value="superadmin">Superadmin</option>
+                                    <option value="admin_situ">Admin SITU</option>
+                                    <option value="koordinator">Koordinator</option>
+                                </select>
+                            </div>
 
                             {{-- Password field --}}
                             <div class="form-group">

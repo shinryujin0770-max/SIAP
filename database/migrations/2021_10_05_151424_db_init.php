@@ -13,76 +13,69 @@ class DbInit extends Migration
      */
     public function up()
     {
-        Schema::create('pasar', function (Blueprint $table) {
+        Schema::create('skpd', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('nama')->nullable();
-            $table->string('lokasi')->nullable();
-            $table->integer('kelas')->nullable();
+            $table->string('name')->nullable();
             $table->timestamps();
         });
 
-        Schema::create('kios', function (Blueprint $table) {
+        Schema::create('partners', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('nomor')->nullable();
-            $table->unsignedBigInteger('id_pasar')->index();
-            $table->enum('kategori', ['kios', 'los', 'pelataran']);
-            $table->string('ukuran');
-            $table->timestamps();
-
-            $table->foreign('id_pasar')->references('id')->on('pasar')
-                ->onUpdate('cascade')->onDelete('cascade');
-        });
-
-        Schema::create('pedagang', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('nik')->nullable();
-            $table->string('nama')->nullable();
-            $table->string('alamat')->nullable();
-            $table->string('tempat_lahir')->nullable();
-            $table->date('tanggal_lahir')->nullable();
+            $table->string('name');
+            $table->text('address');
+            $table->string('director');
             $table->timestamps();
         });
 
-        Schema::create('jenis_dagangan', function (Blueprint $table) {
+        Schema::create('projects', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('nama')->nullable();
-            $table->string('kategori')->nullable();
+            $table->unsignedBigInteger('id_skpd')->index();
+            $table->enum('type', ['perencanaan' . 'kontruksi', 'pengawasan']);
+            $table->string('name');
+            $table->date('spk_date');
+            $table->string('spk_number');
+            $table->double('spk_amount');
+            $table->unsignedBigInteger('id_partner')->index();
+            $table->double('spk_days');
+            $table->date('spk_start');
+            $table->date('spk_end');
+            $table->double('adendum_days');
+            $table->date('adendum_start');
+            $table->date('adendum_end');
+            $table->enum('payment_type', ['paid', 'installment']);
+            $table->double('amount');
+            $table->unsignedBigInteger('id_kpa')->index();
+            $table->string('lokasi');
             $table->timestamps();
-        });
 
-        Schema::create('situ', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('kode')->nullable();
-            $table->unsignedBigInteger('id_pasar')->index();
-            $table->unsignedBigInteger('id_kios')->index();
-            $table->unsignedBigInteger('id_pedagang')->index();
-            $table->unsignedBigInteger('id_jenis_dagangan')->index();
-            $table->date('tanggal_terbit');
-            $table->date('berlaku_sampai');
-            $table->timestamps();
-            $table->softDeletesTz('deleted_at', 0);
-
-            $table->foreign('id_pasar')->references('id')->on('pasar')
+            $table->foreign('id_skpd')->references('id')->on('skpd')
                 ->onUpdate('cascade')->onDelete('cascade');
-
-            $table->foreign('id_kios')->references('id')->on('kios')
+            $table->foreign('id_partner')->references('id')->on('partners')
                 ->onUpdate('cascade')->onDelete('cascade');
-
-            $table->foreign('id_pedagang')->references('id')->on('pedagang')
-                ->onUpdate('cascade')->onDelete('cascade');
-
-            $table->foreign('id_jenis_dagangan')->references('id')->on('jenis_dagangan')
+            $table->foreign('id_kpa')->references('id')->on('users')
                 ->onUpdate('cascade')->onDelete('cascade');
         });
 
-        Schema::create('situ_registration', function (Blueprint $table) {
+        Schema::create('project_payments', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('id_situ')->index();
-            $table->integer('registration');
-            $table->boolean('is_registered')->default(false);
+            $table->unsignedBigInteger('id_project')->index();
+            $table->string('type');
+            $table->double('amount');
+            $table->boolean('paid')->default(false);
             $table->timestamps();
 
-            $table->foreign('id_situ')->references('id')->on('situ')
+            $table->foreign('id_project')->references('id')->on('projects')
+                ->onUpdate('cascade')->onDelete('cascade');
+        });
+
+        Schema::create('payment_detail', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('id_payment')->index();
+            $table->string('type');
+            $table->text('content');
+            $table->timestamps();
+
+            $table->foreign('id_payment')->references('id')->on('project_payments')
                 ->onUpdate('cascade')->onDelete('cascade');
         });
     }
@@ -94,12 +87,10 @@ class DbInit extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pasar');
-        Schema::dropIfExists('kios');
-        Schema::dropIfExists('pedagang');
-        Schema::dropIfExists('jenis_dagangan');
-        Schema::dropIfExists('jenis_dagangan');
-        Schema::dropIfExists('situ');
-        Schema::dropIfExists('situ_registration');
+        Schema::dropIfExists('skpd');
+        Schema::dropIfExists('partners');
+        Schema::dropIfExists('projects');
+        Schema::dropIfExists('project_payments');
+        Schema::dropIfExists('payment_detail');
     }
 }

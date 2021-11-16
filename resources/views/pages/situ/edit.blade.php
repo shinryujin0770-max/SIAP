@@ -84,7 +84,11 @@
                                 </div>
                                 <input type="file" name="foto" class="form-control" id="foto">
                             </div>
-                            <hr>
+                            <div class="custom-control custom-checkbox">
+                                <input class="custom-control-input" name="skrd" type="checkbox" id="skrd"
+                                    {{$situ['is_skrd'] ? 'checked' : '' }} value="option1">
+                                <label for="skrd" class="custom-control-label">SITU SKRD</label>
+                            </div>
                             <button type="button" data-dismiss="modal"
                                 class="btn btn-secondary float-right ml-1">Batal</button>
                             <button type="submit" class="btn btn-primary float-right" id="btn-simpan">Simpan</button>
@@ -174,7 +178,7 @@
                     setTimeout(function() {
                         $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', true);
 
-                        window.location.href = "<?= url('situ') ?>";
+                        window.location.href = "<?= url('situ') . '/' . $situ['id'] ?>";
                     }, 1000);
                 } else {
                     $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', false);

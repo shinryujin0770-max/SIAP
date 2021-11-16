@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Yajra\DataTables\Facades\DataTables;
 
 class SituController extends Controller
@@ -150,7 +151,9 @@ class SituController extends Controller
         }
         $data['tanggal_terbit'] = Carbon::now()->format('Y-m-d');
         $data['berlaku_sampai'] = Carbon::now()->add('years', 5)->subDay()->format('Y-m-d');
+        $data['is_skrd'] = isset($attr['skrd']) ? 1 : 0;
 
+        // dd($data);
         $store = Situ::create($data);
 
         if (!$store) {
@@ -214,7 +217,9 @@ class SituController extends Controller
         }
         $data['tanggal_terbit'] = Carbon::now()->format('Y-m-d');
         $data['berlaku_sampai'] = Carbon::now()->add('years', 5)->subDay()->format('Y-m-d');
+        $data['is_skrd'] = isset($attr['skrd']) ? 1 : 0;
 
+        // dd($data);
         $store = $findSitu->update($data);
 
         if (!$store) {
@@ -277,7 +282,6 @@ class SituController extends Controller
                 $data[] = ['id_situ' => $id, 'registration' => $i + 1, 'is_registered' => false];
             }
             Situ_registration::insert($data);
-            // dd($data);
             DB::commit();
 
             toastr()->success('Berhasil melakukan tanda tangan');
@@ -290,7 +294,7 @@ class SituController extends Controller
         }
     }
 
-    public function previewCertificates($id)
+    public function previewCertificates(Request $request, $id)
     {
         $data = Situ::select(
             'situ.*',
@@ -304,7 +308,7 @@ class SituController extends Controller
             'pedagang.nama as nama_pedagang',
             'pedagang.alamat as alamat_pedagang',
             'pedagang.tempat_lahir as tempat_lahir_pedagang',
-            'pedagang.tanggal_lahir as tanggal_lahir_pedagang',
+            'pedagang.tanggal_lahir as tanggal_lahir_pedagang'
         )
             ->leftJoin('pasar', 'situ.id_pasar', '=', 'pasar.id', 'left')
             ->leftJoin('kios', 'situ.id_kios', '=', 'kios.id', 'left')
@@ -327,7 +331,15 @@ class SituController extends Controller
             }
         }
 
-        return $this->certificateService->getSurat($data);
+        $data['qrcode'] = base64_encode(QrCode::size(70)->backgroundColor(255, 0, 0, 0)->generate(env('APP_URL') . "/situ/$id/certificate"));
+        $data['cetak'] = 0;
+        if ($request['cetak'] == '1') {
+            $data['cetak'] = 1;
+            $user = User::find(Auth::id());
+            if (!$user->can('situ-print')) abort(403, 'User does not have the right permissions.');
+        }
+
+        return $this->certificateService->getCertificate($data);
     }
 
     public function previewSKRD($id)
@@ -344,7 +356,7 @@ class SituController extends Controller
             'pedagang.nama as nama_pedagang',
             'pedagang.alamat as alamat_pedagang',
             'pedagang.tempat_lahir as tempat_lahir_pedagang',
-            'pedagang.tanggal_lahir as tanggal_lahir_pedagang',
+            'pedagang.tanggal_lahir as tanggal_lahir_pedagang'
         )
             ->leftJoin('pasar', 'situ.id_pasar', '=', 'pasar.id', 'left')
             ->leftJoin('kios', 'situ.id_kios', '=', 'kios.id', 'left')
@@ -372,7 +384,7 @@ class SituController extends Controller
             }
         }
 
-        return $this->certificateService->getSurat($data, 'certificates.skrd.page');
+        return $this->certificateService->getSkrd($data);
     }
 
     public function generateKodeSitu($id_situ, $id_pasar, $tahun)

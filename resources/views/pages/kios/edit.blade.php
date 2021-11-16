@@ -31,6 +31,13 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>Menghadap ke</label>
+                        <select class="form-control select2" id="id_kios_type" name="dt[hadap]" style="width: 100%">
+                            <option value="ML" {{$kios['hadap']=='ML' ? 'selected' : '' }}>Menghadap Luar</option>
+                            <option value="MD" {{$kios['hadap']=='MD' ? 'selected' : '' }}>Menghadap Dalam</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Ukuran Kios</label>
                         <input type="text" name="dt[ukuran]" class="form-control" placeholder="Masukkan Ukuran Kios..."
                             value="{{$kios['ukuran']}}">

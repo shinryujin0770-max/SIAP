@@ -20,22 +20,34 @@
             <h5><span class="badge badge-danger badge-md" data-html="true" data-toggle="tooltip" data-placement="bottom"
                     title="Menunggu Tandatangan">Menunggu Tandatangan</span></h5>
             @endif
+            @can ('situ-print')
+            <a href="{{ url('situ/'.$situ['id'].'/certificate?cetak=true') }}"
+                class="btn btn-warning btn-sm float-right mr-1 text-light">
+                <i class="fas fa-fw fa-print"></i> Cetak
+            </a>
+            @endcan
+            @can ('situ-write')
             <a href="{{ url('situ/edit') . '/' . $situ['id'] }}" class="btn btn-primary btn-sm float-right mr-1"><i
                     class="fas fa-fw fa-pencil-alt"></i> Ubah</a>
+            @endcan
 
+            @can ('situ-verify')
             @if (!$situ['is_signatured'])
             <button onclick="signature({{$situ['id']}})" class="btn btn-sm btn-info float-right mr-1">
                 <i class="fas fa-fw fa-file-signature"></i>
                 Tanda tangani
             </button>
             @endif
+            @endcan
 
+            @can ('situ-skrd-print')
             @if ($situ['is_skrd'])
             <a href="{{ url('situ') . '/' . $situ['id'] . '/skrd' }}" target="_blank"
                 class="btn btn-warning btn-sm float-right mr-1 text-white"><i class="fas fa-fw fa-file"></i>
                 SKRD
             </a>
             @endif
+            @endcan
         </div>
     </div>
     <div class="col-12">
@@ -47,6 +59,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-12 scrolling-wrapper">
+                        <img src="">
                         <div class="row justify-content-center">
                             {{-- {!!$certificate!!} --}}
                             <iframe src="{{ url('situ/'.$situ['id'].'/certificate') }}" width="100%" height="1000">

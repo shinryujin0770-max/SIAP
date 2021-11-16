@@ -97,6 +97,9 @@ class UserController extends Controller
         $data['password'] = Hash::make($data['password']);
         $store = User::create($data);
 
+        $role = $attr['role'];
+        $store->assignRole($role);
+
         if (!$store) {
             toastr()->error('Gagal Menambah');
             return;
@@ -122,6 +125,7 @@ class UserController extends Controller
         if (count($data['user']->getMedia('signature')) > 0) {
             $data['signature'] = $data['user']->getMedia('signature')->pop()->getFullUrl();
         }
+        $data['user']['role'] = count($data['user']->roles()->get()) ? $data['user']->roles()->get()[0]->name : 'superadmin';
 
         return view('pages/user/edit', $data);
     }
@@ -161,6 +165,9 @@ class UserController extends Controller
         }
 
         $store = $findUser->update($data);
+
+        $role = $attr['role'];
+        $findUser->syncRoles($role);
 
         if (!$store) {
             toastr()->error('Gagal Mengubah');

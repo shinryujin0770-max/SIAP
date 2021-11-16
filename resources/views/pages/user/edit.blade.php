@@ -49,6 +49,17 @@
                                     placeholder="Masukkan Pangkat Pengguna..." value="{{$user['pangkat']}}">
                                 <div class="invalid-feedback text-capitalize error-pangkat"></div>
                             </div>
+                            <div class="form-group">
+                                <label>Role pengguna</label>
+                                <select class="form-control select2" id="role" name="role" style="width: 100%">
+                                    <option value="superadmin" {{$user['role']=='superadmin' ? 'selected' : '' }}>
+                                        Superadmin</option>
+                                    <option value="admin_situ" {{$user['role']=='admin_situ' ? 'selected' : '' }}>Admin
+                                        SITU</option>
+                                    <option value="koordinator" {{$user['role']=='koordinator' ? 'selected' : '' }}>
+                                        Koordinator</option>
+                                </select>
+                            </div>
 
                             {{-- Password field --}}
                             <div class="form-group">

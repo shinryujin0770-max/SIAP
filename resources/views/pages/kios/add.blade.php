@@ -28,8 +28,8 @@
                     <div class="form-group">
                         <label>Menghadap ke</label>
                         <select class="form-control select2" id="id_kios_type" name="dt[hadap]" style="width: 100%">
-                            <option value="ml">Menghadap Luar</option>
-                            <option value="md">Menghadap Dalam</option>
+                            <option value="ML">Menghadap Luar</option>
+                            <option value="MD">Menghadap Dalam</option>
                         </select>
                     </div>
                     <div class="form-group">

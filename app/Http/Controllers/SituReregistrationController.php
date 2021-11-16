@@ -3,10 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Jenis_dagangan;
-use App\Models\Kios;
-use App\Models\Pasar;
-use App\Models\Pedagang;
 use App\Models\Situ;
 use App\Models\Situ_registration;
 use App\Services\CertificatesService;
@@ -14,8 +10,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
 class SituReregistrationController extends Controller
