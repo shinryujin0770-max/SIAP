@@ -27,9 +27,17 @@
             </div>
         </div>
     </div>
+    <button type="button" onclick="cetak({{$project_payment['id_project']}})" data-dismiss="modal"
+        class="btn btn-primary float-right">Cetak</button>
 </form>
 
 <script>
+    function cetak(id) {
+        window.open(
+            "<?= url('project/print') . '/' ?>" + id + '?kategori={{$kategori}}&page=berita_acara',
+            '_blank' // <- This is what makes it open in a new window.
+        );
+    }
     $("#submit-form").submit(function() {
         var form = $(this);
         var mydata = new FormData(this);

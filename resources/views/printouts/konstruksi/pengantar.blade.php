@@ -1,0 +1,287 @@
+<style>
+    .container {
+        padding: 3rem 5rem;
+        padding-top: 5rem;
+    }
+
+    @page {
+        margin: 0px;
+        size: 24.13cm 27.94cm portrait;
+    }
+
+    body {
+        margin: 0px;
+    }
+
+    .table {
+        border: none;
+        width: 100%;
+    }
+
+    .table-bordered,
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    .table-border,
+    .table-border th.border,
+    .table-border td.border {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    .col {
+        border: 1px solid black;
+    }
+
+    p {
+        margin: 12px 0px
+    }
+
+    .isi p {
+        margin: 0px 0px;
+    }
+
+    .no-margin p {
+        margin: 0px 0px;
+    }
+
+    .text-uppercase {
+        text-transform: uppercase;
+    }
+
+    .text-capitalize {
+        text-transform: capitalize;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .text-left {
+        text-align: left;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    .text-justify {
+        text-align: justify;
+        line-height: 1.6;
+    }
+
+    .float-right {
+        float: right;
+    }
+
+    .text-top {
+        vertical-align: text-top;
+    }
+
+    .text-bottom {
+        vertical-align: text-bottom;
+    }
+
+    .kop-surat p {
+        /* font-size: 12.1px; */
+        color: rgb(0, 0, 0);
+        /* font-weight: bold; */
+        font-style: normal;
+        text-decoration: none
+    }
+
+    .paragraph {
+        padding-left: 40px;
+    }
+
+    .isi {
+        /* padding-left: 85px; */
+        margin-top: 1rem;
+    }
+
+    .ttd {
+        width: 8.15cm;
+    }
+
+    .catatan {
+        width: 5.15cm;
+        margin-top: 230px;
+    }
+
+    .d-inline {
+        display: inline;
+    }
+
+    .keep-together {
+        page-break-inside: avoid;
+    }
+
+    .page-break-before {
+        page-break-before: always;
+    }
+
+    .page-break-after {
+        page-break-after: always;
+    }
+
+    ol {
+        padding-left: 20px;
+    }
+
+    ol li::before {
+        text-align: justify;
+        line-height: 1.6;
+        display: block;
+        float: left;
+        margin-top: -0.25em;
+    }
+
+    .dot {
+        height: 7px;
+        width: 7px;
+        background-color: rgb(0, 0, 0);
+        border-radius: 20%;
+        display: block;
+        margin-top: 6px;
+        margin-right: 10px;
+    }
+</style>
+<div class="container">
+    <div
+        style="position: absolute; right: 100px; top: 25px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
+        FPK-04</div>
+    <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
+        <tr>
+            <td style="width: 100%">
+                <div class="text-center" style="margin-bottom: 50px">
+                    <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
+                        ANGGARAN PENDAPATAN DAN BELANJA DAERAH (APBD)
+                    </div>
+                    <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
+                        KABUPATEN TULUNGAGUNG TAHUN ANGGARAN 2022
+                    </div>
+                    <hr style="width: 60%; margin-top: 0px;">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div style="margin-bottom: 15px">
+                    Tulungagung, ………………. 2022
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div>Kepada</div>
+                <div>Yth. Sdr. Kepala Bagian Administrasi Pembangunan </div>
+                <div style="margin-left: 62px">selaku Pengendali Pekerjaan Konstruksi </div>
+                <div style="margin-left: 62px">Kabupaten Tulungagung Tahun 2022 </div>
+                <div style="margin-left: 62px">di</div>
+                <div style="margin-left: 82px"> <u>TULUNGAGUNG</u> </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table style="width: 100%; margin-top: 20px; margin-bottom: 20px;">
+                    <tr>
+                        <td style="width: 12%;">Nomor</td>
+                        <td style="width: 3%;">:</td>
+                        <td>600/ …………/….. ./2022 </td>
+                    </tr>
+                    <tr>
+                        <td>Perihal</td>
+                        <td>:</td>
+                        <td><u>Pembayaran Perencanaan Konstruksi </u></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div style="margin-top: 10px;" class="text-justify">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Menunjuk Berita Acara Serah Terima Perencanaan
+                    Konstruksi dan pasal-pasal pembayaran pada Surat Perintah Kerja (SPK) / Surat Perjanjian (Kontrak) -
+                    terlampir, dapatnya dilaksanakan verifikasi terhadap berkas Pembayaran Langsung 100%, Uang Muka dan
+                    Angsuran/Tahapan Perencanaan Konstruksi.
+                </div>
+                <div>Bersama ini kami lampirkan : </div>
+                <table width="100%" cellspacing="0">
+                    <tr>
+                        <td style="width: 5%;">1.</td>
+                        <td style="width: 90%;">Surat Perintah Kerja (SPK) / Surat Perjanjian (Kontrak)</td>
+                        <td>
+                            <div style="border: 1px solid #000; width: 50px; text-align: center;">V</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%;">2.</td>
+                        <td style="width: 90%;">Progress Detail Engineering Design (DED) </td>
+                        <td>
+                            <div style="border: 1px solid #000; width: 50px; text-align: center;">V</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%;">3.</td>
+                        <td style="width: 90%;">Berita Acara Pemeriksaan Perencanaan Pekerjaan Konstruksi </td>
+                        <td>
+                            <div style="border: 1px solid #000; width: 50px; text-align: center;">V</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%;">4.</td>
+                        <td style="width: 90%;">Berita Acara Serah Terima Perencanaan Pekerjaan Konstruksi </td>
+                        <td>
+                            <div style="border: 1px solid #000; width: 50px; text-align: center;">V</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%;">5.</td>
+                        <td style="width: 90%;">Ringkasan Kontrak </td>
+                        <td>
+                            <div style="border: 1px solid #000; width: 50px; text-align: center;">V</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%;">6.</td>
+                        <td style="width: 90%;">Surat Tanda Setoran (STS) denda keterlambatan </td>
+                        <td>
+                            <div style="border: 1px solid #000; width: 50px; text-align: center;">V</div>
+                        </td>
+                    </tr>
+                </table>
+                <div style="font-style: italic">*) Beri tanda ( v/x ) pada Kolom Kanan </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div style="margin-top: 10px;" class="text-justify">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Demikian untuk menjadikan periksa.
+                </div>
+            </td>
+        </tr>
+        <tr style="font-size: 12pt;">
+            <table style="width: 100%; margin-top: 30px;">
+                <tr>
+                    <td style="width: 50%" class="ttd text-center">
+                        <div>
+                            PEJABAT PEMBUAT KOMITMEN
+                        </div>
+                        <div style="height: 30mm"></div>
+                        <div>
+                            <u>DIDIK SULAKSONO PUTRO. SE. M.Si</u>
+                        </div>
+                        <div>
+                            NIP. 19640225 199602 1 001
+                        </div>
+                    </td>
+                    <td style="width: 50%" class="ttd text-center">
+                    </td>
+                </tr>
+            </table>
+        </tr>
+    </table>
+</div>

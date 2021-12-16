@@ -1,3 +1,24 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
+
+html {
+    font-family: "Poppins" !important;
+}
+body {
+    font-family: "Poppins" !important;
+    color: #333333;
+}
+
+.main-header {
+    border: none;
+}
+[class*="sidebar-light"] .brand-link {
+    border: none;
+}
+.sidebar-light-primary .nav-sidebar > .nav-item > .nav-link.active {
+    background-color: #9f5bfeb7;
+    color: #fff;
+}
+
 .modal.right .modal-dialog {
     position: fixed;
     margin: auto;
@@ -56,4 +77,30 @@
 
 .modal.right.fade.show .modal-dialog {
     right: 0;
+}
+
+.rounded-lg {
+    border-radius: 0.5rem !important;
+}
+
+.rounded-xl {
+    border-radius: 1rem !important;
+}
+
+.card-add-project {
+    color: #333333;
+}
+
+.card-add-project:hover {
+    text-decoration: underline;
+    box-shadow: 2px 1px 8px 1px rgba(0, 0, 0, 0.44);
+    -webkit-box-shadow: 2px 1px 8px 1px rgba(0, 0, 0, 0.44);
+    -moz-box-shadow: 2px 1px 8px 1px rgba(0, 0, 0, 0.44);
+}
+
+.card-detail-project:hover {
+    text-decoration: underline;
+    box-shadow: 2px 1px 8px 1px rgba(0, 0, 0, 0.44);
+    -webkit-box-shadow: 2px 1px 8px 1px rgba(0, 0, 0, 0.44);
+    -moz-box-shadow: 2px 1px 8px 1px rgba(0, 0, 0, 0.44);
 }

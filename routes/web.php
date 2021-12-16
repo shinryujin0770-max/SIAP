@@ -26,12 +26,17 @@ Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 
 // project
 Route::group(['middleware' => ['permission:project-write']], function () {
+    Route::get('/project/modalAdd', [App\Http\Controllers\ProjectController::class, 'modalAdd'])->name('project.modalAdd');
     Route::get('/project/add', [App\Http\Controllers\ProjectController::class, 'add'])->name('project.add');
     Route::get('/project/edit/{id}', [App\Http\Controllers\ProjectController::class, 'edit'])->name('project.edit');
     Route::post('/project/store', [App\Http\Controllers\ProjectController::class, 'store'])->name('project.store');
     Route::post('/project/update', [App\Http\Controllers\ProjectController::class, 'update'])->name('project.update');
     Route::get('/project/modalDelete/{id}', [App\Http\Controllers\ProjectController::class, 'modalDelete'])->name('project.modalDelete');
     Route::post('/project/delete/{id}', [App\Http\Controllers\ProjectController::class, 'delete'])->name('project.delete');
+
+    Route::get('/project/{id}/details', [App\Http\Controllers\ProjectDetailController::class, 'details'])->name('project.details');
+    Route::get('/project/{id}/detail/{id_detail}', [App\Http\Controllers\ProjectDetailController::class, 'modalDetail'])->name('project.detail');
+    Route::post('/project/{id}/detail/{id_detail}', [App\Http\Controllers\ProjectDetailController::class, 'edit'])->name('project.detail.edit');
 
     // partner
     Route::get('/partner', [App\Http\Controllers\PartnerController::class, 'index'])->name('partner');
@@ -45,6 +50,8 @@ Route::group(['middleware' => ['permission:project-read']], function () {
 
     Route::get('/project/payment/{id}', [App\Http\Controllers\ProjectPaymentController::class, 'detail'])->name('project.payment');
     Route::get('/project/payment/{id}/edit', [App\Http\Controllers\ProjectPaymentController::class, 'edit'])->name('project.payment.edit');
+
+    Route::get('/project/print/{id}', [App\Http\Controllers\ProjectDetailController::class, 'print'])->name('project.print');
 });
 
 Route::group(['middleware' => ['permission:pengaturan-all']], function () {
@@ -62,3 +69,4 @@ Route::group(['middleware' => ['permission:pengaturan-all']], function () {
 
 // Ajax
 Route::get('/partner/ajax/{id}', [App\Http\Controllers\PartnerController::class, 'ajax'])->name('partner.ajax');
+Route::get('/ajax/kelurahan/{id_kecamatan}', [App\Http\Controllers\AjaxController::class, 'kelurahan'])->name('ajax.kelurahan');

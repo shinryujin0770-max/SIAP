@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'Project')
+@section('title', 'APBD')
 
 @section('content_header')
 <div class="m-0 text-dark">
@@ -12,11 +12,11 @@
 @section('content')
 <div class="row">
     <div class="col-12">
-        <div class="card">
-            <div class="card-header">
+        <div class="card shadow-none rounded-lg">
+            <div class="card-header border-0">
                 <h3 class="card-title"></h3>
                 <h3 class="card-tools">
-                    <button onclick="add()" class="right btn btn-md btn-primary">Tambah</button>
+                    <button onclick="ModalAdd()" class="right btn btn-fw btn-gradient-primary">Tambah</button>
                 </h3>
             </div>
             <div class="card-body">
@@ -40,22 +40,9 @@
     </div>
 </div>
 
-<div class="modal fade" aria-labelledby="exampleModalLabel" aria-hidden="true" id="modal-form">
-    <div class="modal-dialog modal-dialog-centered modal-md">
-        <div class="modal-content">
-            <!-- Preloader -->
-            <div id="modal-preloader">
-                <div class="overlay d-flex justify-content-center align-items-center">
-                    <i class="fas fa-2x fa-sync fa-spin"></i>
-                </div>
-            </div>
-            <!-- End Preloader -->
-            <div class="modal-header">
-                <h5 class="modal-title" id="modal-label"></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+<div class="modal fade" aria-labelledby="exampleModalLabel" aria-hidden="true" id="modal-add">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content shadow-none border-0" style="background: transparent;">
             <div class="modal-body">
                 <div id="load-form"></div>
             </div>
@@ -66,8 +53,9 @@
 
 @section('js')
 <script>
-    function add() {
-        location.href = "<?= route('project.add') ?>";
+    function ModalAdd() {
+        $("#modal-add").modal();
+        $("#load-form").load("<?= url('project/modalAdd') . '/' ?>")
     }
 
     function read(id) {

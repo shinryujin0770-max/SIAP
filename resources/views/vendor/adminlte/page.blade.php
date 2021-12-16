@@ -59,6 +59,10 @@
             placeholder: "Cari Pelaksana Lama / Buat Pelaksana Baru...",
             tags: true,
         });
+        $('.select-rekening').select2({
+            placeholder: "Masukkan satu atau lebih kode rekening...",
+            tags: true,
+        });
     });
 </script>
 @stop
