@@ -33,8 +33,8 @@ $bulanName = Carbon::createFromFormat('m', $month)->locale('id')->translatedForm
     <tbody>
         @foreach ($data as $index => $item)
         <tr>
-            <td>{{ $index + 1 }}</td>
-            <td>{{ strtoupper($item['uraian']) }}</td>
+            <td><b>{{ $index + 1 }}</b></td>
+            <td><b>{{ strtoupper($item['uraian']) }}</b></td>
             <td>{{ number_format($item['pagu_anggaran'], 2, ',', '.') }}</td>
             <td>{{ number_format($item['bulan_lalu'], 2, ',', '.') }}</td>
             <td>{{ number_format($item['bulan_ini'], 2, ',', '.') }}</td>

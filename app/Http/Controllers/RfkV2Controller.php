@@ -276,13 +276,8 @@ class RfkV2Controller extends Controller
 
         $rules = [
             'month' => 'required|date_format:Y-m',
+            'opd' => 'sometimes|nullable|exists:opd,id',
         ];
-
-        if ($isSuperadmin) {
-            $rules['opd'] = 'required|exists:opd,id';
-        } else {
-            $rules['opd'] = 'sometimes|nullable|exists:opd,id';
-        }
 
         $validated = $request->validate($rules);
 
@@ -291,74 +286,139 @@ class RfkV2Controller extends Controller
 
         $opdId = null;
         if ($isSuperadmin) {
-            $opdId = (int) $validated['opd'];
+            $opdId = $request->input('opd') ? (int) $request->input('opd') : null;
         } elseif ($user && $user->id_opd) {
             $opdId = $user->id_opd;
         }
 
-        if (!$opdId) {
+        if (!$isSuperadmin && !$opdId) {
             return response()->json([
                 'success' => false,
                 'message' => 'OPD tidak ditemukan atau belum dipilih.',
             ], 422);
         }
 
-        $previousRfk = RfkV2::where('id_opd', $opdId)
-            ->where('month', $previousDate->format('m'))
-            ->where('year', $previousDate->format('Y'))
-            ->first();
+        if ($opdId) {
+            $previousRfk = RfkV2::where('id_opd', $opdId)
+                ->where('month', $previousDate->format('m'))
+                ->where('year', $previousDate->format('Y'))
+                ->first();
 
-        if (!$previousRfk) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data bulan sebelumnya tidak ditemukan.',
-            ], 422);
-        }
+            if (!$previousRfk) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data bulan sebelumnya tidak ditemukan.',
+                ], 422);
+            }
 
-        $previousHasData = RfkV2Detail::where('id_rfk', $previousRfk->id)->exists();
-        if (!$previousHasData) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data bulan sebelumnya belum memiliki detail untuk disalin.',
-            ], 422);
-        }
+            $previousHasData = RfkV2Detail::where('id_rfk', $previousRfk->id)->exists();
+            if (!$previousHasData) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data bulan sebelumnya belum memiliki detail untuk disalin.',
+                ], 422);
+            }
 
-        $currentRfk = RfkV2::firstOrCreate([
-            'id_opd' => $opdId,
-            'month' => $periodDate->format('m'),
-            'year' => $periodDate->format('Y'),
-        ], [
-            'status' => 'draft',
-        ]);
-
-        try {
-            $copiedCount = DB::transaction(function () use ($currentRfk, $previousRfk) {
-                RfkV2Detail::where('id_rfk', $currentRfk->id)->delete();
-                return RfkV2HierarchyService::copyMonthHierarchy($previousRfk->id, $currentRfk->id);
-            });
-        } catch (\Exception $exception) {
-            Log::error('RFK resync failed: ' . $exception->getMessage(), [
-                'current_rfk_id' => $currentRfk->id,
-                'previous_rfk_id' => $previousRfk->id,
+            $currentRfk = RfkV2::firstOrCreate([
+                'id_opd' => $opdId,
+                'month' => $periodDate->format('m'),
+                'year' => $periodDate->format('Y'),
+            ], [
+                'status' => 'draft',
             ]);
 
+            try {
+                $copiedCount = DB::transaction(function () use ($currentRfk, $previousRfk) {
+                    RfkV2Detail::where('id_rfk', $currentRfk->id)->delete();
+                    return RfkV2HierarchyService::copyMonthHierarchy($previousRfk->id, $currentRfk->id);
+                });
+            } catch (\Exception $exception) {
+                Log::error('RFK resync failed: ' . $exception->getMessage(), [
+                    'current_rfk_id' => $currentRfk->id,
+                    'previous_rfk_id' => $previousRfk->id,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat melakukan sinkronisasi ulang.',
+                ], 500);
+            }
+
+            $currentRfk->refresh();
+            $meta = $this->buildAccessMeta($currentRfk, $periodDate, $isSuperadmin, $isAdminRfk);
+
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat melakukan sinkronisasi ulang.',
-            ], 500);
+                'success' => true,
+                'message' => sprintf(
+                    'Data bulan %s berhasil diambil dari bulan %s.',
+                    $periodDate->translatedFormat('F Y'),
+                    $previousDate->translatedFormat('F Y')
+                ),
+                'copied' => $copiedCount,
+                'meta' => $meta,
+            ]);
         }
 
-        $currentRfk->refresh();
-        $meta = $this->buildAccessMeta($currentRfk, $periodDate, $isSuperadmin, $isAdminRfk);
+        // Resync all active OPDs
+        $opds = Opd::where('rfk_code', '!=', '')->get();
+        $successCount = 0;
+        $totalCopied = 0;
+
+        foreach ($opds as $opd) {
+            $previousRfk = RfkV2::where('id_opd', $opd->id)
+                ->where('month', $previousDate->format('m'))
+                ->where('year', $previousDate->format('Y'))
+                ->first();
+
+            if (!$previousRfk) {
+                continue;
+            }
+
+            $previousHasData = RfkV2Detail::where('id_rfk', $previousRfk->id)->exists();
+            if (!$previousHasData) {
+                continue;
+            }
+
+            $currentRfk = RfkV2::firstOrCreate([
+                'id_opd' => $opd->id,
+                'month' => $periodDate->format('m'),
+                'year' => $periodDate->format('Y'),
+            ], [
+                'status' => 'draft',
+            ]);
+
+            try {
+                $copied = DB::transaction(function () use ($currentRfk, $previousRfk) {
+                    RfkV2Detail::where('id_rfk', $currentRfk->id)->delete();
+                    return RfkV2HierarchyService::copyMonthHierarchy($previousRfk->id, $currentRfk->id);
+                });
+                $totalCopied += $copied;
+                $successCount++;
+            } catch (\Exception $exception) {
+                Log::error("RFK resync failed for OPD {$opd->id}: " . $exception->getMessage(), [
+                    'current_rfk_id' => $currentRfk->id,
+                    'previous_rfk_id' => $previousRfk->id,
+                ]);
+            }
+        }
+
+        if ($successCount === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada data dari bulan sebelumnya yang dapat disalin untuk semua OPD.',
+            ], 422);
+        }
+
+        $meta = $this->buildMetaWithoutRfk($periodDate, $isSuperadmin, $isAdminRfk);
 
         return response()->json([
             'success' => true,
             'message' => sprintf(
-                'Data bulan %s berhasil diambil dari bulan %s.',
-                $periodDate->translatedFormat('F Y'),
-                $previousDate->translatedFormat('F Y')
+                'Berhasil menyinkronkan ulang data dari bulan sebelumnya untuk %d OPD (%d detail disalin).',
+                $successCount,
+                $totalCopied
             ),
-            'copied' => $copiedCount,
+            'copied' => $totalCopied,
             'meta' => $meta,
         ]);
     }
@@ -1004,10 +1064,14 @@ class RfkV2Controller extends Controller
         $bulan = $periodDate->format('m');
         $tahun = $periodDate->format('Y');
 
-        // Determine OPD based on role
+        // Determine OPD based on role and filter
+        $opdFilter = $request->input('opd');
         if ($isSuperadmin) {
-            // Superadmin: All OPDs automatically
-            $opds = Opd::where('rfk_code', '!=', '')->get();
+            if ($opdFilter) {
+                $opds = Opd::where('id', $opdFilter)->where('rfk_code', '!=', '')->get();
+            } else {
+                $opds = Opd::where('rfk_code', '!=', '')->get();
+            }
         } else {
             // Admin RFK: Only their own OPD
             $opds = Opd::where('id', $user->id_opd)->get();
@@ -1081,8 +1145,13 @@ class RfkV2Controller extends Controller
         $bulan = $periodDate->format('m');
         $tahun = $periodDate->format('Y');
 
-        // Fetch all OPDs with RFK data for this period
-        $opds = Opd::where('rfk_code', '!=', '')->get();
+        // Fetch OPDs based on filter
+        $opdFilter = $request->input('opd');
+        if ($opdFilter) {
+            $opds = Opd::where('id', $opdFilter)->where('rfk_code', '!=', '')->get();
+        } else {
+            $opds = Opd::where('rfk_code', '!=', '')->get();
+        }
 
         $data = [];
 
@@ -1145,10 +1214,14 @@ class RfkV2Controller extends Controller
         $bulan = $periodDate->format('m');
         $tahun = $periodDate->format('Y');
 
-        // Determine OPD based on role
+        // Determine OPD based on role and filter
+        $opdFilter = $request->input('opd');
         if ($isSuperadmin) {
-            // Superadmin: All OPDs automatically
-            $opds = Opd::where('rfk_code', '!=', '')->get();
+            if ($opdFilter) {
+                $opds = Opd::where('id', $opdFilter)->where('rfk_code', '!=', '')->get();
+            } else {
+                $opds = Opd::where('rfk_code', '!=', '')->get();
+            }
         } else {
             // Admin RFK: Only their own OPD
             $opds = Opd::where('id', $user->id_opd)->get();
@@ -1182,6 +1255,7 @@ class RfkV2Controller extends Controller
                 $items[] = [
                     'code' => $detail->code,
                     'uraian' => $detail->uraian,
+                    'type' => $detail->type,
                     'pagu_anggaran' => $detail->pagu_anggaran,
                     'bulan_lalu' => $detail->bulan_lalu,
                     'bulan_ini' => $detail->bulan_ini,

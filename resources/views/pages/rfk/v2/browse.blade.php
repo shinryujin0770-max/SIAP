@@ -132,12 +132,12 @@ $defaultOpdId = $id_opd ?? null;
                                 <th title="Nilai otomatis dari s.d. Bulan Ini bulan sebelumnya">Bulan Lalu <i class="fas fa-info-circle text-muted" style="font-size: 0.8em;"></i></th>
                                 <th>Bulan Ini</th>
                                 <th>s.d. Bulan Ini</th>
-                                <th>
-                                    <div>Keuangan</div>
-                                    <small id="avg-keuangan-indicator" class="text-muted" style="font-weight: normal; display: none;">
-                                        Rata-rata Keseluruhan OPD: <span id="avg-keuangan-value">0.00</span>%
-                                    </small>
-                                </th>
+                                 <th>
+                                     <div>Keuangan</div>
+                                     <small id="avg-keuangan-indicator" class="text-muted" style="font-weight: normal; display: block; margin-top: 2px;">
+                                         Rata-rata Keseluruhan OPD: <span id="avg-keuangan-value">0.00</span>%
+                                     </small>
+                                 </th>
                                 <th>Fisik</th>
                             </tr>
                         </thead>
@@ -236,6 +236,7 @@ $defaultOpdId = $id_opd ?? null;
     let overtimeToggleEnabled = false;
     const $resyncButton = $('#btn-resync-previous');
     let opdAverageKeuangan = 0; // Store average keuangan for the OPD
+    let serverAverageLoaded = false; // Flag: true when average is fetched from server
     let isAutoExpandingAfterLoad = false;
 
     // Helper functions for loading overlay
@@ -341,10 +342,11 @@ $defaultOpdId = $id_opd ?? null;
         const opd = $('#filter-opd').val();
         const month = $('#filter-month').val();
 
-        let canSync = !!opd && !!month;
-
-        if (!IS_SUPERADMIN) {
-            canSync = canSync && !editingLocked;
+        let canSync = false;
+        if (IS_SUPERADMIN) {
+            canSync = !!month;
+        } else {
+            canSync = !!opd && !!month && !editingLocked;
         }
 
         $resyncButton.prop('disabled', !canSync);
@@ -472,14 +474,14 @@ $defaultOpdId = $id_opd ?? null;
         const opd = $('#filter-opd').val();
         const month = $('#filter-month').val();
 
-        if (!opd) {
-            toastr.error('Pilih OPD terlebih dahulu');
+        if (!month) {
+            toastr.error('Pilih bulan terlebih dahulu');
             updateResyncButtonState();
             return;
         }
 
-        if (!month) {
-            toastr.error('Pilih bulan terlebih dahulu');
+        if (!opd && !IS_SUPERADMIN) {
+            toastr.error('Pilih OPD terlebih dahulu');
             updateResyncButtonState();
             return;
         }
@@ -488,9 +490,11 @@ $defaultOpdId = $id_opd ?? null;
         const previousMonthValue = getPreviousMonthValue(month);
         const previousMonthLabel = previousMonthValue ? (formatMonthLabel(previousMonthValue) || previousMonthValue) : 'bulan sebelumnya';
 
+        const scopeText = opd ? 'OPD yang dipilih' : 'SEMUA OPD';
+
         swal({
             title: "Sync Ulang Data",
-            text: `Data bulan ${monthLabel} akan diganti dengan data dari ${previousMonthLabel}. Lanjutkan?`,
+            text: `Data bulan ${monthLabel} untuk ${scopeText} akan diganti dengan data dari ${previousMonthLabel}. Lanjutkan?`,
             icon: "warning",
             buttons: ["Batal", "Ya"],
             dangerMode: true
@@ -615,8 +619,10 @@ $defaultOpdId = $id_opd ?? null;
         });
 
         if (rowUpdated) {
-            // Recalculate OPD average after updating row from cache
-            calculateOpdAverageKeuanganFromCache();
+            // Only recalculate from cache if server hasn't provided the value yet
+            if (!serverAverageLoaded) {
+                calculateOpdAverageKeuanganFromCache();
+            }
 
             // Update DOM attributes to maintain hierarchy
             if (rowTr && rowTr.length > 0) {
@@ -661,8 +667,10 @@ $defaultOpdId = $id_opd ?? null;
             updateRowInTable(parentData.id, parentData);
         });
 
-        // Recalculate OPD average after updating all parents from cache
-        calculateOpdAverageKeuanganFromCache();
+        // Only recalculate from cache if server hasn't provided the value yet
+        if (!serverAverageLoaded) {
+            calculateOpdAverageKeuanganFromCache();
+        }
 
         // After all updates, ensure order is correct
         const orderAfterUpdate = logDOMOrder('AFTER UPDATE PARENTS');
@@ -674,14 +682,11 @@ $defaultOpdId = $id_opd ?? null;
 
     function download(type) {
         const opd = $('#filter-opd').val();
-        if (!opd) {
-            toastr.error('Pilih OPD terlebih dahulu');
-            return;
+        let url = `{{ url('/rfk-v2/laporan/') }}/${type}?month=${$('#filter-month').val()}`;
+        if (opd) {
+            url += `&opd=${opd}`;
         }
-        window.open(
-            `{{ url('/rfk-v2/laporan/') }}/${type}?` + `month=${$(`#filter-month`).val()}&opd=${opd}`,
-            '_blank'
-        );
+        window.open(url, '_blank');
     }
 
     function getHierarchyLevel(type) {
@@ -708,6 +713,7 @@ $defaultOpdId = $id_opd ?? null;
     // Fetch average keuangan from ALL OPDs in Kabupaten Tulungagung (not just selected OPD)
     function fetchOpdAverageKeuangan(callback) {
         const month = $('#filter-month').val();
+        serverAverageLoaded = false;
 
         if (!month) {
             opdAverageKeuangan = 0;
@@ -726,6 +732,7 @@ $defaultOpdId = $id_opd ?? null;
             success: function (response) {
                 if (response.success && response.data) {
                     opdAverageKeuangan = parseFloat(response.data.opd_keuangan) || 0;
+                    serverAverageLoaded = true;
                     const count = parseInt(response.data.count) || 0;
 
                     console.log('[AVERAGE KEUANGAN] Fetched from server (ALL OPDs):', opdAverageKeuangan.toFixed(2) + '%', 'from', count, 'sub_kegiatan');
@@ -816,14 +823,9 @@ $defaultOpdId = $id_opd ?? null;
         const $value = $('#avg-keuangan-value');
         const $legend = $('#keuangan-legend');
 
-        if (count > 0) {
-            $value.text(average.toFixed(2));
-            $indicator.show();
-            $legend.show();
-        } else {
-            $indicator.hide();
-            $legend.hide();
-        }
+        $value.text(average.toFixed(2));
+        $indicator.show();
+        $legend.show();
     }
 
     // Get color class based on keuangan value compared to OPD average
@@ -1616,8 +1618,10 @@ $defaultOpdId = $id_opd ?? null;
         // Log current DOM order before refresh
         const orderBefore = logDOMOrder('BEFORE REFRESH');
 
-        // Calculate OPD average keuangan from available cache
-        calculateOpdAverageKeuanganFromCache();
+        // Calculate OPD average keuangan from available cache (only if server value not loaded)
+        if (!serverAverageLoaded) {
+            calculateOpdAverageKeuanganFromCache();
+        }
 
         // Reset all editing/creating flags before refreshing
         table.rows().every(function() {
@@ -1914,8 +1918,10 @@ $defaultOpdId = $id_opd ?? null;
                 isAutoExpandingAfterLoad = false;
             }
 
-            // Calculate average from all expanded data
-            calculateOpdAverageKeuanganFromCache();
+            // Calculate average from all expanded data (only if server value not loaded)
+            if (!serverAverageLoaded) {
+                calculateOpdAverageKeuanganFromCache();
+            }
 
             // Update button state and ensure it's enabled, reset flag
             setTimeout(function() {
@@ -2106,45 +2112,45 @@ $defaultOpdId = $id_opd ?? null;
                 // Fetch OPD average keuangan from server (all sub_kegiatan data)
                 fetchOpdAverageKeuangan(function() {
                     console.log('[GET LIST DATA] Average fetched, OPD average:', opdAverageKeuangan.toFixed(2) + '%');
-                });
 
-                // Log DOM order before refresh
-                const orderBeforeRefresh = logDOMOrder('BEFORE GETLISTDATA REFRESH');
-                refreshTable();
-                // Log DOM order after refresh (will be logged inside refreshTable)
+                    // Log DOM order before refresh
+                    const orderBeforeRefresh = logDOMOrder('BEFORE GETLISTDATA REFRESH');
+                    refreshTable();
+                    // Log DOM order after refresh (will be logged inside refreshTable)
 
-                // Auto-expand all rows after data is loaded
-                // Use a longer delay to ensure table is fully rendered and DOM is ready
-                setTimeout(function() {
-                    // Ensure all state is reset
-                    expanded_rows = {};
-                    child_data_cache = {};
-                    isExpandingCollapsing = false; // Reset flag
-
-                    // Ensure button is enabled before expanding
-                    const $btn = $('#btn-toggle-expand');
-                    $btn.prop('disabled', false);
-                    $btn.css('pointer-events', 'auto');
-
-                    // Show loading during expand all
-                    showTableLoading('Memperluas semua data...');
-
-                    // Do NOT call table.draw(false) here as it may reorder rows
-                    // The data is already in correct hierarchical order from refreshTable()
-                    // Just wait a bit to ensure DOM is fully updated, then expand
+                    // Auto-expand all rows after data is loaded
+                    // Use a longer delay to ensure table is fully rendered and DOM is ready
                     setTimeout(function() {
-                        // Then expand all recursively (start with retryCount = 0)
-                        expandAllRecursive(0);
+                        // Ensure all state is reset
+                        expanded_rows = {};
+                        child_data_cache = {};
+                        isExpandingCollapsing = false; // Reset flag
 
-                        // Safety timeout: force hide loading after 10 seconds if still showing
+                        // Ensure button is enabled before expanding
+                        const $btn = $('#btn-toggle-expand');
+                        $btn.prop('disabled', false);
+                        $btn.css('pointer-events', 'auto');
+
+                        // Show loading during expand all
+                        showTableLoading('Memperluas semua data...');
+
+                        // Do NOT call table.draw(false) here as it may reorder rows
+                        // The data is already in correct hierarchical order from refreshTable()
+                        // Just wait a bit to ensure DOM is fully updated, then expand
                         setTimeout(function() {
-                            if (loadingOperations > 0) {
-                                console.warn('[LOADING] Safety timeout: forcing hide loading after 10 seconds');
-                                forceHideTableLoading();
-                            }
-                        }, 10000);
-                    }, 200);
-                }, 600); // Increased delay to ensure table is fully rendered
+                            // Then expand all recursively (start with retryCount = 0)
+                            expandAllRecursive(0);
+
+                            // Safety timeout: force hide loading after 10 seconds if still showing
+                            setTimeout(function() {
+                                if (loadingOperations > 0) {
+                                    console.warn('[LOADING] Safety timeout: forcing hide loading after 10 seconds');
+                                    forceHideTableLoading();
+                                }
+                            }, 10000);
+                        }, 200);
+                    }, 600); // Increased delay to ensure table is fully rendered
+                });
             },
             error: function (response, thrownError) {
                 $('.loader').hide();
@@ -3024,8 +3030,10 @@ $defaultOpdId = $id_opd ?? null;
         });
 
         if (rowRemoved) {
-            // Recalculate OPD average after removing rows from cache
-            calculateOpdAverageKeuanganFromCache();
+            // Only recalculate from cache if server hasn't provided the value yet
+            if (!serverAverageLoaded) {
+                calculateOpdAverageKeuanganFromCache();
+            }
 
             // Sort list_data hierarchically after removal
             list_data = sortListDataHierarchically(list_data);
