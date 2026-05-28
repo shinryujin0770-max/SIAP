@@ -12,13 +12,13 @@
 <body>
     <style>
         .container {
-            padding: 3rem 5rem;
-            padding-top: 5rem;
+            margin-top: 1rem;
+            padding: 5rem 4rem;
         }
 
         @page {
             margin: 0px;
-            size: 24.13cm 28.94cm portrait;
+            size: 21cm 33cm portrait;
         }
 
         body {
@@ -164,8 +164,8 @@
     </style>
     <div class="container">
         <div
-            style="position: absolute; right: 100px; top: 25px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
-            FPK-12</div>
+            style="position: absolute; right: 100px; top: 50px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
+            FPK-14</div>
         <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
             <tr>
                 <td style="width: 100%">
@@ -174,7 +174,8 @@
                             ANGGARAN PENDAPATAN DAN BELANJA DAERAH (APBD)
                         </div>
                         <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
-                            KABUPATEN TULUNGAGUNG TAHUN ANGGARAN 2022
+                            KABUPATEN TULUNGAGUNG TAHUN ANGGARAN
+                            {{\Carbon\Carbon::parse($project_detail['created_at'])->isoFormat('YYYY')}}
                         </div>
                         <hr style="width: 60%; margin-top: 0px;">
                     </div>
@@ -215,7 +216,7 @@
                         </tr>
                         <tr>
                             <td style="width: 15%">
-                                <div style="font-size: 11pt; margin-left: 5px">Nomor</div>
+                                <div style="font-size: 11pt; margin-left: 5px">Nomor BA. Serah Terima</div>
                             </td>
                             <td style="width: 1%; text-align: center;">:</td>
                             <td>
@@ -224,7 +225,7 @@
                         </tr>
                         <tr>
                             <td style="width: 20%">
-                                <div style="font-size: 11pt; margin-left: 5px">Tanggal</div>
+                                <div style="font-size: 11pt; margin-left: 5px">Tanggal BA. Serah Terima</div>
                             </td>
                             <td style="width: 1%; text-align: center;">:</td>
                             <td>
@@ -239,18 +240,7 @@
                             <td style="width: 1%; text-align: center;">:</td>
                             <td>
                                 <div style="font-size: 11pt; margin-left: 5px">1. Berita Acara Pemeriksaan Pengawasan
-                                    Pekerjaan Kontruksi (FPK-11) </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 20%">
-                                <div style="font-size: 11pt; margin-left: 5px"></div>
-                            </td>
-                            <td style="width: 1%; text-align: center;">:</td>
-                            <td>
-                                <div style="font-size: 11pt; margin-left: 5px">
-                                    2. DED Pekerjaan Pengawasan Kontruksi
-                                </div>
+                                    Pekerjaan Kontruksi (FPK-13) </div>
                             </td>
                         </tr>
                     </table>
@@ -291,8 +281,13 @@
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="3">
-                                <div style="font-size: 11pt; margin-left: 5px">Berdasarkan SK. Kepala {{$project_detail['opd_name']}}</div>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">Berdasarkan</div>
+                            </td>
+                            <td style="text-align: center;">:</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['dasar_surat_putusan']}}
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -301,7 +296,8 @@
                             </td>
                             <td style="text-align: center;">:</td>
                             <td>
-                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['user_sk_number']}}</div>
+                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['user_sk_number']}}
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -310,7 +306,9 @@
                             </td>
                             <td style="text-align: center;">:</td>
                             <td>
-                                <div style="font-size: 11pt; margin-left: 5px">{{\Carbon\Carbon::parse($project_detail['user_sk_date'])->isoFormat('DD MMMM YYYY')}}</div>
+                                <div style="font-size: 11pt; margin-left: 5px">
+                                    {{\Carbon\Carbon::parse($project_detail['user_sk_date'])->isoFormat('DD MMMM
+                                    YYYY')}}</div>
                             </td>
                         </tr>
                         <tr>
@@ -342,41 +340,52 @@
                             </td>
                         </tr>
                         <tr>
-                            <td style="width: 30%">
-                                <div style="font-size: 11pt; margin-left: 5px">Nama</div>
-                            </td>
-                            <td style="width: 1%; text-align: center;">:</td>
                             <td>
-                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['partner_name']}}</div>
+                                <table border="0" cellspacing="3" cellpadding="0" style="width: 100%; font-size: 11pt;">
+                                    <tr>
+                                        <td style="width: 31%">
+                                            <div style="font-size: 11pt; margin-left: 5px">Nama</div>
+                                        </td>
+                                        <td style="width: 1%; text-align: center;">:</td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">
+                                                {{$project_detail['director_partner'] ??
+                                                $project_detail['partner_director']}}</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">Jabatan</div>
+                                        </td>
+                                        <td style="text-align: center;">:</td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">Direktur</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">Alamat Kantor</div>
+                                        </td>
+                                        <td style="text-align: center;">:</td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">
+                                                {{$project_detail['address_partner'] ??
+                                                $project_detail['partner_address']}}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <div style="font-size: 11pt; margin-left: 5px">Jabatan</div>
-                            </td>
-                            <td style="text-align: center;">:</td>
-                            <td>
-                                <div style="font-size: 11pt; margin-left: 5px">Direktur</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div style="font-size: 11pt; margin-left: 5px">Alamat Kantor</div>
-                            </td>
-                            <td style="text-align: center;">:</td>
-                            <td>
-                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['partner_address']}}</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="3">
                                 <div style="font-size: 11pt; margin-left: 5px">
                                     selanjutnya disebut sebagai <strong>PIHAK KEDUA</strong>
                                 </div>
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="3">
+                            <td>
                                 <div style="font-size: 11pt; margin-left: 5px">
                                     Berdasarkan :
                                 </div>
@@ -389,7 +398,8 @@
                                         </td>
                                         <td style="width: 1%; text-align: center;">:</td>
                                         <td>
-                                            <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['spk_number']}}</div>
+                                            <div style="font-size: 11pt; margin-left: 5px">
+                                                {{$project_detail['spk_number']}}</div>
                                         </td>
                                     </tr>
                                     <tr>
@@ -399,7 +409,9 @@
                                         </td>
                                         <td style="text-align: center;">:</td>
                                         <td>
-                                            <div style="font-size: 11pt; margin-left: 5px">{{\Carbon\Carbon::parse($project_detail['spk_date'])->isoFormat('DD MMMM YYYY')}}</div>
+                                            <div style="font-size: 11pt; margin-left: 5px">
+                                                {{\Carbon\Carbon::parse($project_detail['spk_date'])->isoFormat('DD MMMM
+                                                YYYY')}}</div>
                                         </td>
                                     </tr>
                                 </table>
@@ -436,7 +448,7 @@
                             </div>
                             <div style="height: 20mm"></div>
                             <div>
-                                <u>{{$project_detail['partner_director']}}</u>
+                                <u>{{$project_detail['director_partner'] ?? $project_detail['partner_director']}}</u>
                             </div>
                             <div>
                                 Direktur
@@ -447,7 +459,7 @@
                                 PIHAK KESATU
                             </div>
                             <div>
-                                PEJABAT PEMBUAT KOMITMEN
+                                {{$project_detail['user_jabatan']}}
                             </div>
                             <div style="height: 20mm"></div>
                             <div>
@@ -462,6 +474,7 @@
             </tr>
         </table>
     </div>
+    @include('printouts.footer')
 
 </body>
 

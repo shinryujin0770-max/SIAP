@@ -7,13 +7,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia\HasMedia;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements HasMedia
 {
-    use Notifiable, HasMediaTrait, HasRoles;
+    use Notifiable, HasMediaTrait, HasRoles, LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -21,7 +22,7 @@ class User extends Authenticatable implements HasMedia
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'username', 'id_opd'
+        'name', 'email', 'password', 'username', 'id_opd', 'nip', 'sk_date', 'sk_number', 'jabatan', 'dasar_surat_putusan',
     ];
 
     /**
@@ -45,16 +46,6 @@ class User extends Authenticatable implements HasMedia
     public function adminlte_image()
     {
         return env('APP_URL') . '/user.png';
-    }
-
-    public function adminlte_name()
-    {
-        $user = AuthUser::find(Auth::id());
-        $res = 'Superadmin';
-        if ($user) {
-            $res = $user['name'];
-        }
-        return $res;
     }
 
     public function adminlte_desc()

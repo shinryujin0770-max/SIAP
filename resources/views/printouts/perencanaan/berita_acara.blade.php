@@ -9,13 +9,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <style>
         .container {
-            padding: 3rem 5rem;
-            padding-top: 5rem;
+            margin-top: 1rem;
+            padding: 5rem 4rem;
         }
 
         @page {
             margin: 0px;
-            size: 24.13cm 28.94cm portrait;
+            size: 21cm 33cm portrait;
         }
 
         body {
@@ -153,8 +153,8 @@
 <body>
     <div class="container">
         <div
-            style="position: absolute; right: 100px; top: 25px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
-            FPK-01</div>
+            style="position: absolute; right: 100px; top: 50px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
+            FPK-03</div>
         <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
             <tr>
                 <td style="width: 100%">
@@ -163,7 +163,8 @@
                             ANGGARAN PENDAPATAN DAN BELANJA DAERAH (APBD)
                         </div>
                         <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
-                            KABUPATEN TULUNGAGUNG TAHUN ANGGARAN 2022
+                            KABUPATEN TULUNGAGUNG TAHUN ANGGARAN
+                            {{\Carbon\Carbon::parse($project_detail['created_at'])->isoFormat('YYYY')}}
                         </div>
                         <hr style="width: 60%; margin-top: 0px;">
                     </div>
@@ -204,7 +205,7 @@
                         </tr>
                         <tr>
                             <td style="width: 15%">
-                                <div style="font-size: 11pt; margin-left: 5px">Nomor</div>
+                                <div style="font-size: 11pt; margin-left: 5px">Nomor BA. Pemeriksaan</div>
                             </td>
                             <td style="width: 1%; text-align: center;">:</td>
                             <td>
@@ -213,7 +214,7 @@
                         </tr>
                         <tr>
                             <td style="width: 20%">
-                                <div style="font-size: 11pt; margin-left: 5px">Tanggal</div>
+                                <div style="font-size: 11pt; margin-left: 5px">Tanggal BA. Pemeriksaan</div>
                             </td>
                             <td style="width: 1%; text-align: center;">:</td>
                             <td>
@@ -248,7 +249,7 @@
                         <tr>
                             <td style="text-align: center;">2.</td>
                             <td>
-                                <div style="font-size: 11pt; margin-left: 5px">Tanggal SPK</div>
+                                <div style="font-size: 11pt; margin-left: 5px">Tanggal SPK/Kontrak</div>
                             </td>
                             <td style="text-align: center;">:</td>
                             <td>
@@ -260,7 +261,7 @@
                         <tr>
                             <td style="text-align: center;">3.</td>
                             <td>
-                                <div style="font-size: 11pt; margin-left: 5px">Nomor SPK</div>
+                                <div style="font-size: 11pt; margin-left: 5px">Nomor SPK/Kontrak</div>
                             </td>
                             <td style="text-align: center;">:</td>
                             <td>
@@ -270,11 +271,12 @@
                         <tr>
                             <td style="text-align: center;">4.</td>
                             <td>
-                                <div style="font-size: 11pt; margin-left: 5px">Nilai SPK</div>
+                                <div style="font-size: 11pt; margin-left: 5px">Nilai SPK/Kontrak</div>
                             </td>
                             <td style="text-align: center;">:</td>
                             <td>
-                                <div style="font-size: 11pt; margin-left: 5px">Rp {{number_format($project_detail['spk_amount'], 2, ',', '.')}}</div>
+                                <div style="font-size: 11pt; margin-left: 5px">Rp
+                                    {{number_format($project_detail['spk_amount'], 2, ',', '.')}}</div>
                             </td>
                         </tr>
                         <tr>
@@ -302,7 +304,8 @@
                                         <td>:</td>
                                         <td>
                                             <div style="font-size: 11pt; margin-left: 5px">
-                                                {{$project_detail['partner_address']}}</div>
+                                                {{$project_detail['address_partner'] ??
+                                                $project_detail['partner_address']}}</div>
                                         </td>
                                     </tr>
                                     <tr>
@@ -312,7 +315,8 @@
                                         <td>:</td>
                                         <td>
                                             <div style="font-size: 11pt; margin-left: 5px">
-                                                {{$project_detail['partner_director']}}</div>
+                                                {{$project_detail['director_partner'] ??
+                                                $project_detail['partner_director']}}</div>
                                         </td>
                                     </tr>
                                 </table>
@@ -357,7 +361,7 @@
                                         <td>:</td>
                                         <td>
                                             <div style="font-size: 11pt; margin-left: 5px">
-                                                {{$project_detail['spk_days']}} hari</div>
+                                                {{$project_detail['spk_days'] + 1}} hari</div>
                                         </td>
                                     </tr>
                                 </table>
@@ -425,7 +429,7 @@
                                     )
                                     pada hasil pekerjaan
                                 </div>
-                                <div>(Laporan lengkap disampaikan kepada Pejabat Pembuat Komitmen - PPK)</div>
+                                <div>(Laporan lengkap disampaikan kepada PA/KPA/PPKom)</div>
                             </td>
                         </tr>
                     </table>
@@ -444,10 +448,25 @@
                     <tr>
                         <td style="width: 50%" class="ttd text-center">
                             <div id="signature_jabatan">
-                                diperiksa oleh
+                                &nbsp;
                             </div>
                             <div>
-                                Pejabat Pembuat Komitmen / PPK
+                                Pelaksana Perencanaan
+                            </div>
+                            <div style="height: 20mm"></div>
+                            <div>
+                                <u>{{$project_detail['director_partner'] ?? $project_detail['partner_director']}}</u>
+                            </div>
+                            <div>
+                                Direktur
+                            </div>
+                        </td>
+                        <td style="width: 50%" class="ttd text-center">
+                            <div id="signature_jabatan">
+                                dibuat oleh
+                            </div>
+                            <div>
+                                {{$project_detail['user_jabatan']}}
                             </div>
                             <div style="height: 20mm"></div>
                             <div>
@@ -457,26 +476,12 @@
                                 NIP. {{$project_detail['user_nip']}}
                             </div>
                         </td>
-                        <td style="width: 50%" class="ttd text-center">
-                            <div id="signature_jabatan">
-                                dibuat oleh
-                            </div>
-                            <div>
-                                Pelaksana Perencanaan
-                            </div>
-                            <div style="height: 20mm"></div>
-                            <div>
-                                <u>{{$project_detail['partner_director']}}</u>
-                            </div>
-                            <div>
-                                Direktur
-                            </div>
-                        </td>
                     </tr>
                 </table>
             </tr>
         </table>
     </div>
+    @include('printouts.footer')
 
 </body>
 

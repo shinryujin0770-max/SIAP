@@ -7,6 +7,7 @@ use App\Models\Opd;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
@@ -37,10 +38,11 @@ class UserController extends Controller
                 ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id', 'left')
                 ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id', 'left')
                 ->leftJoin('opd', 'users.id_opd', '=', 'opd.id', 'left');
+            $data = DB::table($data)->select('*');
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
-                    $id = $row['id'];
+                    $id = $row->id;
                     $btn = "<button onclick='read($id)' class='edit btn btn-block btn-info btn-sm'><i class='fa fa-edit'></i> Edit</button>";
                     $btn .= "<button onclick='hapus($id)' class='edit btn btn-block btn-danger btn-sm'><i class='fa fa-trash'></i> Delete</button>";
                     return $btn;
@@ -79,6 +81,10 @@ class UserController extends Controller
             'id_opd' => 'required',
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'nip' => 'required',
+            'sk_date' => 'required',
+            'sk_number' => 'required',
+            'jabatan' => 'required',
         ], [
             'required' => ':attribute harus diisi.',
         ]);
@@ -138,10 +144,17 @@ class UserController extends Controller
         $validationEmail = [
             'email' => $findUser['email'] != $data['email'] ? ['required', 'string', 'email', 'max:255', 'unique:users'] : ['required', 'string', 'email', 'max:255']
         ];
-        $validator = Validator::make($dataValidation, array_merge($validationEmail, $validationUsername, [
+
+        $validationPassword = isset($dataValidation['password']) ? [
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ] : [];
+        $validator = Validator::make($dataValidation, array_merge($validationEmail, $validationUsername, $validationPassword, [
             'name' => 'required',
             'id_opd' => 'required',
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'nip' => 'required',
+            'sk_date' => 'required',
+            'sk_number' => 'required',
+            'jabatan' => 'required',
         ]), [
             'required' => ':attribute harus diisi.',
         ]);
@@ -159,6 +172,9 @@ class UserController extends Controller
             ), 400); // 400 being the HTTP code for an invalid request.
         }
 
+        if ($attr['password']) {
+            $data['password'] = Hash::make($attr['password']);
+        }
         $store = $findUser->update($data);
 
         $role = $attr['role'];

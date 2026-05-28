@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'PEMBANGUNAN',
+    'title' => 'SIAP APPS',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -45,12 +45,12 @@ return [
     |
     */
 
-    'logo' => '<b>Pem</b>bangunan',
+    'logo' => '<b>SIAP</b> Apps',
     'logo_img' => 'logo-tulungagung.png',
     'logo_img_class' => 'brand-image img-circle elevation-1',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
-    'logo_img_alt' => 'PEMBANGUNAN',
+    'logo_img_alt' => 'SIAP APPS',
 
     /*
     |--------------------------------------------------------------------------
@@ -69,7 +69,7 @@ return [
     'usermenu_header_class' => 'bg-primary',
     'usermenu_image' => false,
     'usermenu_desc' => false,
-    'usermenu_profile_url' => true,
+    'usermenu_profile_url' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -145,7 +145,7 @@ return [
     |
     */
 
-    'sidebar_mini' => 'sm',
+    'sidebar_mini' => 'lg',
     'sidebar_collapse' => true,
     'sidebar_collapse_auto_size' => true,
     'sidebar_collapse_remember' => false,
@@ -188,7 +188,7 @@ return [
     */
 
     'use_route_url' => false,
-    'dashboard_url' => 'home',
+    'dashboard_url' => 'dashboard',
     'logout_url' => 'logout',
     'login_url' => 'login',
     'register_url' => 'register',
@@ -354,22 +354,22 @@ return [
             ],
         ],
         'Chartjs' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
-                    'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js',
+                    'asset' => true,
+                    'location' => '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.min.js',
                 ],
             ],
         ],
         'Sweetalert2' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
-                    'asset' => false,
-                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@8',
+                    'asset' => true,
+                    'location' => '//unpkg.com/sweetalert/dist/sweetalert.min.js',
                 ],
             ],
         ],

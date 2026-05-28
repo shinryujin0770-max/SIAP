@@ -74,9 +74,36 @@
     <meta name="msapplication-TileImage" content="{{ asset('favicon/ms-icon-144x144.png') }}">
     @endif
 
+    <style type="text/css">
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background-color: #fff;
+            opacity: 50%;
+            display: none;
+        }
+
+        .loading {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font: 14px arial;
+        }
+    </style>
 </head>
 
 <body class="@yield('classes_body')" @yield('body_data')>
+    <div class="loader">
+        <div class="loading">
+            <div class="spinner-border">
+            </div>
+        </div>
+    </div>
 
     {{-- Body Content --}}
     @yield('body')

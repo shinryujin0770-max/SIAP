@@ -3,7 +3,7 @@
     <div class="row p-3">
         @csrf
         <div class="col-12">
-            <h5 class="font-weight-bolder text-center mb-3">BERITA ACARA SERAH TERIMA PERENCANAAN</h5>
+            <h5 class="font-weight-bolder text-center mb-3">BERITA ACARA SERAH TERIMA</h5>
             @if ($contents)
             <button type="button" onclick="cetak({{$project_details['id']}})" data-dismiss="modal"
                 class="btn btn-inverse-info btn-sm float-right position-absolute" style="top: 0; right: 0;"><i
@@ -61,9 +61,7 @@
                     setTimeout(function() {
                         $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', true);
 
-                        toastr.options = {"closeButton":true,"closeClass":"toast-close-button","closeDuration":300,"closeEasing":"swing","closeHtml":"<button><i class=\"icon-off\"><\/i><\/button>","closeMethod":"fadeOut","closeOnHover":true,"containerId":"toast-container","debug":false,"escapeHtml":false,"extendedTimeOut":10000,"hideDuration":1000,"hideEasing":"linear","hideMethod":"fadeOut","iconClass":"toast-info","iconClasses":{"error":"toast-error","info":"toast-info","success":"toast-success","warning":"toast-warning"},"messageClass":"toast-message","newestOnTop":false,"onHidden":null,"onShown":null,"positionClass":"toast-top-right","preventDuplicates":true,"progressBar":true,"progressClass":"toast-progress","rtl":false,"showDuration":300,"showEasing":"swing","showMethod":"fadeIn","tapToDismiss":true,"target":"body","timeOut":5000,"titleClass":"toast-title","toastClass":"toast"};
-                        toastr.success('Berhasil Menyimpan Dokumen', '', []);
-                        $("#modal-form").modal('hide');
+                        window.location.href = "<?= url('project/') .'/'.$project_details->id_project ?>";
                     }, 1000);
                 } else {
                     $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', false);

@@ -20,6 +20,13 @@
                         <div class="col-sm-12">
                             <input type="hidden" name="id" value="{{$user['id']}}">
                             <div class="form-group">
+                                <label>Dasar Surat Putusan</label>
+                                <input type="text" name="dt[dasar_surat_putusan]" class="form-control"
+                                    id="dasar_surat_putusan" placeholder="Masukkan Dasar Surat Putusan..."
+                                    value="{{$user['dasar_surat_putusan']}}">
+                                <div class="invalid-feedback text-capitalize error-dasar_surat_putusan"></div>
+                            </div>
+                            <div class="form-group">
                                 <label>Email Pengguna</label>
                                 <input type="email" name="dt[email]" class="form-control" id="email"
                                     placeholder="Masukkan Email Pengguna..." value="{{$user['email']}}">
@@ -38,21 +45,54 @@
                                 <div class="invalid-feedback text-capitalize error-name"></div>
                             </div>
                             <div class="form-group">
+                                <label>NIP Pengguna</label>
+                                <input type="text" name="dt[nip]" class="form-control" id="nip"
+                                    placeholder="Masukkan NIP Pengguna..." value="{{$user['nip']}}">
+                                <div class="invalid-feedback text-capitalize error-nip"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Tanggal SK Pengguna</label>
+                                <input type="date" name="dt[sk_date]" class="form-control" id="sk_date"
+                                    placeholder="Masukkan Tanggal SK Pengguna..." value="{{$user['sk_date']}}">
+                                <div class="invalid-feedback text-capitalize error-sk_date"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>No. SK Pengguna</label>
+                                <input type="text" name="dt[sk_number]" class="form-control" id="sk_number"
+                                    placeholder="Masukkan No. SK Pengguna..." value="{{$user['sk_number']}}">
+                                <div class="invalid-feedback text-capitalize error-sk_number"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Jabatan Pengguna</label>
+                                <select class="form-control select2" name="dt[jabatan]" style="width: 100%">
+                                    <option value="Pengguna Anggaran" {{$user['jabatan']=='Pengguna Anggaran'
+                                        ? 'selected' : '' }}>Pengguna Anggaran</option>
+                                    <option value="Kuasa Pengguna Anggaran"
+                                        {{$user['jabatan']=='Kuasa Pengguna Anggaran' ? 'selected' : '' }}>Kuasa
+                                        Pengguna Anggaran</option>
+                                    <option value="Pejabat Pembuat Komitmen"
+                                        {{$user['jabatan']=='Pejabat Pembuat Komitmen' ? 'selected' : '' }}>Pejabat
+                                        Pembuat Komitmen</option>
+                                </select>
+                                <div class="invalid-feedback text-capitalize error-jabatan"></div>
+                            </div>
+                            <div class="form-group">
                                 <label>Role pengguna</label>
                                 <select class="form-control select2" id="role" name="role" style="width: 100%">
                                     <option value="superadmin" {{$user['role']=='superadmin' ? 'selected' : '' }}>
                                         Superadmin</option>
                                     <option value="admin_opd" {{$user['role']=='admin_opd' ? 'selected' : '' }}>Admin
                                         OPD</option>
+                                    <option value="admin_rfk" {{$user['role']=='admin_rfk' ? 'selected' : '' }}>Admin
+                                        RFK</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>OPD</label>
-                                <select class="form-control select2" id="id_opd" name="dt[id_opd]"
-                                    style="width: 100%">
+                                <select class="form-control select2" id="id_opd" name="dt[id_opd]" style="width: 100%">
                                     @foreach ($opds as $opd)
-                                    <option value="{{$opd['id']}}" {{$user['id_opd']==$opd['id'] ? 'selected' : ''
-                                        }}>{{$opd['name']}}</option>
+                                    <option value="{{$opd['id']}}" {{$user['id_opd']==$opd['id'] ? 'selected' : '' }}>
+                                        {{$opd['name']}}</option>
                                     @endforeach
                                 </select>
                             </div>

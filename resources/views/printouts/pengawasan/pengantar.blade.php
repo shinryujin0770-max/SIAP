@@ -9,13 +9,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <style>
         .container {
-            padding: 3rem 5rem;
-            padding-top: 5rem;
+            margin-top: 1rem;
+            padding: 5rem 4rem;
         }
 
         @page {
             margin: 0px;
-            size: 24.13cm 28.94cm portrait;
+            size: 21cm 33cm portrait;
         }
 
         body {
@@ -163,8 +163,8 @@
 <body>
     <div class="container">
         <div
-            style="position: absolute; right: 100px; top: 25px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
-            FPK-04</div>
+            style="position: absolute; right: 100px; top: 50px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
+            FPK-16</div>
         <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
             <tr>
                 <td style="width: 100%">
@@ -173,7 +173,8 @@
                             ANGGARAN PENDAPATAN DAN BELANJA DAERAH (APBD)
                         </div>
                         <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
-                            KABUPATEN TULUNGAGUNG TAHUN ANGGARAN 2022
+                            KABUPATEN TULUNGAGUNG TAHUN ANGGARAN
+                            {{\Carbon\Carbon::parse($project_detail['created_at'])->isoFormat('YYYY')}}
                         </div>
                         <hr style="width: 60%; margin-top: 0px;">
                     </div>
@@ -190,8 +191,9 @@
                 <td>
                     <div>Kepada</div>
                     <div>Yth. Sdr. Kepala Bagian Administrasi Pembangunan </div>
-                    <div style="margin-left: 62px">selaku Pengendali Pekerjaan Konstruksi </div>
-                    <div style="margin-left: 62px">Kabupaten Tulungagung Tahun 2022 </div>
+                    <div style="margin-left: 62px">selaku Pengendali Pengawasan Konstruksi </div>
+                    <div style="margin-left: 62px">Kabupaten Tulungagung Tahun
+                        {{\Carbon\Carbon::parse($project_detail['created_at'])->isoFormat('YYYY')}} </div>
                     <div style="margin-left: 62px">di</div>
                     <div style="margin-left: 82px"> <u>TULUNGAGUNG</u> </div>
                 </td>
@@ -218,9 +220,22 @@
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Menunjuk Berita Acara Serah Terima Pengawasan
                         Konstruksi dan pasal-pasal pembayaran pada Surat Perintah Kerja (SPK) / Surat Perjanjian
                         (Kontrak) -
-                        terlampir, dapatnya dilaksanakan verifikasi terhadap berkas Pembayaran Langsung 100%, Uang Muka
-                        dan
-                        Angsuran/Tahapan Pengawasan Konstruksi.
+                        terlampir, dapatnya dilaksanakan verifikasi terhadap berkas Pembayaran
+                        @if ($project_detail->type == 'Uang Muka')
+                        <span style="text-decoration: line-through;">Langsung 100%</span>,
+                        Uang Muka dan
+                        <span style="text-decoration: line-through;">Angsuran/Tahapan</span>
+                        @elseif($project_detail->type == 'Langsung 100%' || ($project_detail->type == 'pengantar' &&
+                        $project_detail->payment_type == 'paid'))
+                        Langsung 100%,
+                        <span style="text-decoration: line-through;">Uang Muka</span> dan
+                        <span style="text-decoration: line-through;">Angsuran/Tahapan
+                            @else
+                            <span style="text-decoration: line-through;">Langsung 100% </span>,
+                            <span style="text-decoration: line-through;">Uang Muka </span> dan
+                            Angsuran/Tahapan
+                            @endif
+                            Pengawasan Konstruksi.
                     </div>
                     <div>Bersama ini kami lampirkan : </div>
                     <table width="100%" cellspacing="0">
@@ -229,7 +244,8 @@
                             <td style="width: 90%;">Surat Perintah Kerja (SPK) / Surat Perjanjian (Kontrak)</td>
                             <td>
                                 <div style="border: 1px solid #000; width: 50px; text-align: center;">
-                                    <span style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
                                         &#10003;
                                     </span>
                                 </div>
@@ -237,12 +253,20 @@
                         </tr>
                         <tr>
                             <td style="width: 5%;">2.</td>
-                            <td style="width: 90%;">Progress Detail Engineering Design (DED) </td>
+                            <td style="width: 90%;">Laporan Periode / Akhir Pengawasan </td>
                             <td>
                                 <div style="border: 1px solid #000; width: 50px; text-align: center;">
-                                    <span style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                    @if (isset($contents['laporan_akhir']) && $contents['laporan_akhir'])
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
                                         &#10003;
                                     </span>
+                                    @else
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                        &#10006;
+                                    </span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -251,9 +275,17 @@
                             <td style="width: 90%;">Berita Acara Pemeriksaan Pengawasan Pekerjaan Konstruksi </td>
                             <td>
                                 <div style="border: 1px solid #000; width: 50px; text-align: center;">
-                                    <span style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                    @if ($project_details['berita_acara'][0]['content'])
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
                                         &#10003;
                                     </span>
+                                    @else
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                        &#10006;
+                                    </span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -262,20 +294,36 @@
                             <td style="width: 90%;">Berita Acara Serah Terima Pengawasan Pekerjaan Konstruksi </td>
                             <td>
                                 <div style="border: 1px solid #000; width: 50px; text-align: center;">
-                                    <span style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                    @if ($project_details['bast'][0]['content'])
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
                                         &#10003;
                                     </span>
+                                    @else
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                        &#10006;
+                                    </span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
                         <tr>
                             <td style="width: 5%;">5.</td>
-                            <td style="width: 90%;">Ringkasan Kontrak </td>
+                            <td style="width: 90%;">Ringkasan Kontrak Pengawasan Pekerjaan Konstruksi </td>
                             <td>
                                 <div style="border: 1px solid #000; width: 50px; text-align: center;">
-                                    <span style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                    @if ($project_details['ringkasan_kontrak'][0]['content'])
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
                                         &#10003;
                                     </span>
+                                    @else
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                        &#10006;
+                                    </span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -284,9 +332,17 @@
                             <td style="width: 90%;">Surat Tanda Setoran (STS) denda keterlambatan </td>
                             <td>
                                 <div style="border: 1px solid #000; width: 50px; text-align: center;">
-                                    <span style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                    @if (isset($contents['sts']) && $contents['sts'])
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
                                         &#10003;
                                     </span>
+                                    @else
+                                    <span
+                                        style="font-family: 'DeJaVu Sans Mono', monospace; margin-right: -10px; font-weight: bold">
+                                        &#10006;
+                                    </span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -313,7 +369,7 @@
                     <tr>
                         <td style="width: 50%" class="ttd text-center">
                             <div>
-                                PEJABAT PEMBUAT KOMITMEN
+                                {{$project_detail['user_jabatan']}}
                             </div>
                             <div style="height: 30mm"></div>
                             <div>
@@ -330,6 +386,7 @@
             </tr>
         </table>
     </div>
+    @include('printouts.footer')
 
 </body>
 

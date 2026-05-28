@@ -16,59 +16,47 @@
                 <div>{{$project_details['rekening']}}</div>
             </div>
             <div class="form-group">
-                <label>Tanggal</label>
-                <input type="date" name="data[tanggal]" class="form-control"
-                    value="{{$contents ? $contents['tanggal'] : ''}}">
-            </div>
-            <div class="form-group">
                 <label>Nomor DPA/DPPA</label>
                 <input type="text" name="data[nomor_dpa]" class="form-control" placeholder="Masukkan Nomor..."
-                    value="{{$contents ? $contents['nomor_dpa'] : ''}}">
+                    value="{{isset($contents['nomor_dpa']) ? $contents['nomor_dpa'] : ''}}">
             </div>
             <div class="form-group">
                 <label>Tanggal DPA/DPPA</label>
-                <input type="date" name="data[tanggal_dpa]" class="form-control" {{$contents ? $contents['tanggal_dpa']
-                    : '' }}>
+                <input type="date" name="data[tanggal_dpa]" class="form-control" value="{{isset($contents['tanggal_dpa']) ? $contents['tanggal_dpa']
+                    : '' }}">
+            </div>
+            <div class="form-group">
+                <label>NPWP</label>
+                <input type="number" name="data[npwp]" class="form-control" placeholder="Masukkan NPWP..."
+                    value="{{isset($contents['npwp']) ? $contents['npwp'] : '' }}">
             </div>
             <div class="form-group">
                 <label>Bank Referensi</label>
                 <input type="text" name="data[bank]" class="form-control" placeholder="Masukkan Bank Referensi..."
-                    value="{{$contents ? $contents['bank'] : '' }}">
+                    value="{{isset($contents['bank']) ? $contents['bank'] : '' }}">
             </div>
             <div class="form-group">
                 <label>Nomor Rekening Bank</label>
                 <input type="text" name="data[nomor_rekening]" class="form-control"
                     placeholder="Masukkan Nomor Rekening Bank..."
-                    value="{{$contents ? $contents['nomor_rekening'] : '' }}">
+                    value="{{isset($contents['nomor_rekening']) ? $contents['nomor_rekening'] : '' }}">
             </div>
             <div class="form-group">
                 <label>Nama Pemilik Rekening</label>
                 <input type="text" name="data[nama_rekening]" class="form-control"
                     placeholder="Masukkan Nama Pemilik Rekening..."
-                    value="{{$contents ? $contents['nama_rekening'] : '' }}">
+                    value="{{isset($contents['nama_rekening']) ? $contents['nama_rekening'] : '' }}">
             </div>
             <div class="form-group">
                 <label>Masa Pemeliharaan</label>
                 <input type="number" name="data[masa_pemeliharaan]" class="form-control"
                     placeholder="Masukkan Masa Pemeliharaan..."
-                    value="{{$contents ? $contents['masa_pemeliharaan'] : '' }}">
+                    value="{{isset($contents['masa_pemeliharaan']) ? $contents['masa_pemeliharaan'] : '' }}">
             </div>
             <div class="form-group">
                 <label>Tanggal Penyelesaian Pekerjaan</label>
                 <input type="date" name="data[penyelesaian_pekerjaan]" class="form-control"
-                    value="{{$contents ? $contents['penyelesaian_pekerjaan'] : ''}}">
-            </div>
-            <div class="form-group">
-                <label>Nama Kuasa Pengguna Anggaran</label>
-                <input type="text" name="data[kuasa_pengguna_anggaran]" class="form-control"
-                    placeholder="Masukkan Nama Kuasa Pengguna Anggaran..."
-                    value="{{$contents ? $contents['nama_kuasa_pengguna_anggaran'] : '' }}">
-            </div>
-            <div class="form-group">
-                <label>NIP Kuasa Pengguna Anggaran</label>
-                <input type="text" name="data[kuasa_pengguna_anggaran]" class="form-control"
-                    placeholder="Masukkan NIP Kuasa Pengguna Anggaran..."
-                    value="{{$contents ? $contents['nip_kuasa_pengguna_anggaran'] : '' }}">
+                    value="{{isset($contents['penyelesaian_pekerjaan']) ? $contents['penyelesaian_pekerjaan'] : ''}}">
             </div>
             <div class="mt-5">
                 <button type="button" data-dismiss="modal"
@@ -105,9 +93,7 @@
                     setTimeout(function() {
                         $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', true);
 
-                        toastr.options = {"closeButton":true,"closeClass":"toast-close-button","closeDuration":300,"closeEasing":"swing","closeHtml":"<button><i class=\"icon-off\"><\/i><\/button>","closeMethod":"fadeOut","closeOnHover":true,"containerId":"toast-container","debug":false,"escapeHtml":false,"extendedTimeOut":10000,"hideDuration":1000,"hideEasing":"linear","hideMethod":"fadeOut","iconClass":"toast-info","iconClasses":{"error":"toast-error","info":"toast-info","success":"toast-success","warning":"toast-warning"},"messageClass":"toast-message","newestOnTop":false,"onHidden":null,"onShown":null,"positionClass":"toast-top-right","preventDuplicates":true,"progressBar":true,"progressClass":"toast-progress","rtl":false,"showDuration":300,"showEasing":"swing","showMethod":"fadeIn","tapToDismiss":true,"target":"body","timeOut":5000,"titleClass":"toast-title","toastClass":"toast"};
-                        toastr.success('Berhasil Menyimpan Dokumen', '', []);
-                        $("#modal-form").modal('hide');
+                        window.location.href = "<?= url('project/') .'/'.$project_details->id_project ?>";
                     }, 1000);
                 } else {
                     $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', false);

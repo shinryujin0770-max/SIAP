@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'APBD')
+@section('title', 'Paket Pekerjaan Konstruksi')
 
 @section('content_header')
 <div class="m-0 text-dark">
@@ -18,7 +18,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
-                            <h5 class="font-weight-bolder mb-3 text-capitalize text-primary">APBD {{$category}}</h5>
+                            <h5 class="font-weight-bolder mb-3 text-capitalize text-primary">Paket Pekerjaan
+                                {{$category}}</h5>
                             <input type="hidden" value="{{$category}}" name="project[category]">
                         </div>
                         <div class="col-md-6">
@@ -47,7 +48,8 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="text-muted" style="font-size: 11pt">Tanggal SPK</label>
-                                <input type="date" name="project[spk_date]" class="form-control"
+                                <input type="date" name="project[spk_date]" class="form-control" {{--
+                                    min="{{\Carbon\Carbon::now()->subDays(7)->isoFormat('YYYY-MM-DD')}}" --}}
                                     placeholder="Masukkan Tanggal SPK...">
                                 <div class="invalid-feedback text-capitalize error-spk_date"></div>
                             </div>
@@ -192,25 +194,19 @@
                         <div class="col-12">
                             <p class="font-weight-bolder mb-3">Periode SPK</p>
                         </div>
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label class="text-muted" style="font-size: 11pt">Lama</label>
-                                <input type="text" name="project[spk_days]" class="form-control"
-                                    placeholder="Lama Pekerjaan (Hari/Kalender)...">
-                                <div class="invalid-feedback text-capitalize error-spk_days"></div>
-                            </div>
-                        </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="text-muted" style="font-size: 11pt">Tanggal Mulai</label>
-                                <input type="date" name="project[spk_start]" class="form-control">
+                                <input type="date" name="project[spk_start]" class="form-control" {{--
+                                    min="{{\Carbon\Carbon::now()->subDays(7)->isoFormat('YYYY-MM-DD')}}" --}}>
                                 <div class="invalid-feedback text-capitalize error-spk_start"></div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="text-muted" style="font-size: 11pt">Tanggal Selesai</label>
-                                <input type="date" name="project[spk_end]" class="form-control">
+                                <input type="date" name="project[spk_end]" class="form-control" {{--
+                                    min="{{\Carbon\Carbon::now()->subDays(7)->isoFormat('YYYY-MM-DD')}}" --}}>
                                 <div class="invalid-feedback text-capitalize error-spk_end"></div>
                             </div>
                         </div>
@@ -235,6 +231,18 @@
                                 <input type="date" name="project[adendum_end]" class="form-control">
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="text-muted" style="font-size: 11pt">Nomor Adendum SPK/Kontrak</label>
+                                <input type="text" name="project[adendum_no]" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="text-muted" style="font-size: 11pt">Tanggal Adendum SPK/Kontrak</label>
+                                <input type="date" name="project[adendum_date]" class="form-control">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,9 +254,15 @@
                         <p class="font-weight-bolder mb-3">Pembayaran</p>
                     </div>
                     <div class="form-group">
+                        <label class="text-muted" style="font-size: 11pt">Uraian Sub Kegiatan</label>
+                        <textarea class="form-control" name="project[uraian]" style="width: 100%">
+                        </textarea>
+                        <div class="invalid-feedback text-capitalize error-uraian"></div>
+                    </div>
+                    <div class="form-group">
                         <label class="text-muted" style="font-size: 11pt">Kode Rekening</label>
-                        <select class="form-control select-rekening" id="rekening"
-                            onchange="handleChangeRekening()" style="width: 100%" multiple>
+                        <select class="form-control select-rekening" id="kode_rekening" onchange="handleChangeRekening()"
+                            style="width: 100%" multiple>
                         </select>
                         <div class="invalid-feedback text-capitalize error-rekening"></div>
                     </div>
@@ -288,18 +302,46 @@
                 <div class="card-body">
                     {{-- <button type="button" data-dismiss="modal"
                         class="btn btn-secondary float-right ml-1">Batal</button> --}}
-                    <button type="submit" class="btn btn-inverse-primary float-right" id="btn-simpan">Simpan</button>
+                    <button type="button" onclick="modalConfirmation()"
+                        class="btn btn-inverse-primary float-right">Simpan</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+        id="modal-confirmation">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content rounded-xl border-0">
+                <div class="modal-body">
+                    <div class="row p-3">
+                        <div class="col-12">
+                            <h6 class="text-center">Apakah anda yakin akan mengajukan Paket Pekerjaan ini ?</h6>
+                        </div>
+                        <div class="col-12 d-flex justify-content-center mt-4">
+                            <button type="submit" class="btn btn-inverse-primary" id="btn-simpan">Ya</button>
+                            <button type="button" data-dismiss="modal" class="btn btn-secondary ml-1">Tidak</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @include('pages.project.modals.modal-overtime')
 </form>
 @stop
 
 @section('js')
 <script>
-    $( '.uang' ).mask('000.000.000.000.000', {reverse: true});
+    function modalConfirmation() {
+        $("#modal-confirmation").modal()
+    }
+
+    $( '.uang' ).mask('#.##0,00', {reverse: true});
     function handleChangePartner(id) {
+        $("#partner_id").val('');
+        $("#partner_director").val('');
+        $("#partner_address").val('');
         if (id) {
             $.ajax({
                 url: "<?= url('partner/ajax/') . '/' ?>" + id,
@@ -353,7 +395,7 @@
     }
 
     function handleChangeRekening() {
-        const value = $('#rekening').val();
+        const value = $('#kode_rekening').val();
         if (value.length > 0) {
             const typePayment = $('input[name="project[payment_type]"]:checked').val();
             $(".input-payment-type").removeClass("disabled").attr('disabled', false);
@@ -373,12 +415,13 @@
     function handleChangePaymentType(type) {
         $("#nav-tabs-payment-detail").empty();
         $("#tabs-payment-detail").empty();
-        const value = $('#rekening').val();
+        const value = $('#kode_rekening').val();
         let tab = '';
         value.map(function (item) {
+            const str = item.replaceAll('.', '-');
             $('#nav-tabs-payment-detail').append(`
                 <li class="nav-item">
-                    <a class="nav-link text-muted" onclick="activeTab('#tabs-${item}')" href="#tabs-${item}">
+                    <a class="nav-link text-muted" onclick="activeTab('#tabs-${str}')" href="#tabs-${str}">
                         ${item}
                     </a>
                 </li>
@@ -386,11 +429,13 @@
         })
         if (type === 'installment') {
             value.map(function (item, i) {
+                const str = item.replaceAll('.', '-');
                 if (i === 0) {
-                    tab = item;
+                    tab = str;
                 }
                 $('#tabs-payment-detail').append(
-                    '<div class="tab-pane py-3 fade show" id="tabs-' + item + '" role="tabpanel" aria-labelledby="tabs-' + item + '-tab">' +
+                    '<div class="tab-pane py-3 fade show" id="tabs-' + str + '" role="tabpanel" aria-labelledby="tabs-' + str + '-tab">' +
+
                     '<div class="card shadow-none my-1">' +
                     '<div class="card-body p-0">' +
                     '<div class="row">' +
@@ -411,6 +456,7 @@
                     '</div>' +
                     '</div>' +
                     '</div>' +
+
                     '<div class="card shadow-none my-1">' +
                     '<div class="card-body p-0">' +
                     '<div class="row">' +
@@ -431,6 +477,7 @@
                     '</div>' +
                     '</div>' +
                     '</div>' +
+
                     '<div class="card shadow-none my-1">' +
                     '<div class="card-body p-0">' +
                     '<div class="row">' +
@@ -451,6 +498,7 @@
                     '</div>' +
                     '</div>' +
                     '</div>' +
+
                     '<div class="card shadow-none my-1">' +
                     '<div class="card-body p-0">' +
                     '<div class="row">' +
@@ -471,6 +519,7 @@
                     '</div>' +
                     '</div>' +
                     '</div>' +
+
                     '<div class="card shadow-none my-1">' +
                     '<div class="card-body p-0">' +
                     '<div class="row">' +
@@ -491,16 +540,39 @@
                     '</div>' +
                     '</div>' +
                     '</div>' +
+
+                    '<div class="card shadow-none my-1">' +
+                    '<div class="card-body p-0">' +
+                    '<div class="row">' +
+                    '<div class="col-3 d-flex align-items-center">' +
+                    '<label class="text-muted" style="font-size: 11pt">Termin Ke-5</label>' +
+                    '</div>' +
+                    '<div class="col-9">' +
+                    '<input type="hidden" name="payment[' + item + '][5][type]" value="Termin 5">' +
+                    '<div class="input-group mb-3">'+
+                    '<div class="input-group-append">'+
+                    '<div class="input-group-text">'+
+                    'Rp'+
+                    '</div>'+
+                    '</div>'+
+                    '<input type="text" name="payment[' + item + '][5][amount]" class="form-control uang termin-angsuran" id="termin-5" onkeyup="handleChangeTermin()" placeholder="0">' +
+                    '</div>'+
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+
                     '</div>'
                 );
             })
         } else if (type === 'paid') {
             value.map(function (item, i) {
+                const str = item.replaceAll('.', '-');
                 if (i === 0) {
-                    tab = item;
+                    tab = str;
                 }
                 $('#tabs-payment-detail').append(
-                    '<div class="tab-pane py-3 fade show" id="tabs-' + item + '" role="tabpanel" aria-labelledby="tabs-' + item + '-tab">' +
+                    '<div class="tab-pane py-3 fade show" id="tabs-' + str + '" role="tabpanel" aria-labelledby="tabs-' + str + '-tab">' +
                     '<div class="card shadow-none my-1">' +
                     '<div class="card-body p-0">' +
                     '<div class="row">' +
@@ -531,19 +603,19 @@
             return;
         }
         activeTab('#tabs-' + tab);
-        $( '.uang' ).mask('000.000.000.000.000', {reverse: true});
+        $( '.uang' ).mask('#.##0,00', {reverse: true});
     }
 
     function handleChangeLunas() {
         const inputLunas = $('.termin-langsung');
-        const totalSPK = parseInt($('#spk_amount').val().replace(/\./g, '')) || 0;
+        const totalSPK = parseFloat($('#spk_amount').val().replace(/\./g, '').replace(/\,/g, '.')) || 0;
         let lunas = 0;
 
         for (var i = 0; i < inputLunas.length; i++) {
-            lunas += parseInt($(inputLunas[i]).val().replace(/\./g, '')) || 0;
+            lunas += parseFloat($(inputLunas[i]).val().replace(/\./g, '').replace(/\,/g, '.')) || 0;
         }
 
-        if (lunas !== totalSPK) {
+        if ((Math.round(lunas * 100) / 100) !== totalSPK) {
             $(".error-termin").addClass("d-block").html('<strong>Total Pembayaran harus sama dengan Nilai SPK</strong>');
             $("#btn-simpan").addClass("disabled").attr('disabled', true);
         } else {
@@ -554,14 +626,14 @@
 
     function handleChangeTermin() {
         const inputs = $('.termin-angsuran');
-        const totalSPK = parseInt($('#spk_amount').val().replace(/\./g, '')) || 0;
+        const totalSPK = parseFloat($('#spk_amount').val().replace(/\./g, '').replace(/\,/g, '.')) || 0;
         let lunas = 0;
 
         for (var i = 0; i < inputs.length; i++) {
-            lunas += parseInt($(inputs[i]).val().replace(/\./g, '')) || 0;
+            lunas += parseFloat($(inputs[i]).val().replace(/\./g, '').replace(/\,/g, '.')) || 0;
         }
 
-        if (lunas !== totalSPK) {
+        if ((Math.round(lunas * 100) / 100) !== totalSPK) {
             $(".error-termin").addClass("d-block").html('<strong>Total Pembayaran harus sama dengan Nilai SPK</strong>');
             $("#btn-simpan").addClass("disabled").attr('disabled', true);
         } else {
@@ -591,15 +663,26 @@
             },
             success: function(response, textStatus, xhr) {
                 var str = response;
+                if (str === 'overtime'){
+                    toastr.options = {"closeButton":true,"closeClass":"toast-close-button","closeDuration":300,"closeEasing":"swing","closeHtml":"<button><i class=\"icon-off\"><\/i><\/button>","closeMethod":"fadeOut","closeOnHover":true,"containerId":"toast-container","debug":false,"escapeHtml":false,"extendedTimeOut":10000,"hideDuration":1000,"hideEasing":"linear","hideMethod":"fadeOut","iconClass":"toast-info","iconClasses":{"error":"toast-error","info":"toast-info","success":"toast-success","warning":"toast-warning"},"messageClass":"toast-message","newestOnTop":false,"onHidden":null,"onShown":null,"positionClass":"toast-top-right","preventDuplicates":true,"progressBar":true,"progressClass":"toast-progress","rtl":false,"showDuration":300,"showEasing":"swing","showMethod":"fadeIn","tapToDismiss":true,"target":"body","timeOut":5000,"titleClass":"toast-title","toastClass":"toast"};
+                    toastr.error('SPK/Kontrak anda telah melewati batas tanggal', '', []);
+
+                    $("#modal-overtime").modal();
+                }
+                if (str === 'password'){
+                    toastr.options = {"closeButton":true,"closeClass":"toast-close-button","closeDuration":300,"closeEasing":"swing","closeHtml":"<button><i class=\"icon-off\"><\/i><\/button>","closeMethod":"fadeOut","closeOnHover":true,"containerId":"toast-container","debug":false,"escapeHtml":false,"extendedTimeOut":10000,"hideDuration":1000,"hideEasing":"linear","hideMethod":"fadeOut","iconClass":"toast-info","iconClasses":{"error":"toast-error","info":"toast-info","success":"toast-success","warning":"toast-warning"},"messageClass":"toast-message","newestOnTop":false,"onHidden":null,"onShown":null,"positionClass":"toast-top-right","preventDuplicates":true,"progressBar":true,"progressClass":"toast-progress","rtl":false,"showDuration":300,"showEasing":"swing","showMethod":"fadeIn","tapToDismiss":true,"target":"body","timeOut":5000,"titleClass":"toast-title","toastClass":"toast"};
+                    toastr.error('Kata sandi salah!', '', []);
+                }
                 if (str === 'true') {
                     setTimeout(function() {
-                        $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', true);
+                        $("#btn-simpan").removeClass("disabled").html('Ya').attr('disabled', true);
 
                         window.location.href = "<?= url('project') ?>";
                     }, 1000);
                 } else {
-                    $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', false);
+                    $("#btn-simpan").removeClass("disabled").html('Ya').attr('disabled', false);
                 }
+                $("#modal-confirmation").modal('hide')
             },
             error: function(xhr, textStatus, errorThrown) {
                 if(xhr.responseJSON.errors){
@@ -608,7 +691,8 @@
                         $(".error-" + value.code).addClass("d-block").html('<strong>' + value.message + '</strong>');
                     })
                 }
-                $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', false);
+                $("#btn-simpan").removeClass("disabled").html('Ya').attr('disabled', false);
+                $("#modal-confirmation").modal('hide')
             }
         });
 

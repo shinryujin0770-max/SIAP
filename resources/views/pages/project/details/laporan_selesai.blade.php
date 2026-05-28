@@ -13,42 +13,77 @@
         <div class="col-sm-12">
             <div class="form-group">
                 <label>Nomor</label>
-                <input type="text" name="data[nomor]" class="form-control" placeholder="Masukkan Nomor..." value="{{$contents ? $contents['nomor'] : ''}}">
+                <input type="text" name="data[nomor]" class="form-control" placeholder="Nomor dikeluarkan Rekanan/Pelaksana Pekerjaan Konstruksi"
+                    value="" readonly>
             </div>
             <div class="form-group">
                 <label>Tanggal</label>
-                <input type="date" name="data[tanggal]" class="form-control" {{$contents ? $contents['tanggal'] : ''}}>
+                <input type="date" name="data[tanggal]" class="form-control" value="{{isset($contents['tanggal']) ? $contents['tanggal']
+                    : '' }}">
             </div>
             <div class="form-group">
-                <label>Konsultan Pengawas</label>
-                <input type="text" name="data[konsultan_pengawas]" class="form-control"
-                    placeholder="Masukkan Konsultan Pengawas..." {{$contents ? $contents['konsultan_pengawas'] : ''}}>
+                <label>CV/PT Konsultan Pengawas</label>
+                <input type="text" name="data[konsultan_pengawas_nama]" class="form-control"
+                    placeholder="Masukkan Konsultan Pengawas..." value="{{isset($contents['konsultan_pengawas_nama']) ? $contents['konsultan_pengawas_nama']
+                    : '' }}">
+            </div>
+            <div class="form-group">
+                <label>Direktur Konsultan Pengawas</label>
+                <input type="text" name="data[konsultan_pengawas_direktur]" class="form-control"
+                    placeholder="Masukkan Konsultan Pengawas..." value="{{isset($contents['konsultan_pengawas_direktur']) ? $contents['konsultan_pengawas_direktur']
+                    : '' }}">
             </div>
             <div class="form-group">
                 <label>Pelaksanaan Perencanaan Pekerjaan</label>
                 <table class="table table-responsive text-center" id="list_pekerjaan">
                     <tr class="text-center">
-                        <th>NO</th>
+                        {{-- <th>NO</th> --}}
                         <th style="width:40%;">JENIS PEKERJAAN</th>
-                        <th style="width:25%;">BOBOT (%)</th>
-                        <th style="width:35%;">PRESTASI (%)</th>
-                        <th style="width:35%;">PROGRES (%)</th>
+                        <th style="width:20%;">BOBOT (%)</th>
+                        <th style="width:20%;">PRESTASI (%)</th>
+                        <th style="width:20%;">PROGRES (%)</th>
                     </tr>
+                    @if ($pekerjaan)
+                    @foreach ($pekerjaan as $i => $item)
+                    <tr id="tr_list_pekerjaan-{{$i + 1}}">
+                        {{-- <td class="text-center">{{$i + 1}}</td> --}}
+                        <td>
+                            <input type="text" name="pekerjaan[{{$i}}][jenis]" id="jenis-{{$i}}" class="form-control"
+                                value="{{$item['jenis']}}">
+                        </td>
+                        <td>
+                            <input type="number" step="any" name="pekerjaan[{{$i}}][bobot]" id="bobot-{{$i}}" onkeyup="calculateProgress({{$i}})" class="form-control"
+                                value="{{$item['bobot']}}">
+                        </td>
+                        <td>
+                            <input type="number" step="any" name="pekerjaan[{{$i}}][prestasi]" id="prestasi-{{$i}}" onkeyup="calculateProgress({{$i}})" class="form-control"
+                                value="{{$item['prestasi']}}">
+                        </td>
+                        <td class="text-right">
+                            <input type="number" step="any" name="pekerjaan[{{$i}}][progress]" id="progress-{{$i}}" class="form-control" readonly
+                                value="{{$item['progress']}}">
+                            <small id="{{$i + 1}}" class="text-danger btn_remove"
+                                style="cursor: pointer;"><u>Hapus</u></small>
+                        </td>
+                    </tr>
+                    @endforeach
+                    @else
                     <tr>
-                        <td class="text-center">1</td>
+                        {{-- <td class="text-center">1</td> --}}
                         <td>
-                            <input type="text" name="pekerjaan[0][jenis]" class="form-control">
+                            <input type="text" name="pekerjaan[0][jenis]" id="jenis-0" class="form-control">
                         </td>
                         <td>
-                            <input type="number" name="pekerjaan[0][bobot]" class="form-control">
+                            <input type="number" step="any" name="pekerjaan[0][bobot]" id="bobot-0" onkeyup="calculateProgress(0)" class="form-control">
                         </td>
                         <td>
-                            <input type="number" name="pekerjaan[0][prestasi]" class="form-control">
+                            <input type="number" step="any" name="pekerjaan[0][prestasi]" id="prestasi-0" onkeyup="calculateProgress(0)" class="form-control">
                         </td>
                         <td>
-                            <input type="number" name="pekerjaan[0][progress]" class="form-control">
+                            <input type="number" step="any" name="pekerjaan[0][progress]" id="progress-0" class="form-control" readonly>
                         </td>
                     </tr>
+                    @endif
                 </table>
                 <div class="d-flex justify-content-center align-items-center">
                     <button type="button" name="add_pekerjaan" id="add_pekerjaan"
@@ -67,22 +102,22 @@
 
 <script>
     $(document).ready(function() {
-        var i = "{{ isset($mail) && isset($mail['message']) && is_array(json_decode($mail['message'])) ? count(json_decode($mail['message'])) + 1 : 1 }}"
+        var i = "{{ isset($pekerjaan) ? count($pekerjaan) : 1 }}"
         $('#add_pekerjaan').click(function() {
         i++;
         $('#list_pekerjaan').append('<tr id="tr_list_pekerjaan-' + i + '">' +
-            `<td class="text-center">${i}</td>
-            <td>
-                <input type="text" name="pekerjaan[${i}][jenis]" class="form-control">
+            // <td class="text-center">${i}</td>
+            `<td>
+                <input type="text" name="pekerjaan[${i}][jenis]" id="jenis-${i}" class="form-control">
             </td>
             <td>
-                <input type="number" name="pekerjaan[${i}][bobot]" class="form-control">
+                <input type="number" step="any" name="pekerjaan[${i}][bobot]" id="bobot-${i}" onkeyup="calculateProgress(${i})" class="form-control">
             </td>
             <td>
-                <input type="number" name="pekerjaan[${i}][prestasi]" class="form-control">
+                <input type="number" step="any" name="pekerjaan[${i}][prestasi]" id="prestasi-${i}" onkeyup="calculateProgress(${i})" class="form-control">
             </td>
             <td class="text-right">
-                <input type="number" name="pekerjaan[${i}][progress]" class="form-control">
+                <input type="number" step="any" name="pekerjaan[${i}][progress]" id="progress-${i}" class="form-control">
                 <small id="${i}" class="text-danger btn_remove" style="cursor: pointer;"><u>Hapus</u></small>
             </td>` +
             '</tr>');
@@ -94,6 +129,14 @@
             $('#tr_list_pekerjaan-' + button_id + '').remove();
         });
     });
+
+    function calculateProgress(i) {
+        const bobot = $(`#bobot-${i}`).val();
+        const prestasi = $(`#prestasi-${i}`).val();
+        const progress = (parseFloat(prestasi) / parseFloat(bobot) * 100).toFixed(2);
+        console.log(prestasi, bobot)
+        $(`#progress-${i}`).val(progress);
+    }
 
     $("#submit-form").submit(function() {
         var form = $(this);
@@ -120,9 +163,7 @@
                     setTimeout(function() {
                         $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', true);
 
-                        toastr.options = {"closeButton":true,"closeClass":"toast-close-button","closeDuration":300,"closeEasing":"swing","closeHtml":"<button><i class=\"icon-off\"><\/i><\/button>","closeMethod":"fadeOut","closeOnHover":true,"containerId":"toast-container","debug":false,"escapeHtml":false,"extendedTimeOut":10000,"hideDuration":1000,"hideEasing":"linear","hideMethod":"fadeOut","iconClass":"toast-info","iconClasses":{"error":"toast-error","info":"toast-info","success":"toast-success","warning":"toast-warning"},"messageClass":"toast-message","newestOnTop":false,"onHidden":null,"onShown":null,"positionClass":"toast-top-right","preventDuplicates":true,"progressBar":true,"progressClass":"toast-progress","rtl":false,"showDuration":300,"showEasing":"swing","showMethod":"fadeIn","tapToDismiss":true,"target":"body","timeOut":5000,"titleClass":"toast-title","toastClass":"toast"};
-                        toastr.success('Berhasil Menyimpan Dokumen', '', []);
-                        $("#modal-form").modal('hide');
+                        window.location.href = "<?= url('project/') .'/'.$project_details->id_project ?>";
                     }, 1000);
                 } else {
                     $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', false);

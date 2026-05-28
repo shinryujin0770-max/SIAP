@@ -11,6 +11,11 @@ body {
 .main-header {
     border: none;
 }
+
+[class*=sidebar-light-] .sidebar a {
+    color: #5b6064;
+}
+
 [class*="sidebar-light"] .brand-link {
     border: none;
 }

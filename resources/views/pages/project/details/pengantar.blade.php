@@ -13,11 +13,50 @@
         <div class="col-sm-12">
             <div class="form-group">
                 <label>Nomor</label>
-                <input type="text" name="data[nomor]" class="form-control" placeholder="Masukkan Nomor..." value="{{$contents ? $contents['nomor'] : ''}}">
+                <input type="text" name="data[nomor]" class="form-control" placeholder="Masukkan Nomor..."
+                    value="{{$contents ? $contents['nomor'] : ''}}">
             </div>
             <div class="form-group">
                 <label>Tanggal</label>
-                <input type="date" name="data[tanggal]" class="form-control" value="{{$contents ? $contents['tanggal'] : ''}}">
+                <input type="date" name="data[tanggal]"
+                    min="{{\Carbon\Carbon::now()->isoFormat('YYYY-MM-DD')}}" class="form-control"
+                    value="{{$contents ? $contents['tanggal'] : ''}}">
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input class="custom-control-input input-payment-type" name="data[ded]" type="checkbox" id="ded"
+                    {{(isset($contents['ded']) ? $contents['ded'] : '' ) ? 'checked' : '' }}>
+                <label for="ded" class="custom-control-label">Progress Detail Engineering Design (DED)</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input class="custom-control-input input-payment-type" name="data[jaminan_pembayaran]" type="checkbox"
+                    id="jaminan_pembayaran" {{(isset($contents['jaminan_pembayaran']) ? $contents['jaminan_pembayaran']
+                    : '' ) ? 'checked' : '' }}>
+                <label for="jaminan_pembayaran" class="custom-control-label">Jaminan Pembayaran Uang Muka /
+                    Pelaksanaan</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input class="custom-control-input input-payment-type" name="data[laporan_akhir]" type="checkbox"
+                    id="laporan_akhir" {{(isset($contents['laporan_akhir']) ? $contents['laporan_akhir'] : '' )
+                    ? 'checked' : '' }}>
+                <label for="laporan_akhir" class="custom-control-label">Laporan Periode/Akhir</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input class="custom-control-input input-payment-type" name="data[jaminan_pemeliharaan]" type="checkbox"
+                    id="jaminan_pemeliharaan" {{(isset($contents['jaminan_pemeliharaan']) ?
+                    $contents['jaminan_pemeliharaan'] : '' ) ? 'checked' : '' }}>
+                <label for="jaminan_pemeliharaan" class="custom-control-label">Jaminan Pemeliharaan</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input class="custom-control-input input-payment-type" name="data[sts]" type="checkbox" id="sts"
+                    {{(isset($contents['sts']) ? $contents['sts'] : '' ) ? 'checked' : '' }}>
+                <label for="sts" class="custom-control-label">Surat Tanda Setoran (STS) denda keterlambatan</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input class="custom-control-input input-payment-type" name="data[verifikasi_ded]" type="checkbox"
+                    id="verifikasi_ded" {{(isset($contents['verifikasi_ded']) ? $contents['verifikasi_ded'] : '' )
+                    ? 'checked' : '' }}>
+                <label for="verifikasi_ded" class="custom-control-label">Surat Hasil Verifikasi DED dari Dinas
+                    Teknis</label>
             </div>
             <div class="mt-5">
                 <button type="button" data-dismiss="modal"
@@ -53,9 +92,8 @@
                 if (str === 'true') {
                     setTimeout(function() {
                         $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', true);
-                        toastr.options = {"closeButton":true,"closeClass":"toast-close-button","closeDuration":300,"closeEasing":"swing","closeHtml":"<button><i class=\"icon-off\"><\/i><\/button>","closeMethod":"fadeOut","closeOnHover":true,"containerId":"toast-container","debug":false,"escapeHtml":false,"extendedTimeOut":10000,"hideDuration":1000,"hideEasing":"linear","hideMethod":"fadeOut","iconClass":"toast-info","iconClasses":{"error":"toast-error","info":"toast-info","success":"toast-success","warning":"toast-warning"},"messageClass":"toast-message","newestOnTop":false,"onHidden":null,"onShown":null,"positionClass":"toast-top-right","preventDuplicates":true,"progressBar":true,"progressClass":"toast-progress","rtl":false,"showDuration":300,"showEasing":"swing","showMethod":"fadeIn","tapToDismiss":true,"target":"body","timeOut":5000,"titleClass":"toast-title","toastClass":"toast"};
-                        toastr.success('Berhasil Menyimpan Dokumen', '', []);
-                        $("#modal-form").modal('hide');
+
+                        window.location.href = "<?= url('project/') .'/'.$project_details->id_project ?>";
                     }, 1000);
                 } else {
                     $("#btn-simpan").removeClass("disabled").html('Simpan').attr('disabled', false);

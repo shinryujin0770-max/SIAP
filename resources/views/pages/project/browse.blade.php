@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'APBD')
+@section('title', 'Paket Pekerjaan Konstruksi')
 
 @section('content_header')
 <div class="m-0 text-dark">
@@ -14,17 +14,40 @@
     <div class="col-12">
         <div class="card shadow-none rounded-lg">
             <div class="card-header border-0">
-                <h3 class="card-title"></h3>
-                <h3 class="card-tools">
-                    <button onclick="ModalAdd()" class="right btn btn-fw btn-gradient-primary">Tambah</button>
+                <div class="row mb-3">
+                    <div class="col-sm-12 col-lg-6">
+                        <label for="filter-start">Tanggal</label>
+                        <div class="d-flex align-items-center">
+                            <input type="date" name="created_at" id="filter-start" class="form-control">
+                            <div class="mx-2">s/d</div>
+                            <input type="date" name="created_at" id="filter-end" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-3">
+                        <label for="filter-jenis">Jenis Pekerjaan</label>
+                        <select class="form-control select2" id="filter-jenis" name="jenis" style="width: 100%"
+                            multiple>
+                            <option value="perencanaan">Perencanaan</option>
+                            <option value="konstruksi">Konstruksi</option>
+                            <option value="pengawasan">Pengawasan</option>
+                        </select>
+                    </div>
+                </div>
+                <h3 class="card-tools d-flex">
+                    <button onclick="ModalAdd()" class="btn btn-fw btn-gradient-primary">Tambah</button>
+                    @if (auth()->user()->hasRole('superadmin'))
+                    <button onclick="modalDelete()" class="btn btn-fw btn-danger ml-3">Hapus</button>
+                    @endif
                 </h3>
             </div>
             <div class="card-body">
                 <table id="example1" class="table table-bordered table-hover">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Nomor SPK</th>
                             <th>Nama Pekerjaan</th>
+                            <th>Jenis Pekerjaan</th>
                             <th>Tanggal SPK</th>
                             <th>OPD</th>
                             <th>CV/PT Pelaksana</th>
@@ -49,17 +72,42 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" id="modal-delete">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content rounded-xl border-0">
+            <div class="modal-body">
+                <div id="load-delete"></div>
+            </div>
+        </div>
+    </div>
+</div>
 @stop
 
 @section('js')
 <script>
+    let projects = [];
     function ModalAdd() {
         $("#modal-add").modal();
         $("#load-form").load("<?= url('project/modalAdd') . '/' ?>")
     }
 
+    function modalDelete() {
+        if (!projects.length) {
+            alert('Tidak ada project yang dipilih!')
+            return;
+        }
+        $("#modal-delete").modal();
+        $("#load-delete").load("<?= url('project/modalDelete') . '/' ?>" + projects.join(','))
+    }
+
     function read(id) {
         location.href = "<?= url('project') . '/' ?>" + id;
+    }
+
+    function chooseProject(event, id) {
+        projects = projects.filter(value => value !== id);
+        if (event.checked) projects.push(id);
     }
 
     $(function() {
@@ -68,8 +116,21 @@
             serverSide: true,
             responsive: true,
             autoWidth: false,
-            ajax: "{{ route('project.browse') }}",
+            ajax: {
+                url:  "{{ route('project.browse') }}",
+                data: function(d) {
+                    d.filterStart = $('#filter-start').val();
+                    d.filterEnd = $('#filter-end').val();
+                    d.filterJenis = $('#filter-jenis').val();
+                }
+            },
             columns: [
+                {
+                    data: 'checkbox',
+                    name: 'checkbox',
+                    orderable: false,
+                    searchable: false
+                },
                 {
                     data: 'spk_number',
                     name: 'spk_number'
@@ -77,6 +138,10 @@
                 {
                     data: 'name',
                     name: 'name'
+                },
+                {
+                    data: 'category',
+                    name: 'category'
                 },
                 {
                     data: 'spk_date',
@@ -101,6 +166,18 @@
                     searchable: false
                 },
             ]
+        });
+
+        $('#filter-start').change(function () {
+            table.draw();
+        });
+
+        $('#filter-end').change(function () {
+            table.draw();
+        });
+
+        $('#filter-jenis').change(function () {
+            table.draw();
         });
     });
 </script>

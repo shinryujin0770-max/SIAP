@@ -12,13 +12,13 @@
 <body>
     <style>
         .container {
-            padding: 0 5rem;
-            padding-top: 5rem;
+            margin-top: 1rem;
+            padding: 5rem 4rem;
         }
 
         @page {
             margin: 0px;
-            size: 24.13cm 28.94cm portrait;
+            size: 21cm 33cm portrait;
         }
 
         body {
@@ -163,8 +163,8 @@
     </style>
     <div class="container">
         <div
-            style="position: absolute; right: 100px; top: 25px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
-            FPK-03</div>
+            style="position: absolute; right: 100px; top: 50px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
+            FPK-05</div>
         <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
             <tr>
                 <td style="width: 100%">
@@ -173,7 +173,8 @@
                             ANGGARAN PENDAPATAN DAN BELANJA DAERAH (APBD)
                         </div>
                         <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
-                            KABUPATEN TULUNGAGUNG TAHUN ANGGARAN 2022
+                            KABUPATEN TULUNGAGUNG TAHUN ANGGARAN
+                            {{\Carbon\Carbon::parse($project_detail['created_at'])->isoFormat('YYYY')}}
                         </div>
                         <hr style="width: 60%; margin-top: 0px;">
                     </div>
@@ -205,16 +206,6 @@
                         </tr>
                         <tr>
                             <td style="border-right: 0px;">
-                                <div style="font-size: 12pt; margin-left: 5px;">Tanggal</div>
-                            </td>
-                            <td style="text-align: center; border-left: 0px; border-right: 0px;">:</td>
-                            <td style="border-left: 0px;">
-                                <div style="font-size: 12pt; margin-left: 5px">
-                                    {{\Carbon\Carbon::parse($contents['tanggal'])->isoFormat('DD MMMM YYYY')}}</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border-right: 0px;">
                                 <div style="font-size: 12pt; margin-left: 5px;">Nomor DPA/DPPA </div>
                             </td>
                             <td style="text-align: center; border-left: 0px; border-right: 0px;">:</td>
@@ -234,11 +225,20 @@
                         </tr>
                         <tr>
                             <td style="border-right: 0px;">
-                                <div style="font-size: 12pt; margin-left: 5px;">Kode Rekening </div>
+                                <div style="font-size: 12pt; margin-left: 5px;">Kode Rekening Belanja </div>
                             </td>
                             <td style="text-align: center; border-left: 0px; border-right: 0px;">:</td>
                             <td style="border-left: 0px;">
                                 <div style="font-size: 12pt; margin-left: 5px">{{$project_detail['rekening']}}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-right: 0px;">
+                                <div style="font-size: 12pt; margin-left: 5px;">Uraian Sub Kegiatan </div>
+                            </td>
+                            <td style="text-align: center; border-left: 0px; border-right: 0px;">:</td>
+                            <td style="border-left: 0px;">
+                                <div style="font-size: 12pt; margin-left: 5px">{{$project_detail['uraian']}}</div>
                             </td>
                         </tr>
                         <tr>
@@ -265,8 +265,19 @@
                             </td>
                             <td style="text-align: center; border-left: 0px; border-right: 0px;">:</td>
                             <td style="border-left: 0px;">
-                                <div style="font-size: 12pt; margin-left: 5px">{{$project_detail['partner_director']}}
+                                <div style="font-size: 12pt; margin-left: 5px">{{$project_detail['director_partner'] ??
+                                    $project_detail['partner_director']}}
                                 </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-right: 0px;">
+                                <div style="font-size: 12pt; margin-left: 5px;">NPWP</div>
+                            </td>
+                            <td style="text-align: center; border-left: 0px; border-right: 0px;">:</td>
+                            <td style="border-left: 0px;">
+                                <div style="font-size: 12pt; margin-left: 5px">{{isset($contents['npwp']) ?
+                                    $contents['npwp'] : '-'}}</div>
                             </td>
                         </tr>
                         <tr>
@@ -301,11 +312,36 @@
                         </tr>
                         <tr>
                             <td style="border-right: 0px;">
+                                <div style="font-size: 12pt; margin-left: 5px;">Nomor Adendum</div>
+                            </td>
+                            <td style="text-align: center; border-left: 0px; border-right: 0px;">:</td>
+                            <td style="border-left: 0px;">
+                                <div style="font-size: 12pt; margin-left: 5px">
+                                    {{$project_detail['adendum_no'] ?? '-'}}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-right: 0px;">
+                                <div style="font-size: 12pt; margin-left: 5px;">Tanggal Adendum</div>
+                            </td>
+                            <td style="text-align: center; border-left: 0px; border-right: 0px;">:</td>
+                            <td style="border-left: 0px;">
+                                <div style="font-size: 12pt; margin-left: 5px">
+                                    {{$project_detail['adendum_date'] ?
+                                    \Carbon\Carbon::parse($project_detail['adendum_date'])->isoFormat('DD MMMM YYYY') :
+                                    '-'}}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-right: 0px;">
                                 <div style="font-size: 12pt; margin-left: 5px;">Alamat</div>
                             </td>
                             <td style="text-align: center; border-left: 0px; border-right: 0px;">:</td>
                             <td style="border-left: 0px;">
-                                <div style="font-size: 12pt; margin-left: 5px">{{$project_detail['partner_address']}}
+                                <div style="font-size: 12pt; margin-left: 5px">{{$project_detail['address_partner'] ??
+                                    $project_detail['partner_address']}}
                                 </div>
                             </td>
                         </tr>
@@ -337,7 +373,9 @@
                             </td>
                             <td style="text-align: center; border-left: 0px; border-right: 0px;">:</td>
                             <td style="border-left: 0px;">
-                                <div style="font-size: 12pt; margin-left: 5px">{{\Carbon\Carbon::parse($contents['penyelesaian_pekerjaan'])->isoFormat('DD MMMM YYYY')}}</div>
+                                <div style="font-size: 12pt; margin-left: 5px">
+                                    {{\Carbon\Carbon::parse($contents['penyelesaian_pekerjaan'])->isoFormat('DD MMMM
+                                    YYYY')}}</div>
                             </td>
                         </tr>
                         <tr>
@@ -348,15 +386,26 @@
                             <td style="border-left: 0px;">
                                 <table style="width: 100%;">
                                     <tr>
-                                        <td style="width: 30%">
-                                            <div style="font-size: 12pt; margin-left: 5px">1. Langsung 100% </div>
+                                        <td style="width: 35%">
+                                            <div style="font-size: 12pt; margin-left: 5px">1.
+                                                {{$project_detail->payment_type != 'paid' ? 'Uang Muka' : 'Langsung
+                                                100%'}} </div>
                                         </td>
                                         <td style="width: 5%">Rp</td>
-                                        <td>{{number_format(isset($project_payments['data']['Langsung 100%']['amount']) ? $project_payments['data']['Langsung 100%']['amount'] : 0, 0, ',', '.')}},-</td>
+                                        <td>{{number_format(isset($project_payments['data'][$project_detail->payment_type
+                                            != 'paid' ? 'Uang Muka' : 'Langsung 100%']['amount'])
+                                            ? $project_payments['data'][$project_detail->payment_type != 'paid'
+                                            ? 'Uang Muka' : 'Langsung 100%']['amount'] : 0, 2, ',', '.')}}
+                                        </td>
                                     </tr>
                                 </table>
                             </td>
                         </tr>
+                        @php
+                        $i = 1;
+                        @endphp
+                        @foreach ($project_payments['payments'] as $item)
+                        {{-- @if ($i > 0) --}}
                         <tr>
                             <td style="border-right: 0px;">
                                 <div style="font-size: 12pt; margin-left: 5px;"></div>
@@ -365,83 +414,22 @@
                             <td style="border-left: 0px;">
                                 <table style="width: 100%;">
                                     <tr>
-                                        <td style="width: 30%">
-                                            <div style="font-size: 12pt; margin-left: 5px">2. Uang Muka </div>
+                                        <td style="width: 35%">
+                                            <div style="font-size: 12pt; margin-left: 5px">{{$i + 1}}.
+                                                {{str_replace("Termin", "Angsuran", $item['type'])}} </div>
                                         </td>
                                         <td style="width: 5%">Rp</td>
-                                        <td>{{number_format(isset($project_payments['data']['Uang Muka']['amount']) ? $project_payments['data']['Uang Muka']['amount'] : 0, 0, ',', '.')}},-</td>
+                                        <td>{{number_format(isset($item['amount']) ?
+                                            $item['amount'] : 0, 2, ',', '.')}}</td>
                                     </tr>
                                 </table>
                             </td>
                         </tr>
-                        <tr>
-                            <td style="border-right: 0px;">
-                                <div style="font-size: 12pt; margin-left: 5px;"></div>
-                            </td>
-                            <td style="text-align: center; border-left: 0px; border-right: 0px;"></td>
-                            <td style="border-left: 0px;">
-                                <table style="width: 100%;">
-                                    <tr>
-                                        <td style="width: 30%">
-                                            <div style="font-size: 12pt; margin-left: 5px">3. Angsuran I </div>
-                                        </td>
-                                        <td style="width: 5%">Rp</td>
-                                        <td>{{number_format(isset($project_payments['data']['Termin 1']['amount']) ? $project_payments['data']['Termin 1']['amount'] : 0, 0, ',', '.')}},-</td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border-right: 0px;">
-                                <div style="font-size: 12pt; margin-left: 5px;"></div>
-                            </td>
-                            <td style="text-align: center; border-left: 0px; border-right: 0px;"></td>
-                            <td style="border-left: 0px;">
-                                <table style="width: 100%;">
-                                    <tr>
-                                        <td style="width: 30%">
-                                            <div style="font-size: 12pt; margin-left: 5px">4. Angsuran II </div>
-                                        </td>
-                                        <td style="width: 5%">Rp</td>
-                                        <td>{{number_format(isset($project_payments['data']['Termin 2']['amount']) ? $project_payments['data']['Termin 2']['amount'] : 0, 0, ',', '.')}},-</td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border-right: 0px;">
-                                <div style="font-size: 12pt; margin-left: 5px;"></div>
-                            </td>
-                            <td style="text-align: center; border-left: 0px; border-right: 0px;"></td>
-                            <td style="border-left: 0px;">
-                                <table style="width: 100%;">
-                                    <tr>
-                                        <td style="width: 30%">
-                                            <div style="font-size: 12pt; margin-left: 5px">5. Angsuran III </div>
-                                        </td>
-                                        <td style="width: 5%">Rp</td>
-                                        <td>{{number_format(isset($project_payments['data']['Termin 3']['amount']) ? $project_payments['data']['Termin 3']['amount'] : 0, 0, ',', '.')}},-</td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border-right: 0px;">
-                                <div style="font-size: 12pt; margin-left: 5px;"></div>
-                            </td>
-                            <td style="text-align: center; border-left: 0px; border-right: 0px;"></td>
-                            <td style="border-left: 0px;">
-                                <table style="width: 100%;">
-                                    <tr>
-                                        <td style="width: 30%">
-                                            <div style="font-size: 12pt; margin-left: 5px">6. Angsuran III </div>
-                                        </td>
-                                        <td style="width: 5%">Rp</td>
-                                        <td>{{number_format(isset($project_payments['data']['Termin 4']['amount']) ? $project_payments['data']['Termin 4']['amount'] : 0, 0, ',', '.')}},-</td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
+                        @php
+                        $i++;
+                        @endphp
+                        {{-- @endif --}}
+                        @endforeach
                         <tr>
                             <td style="border-right: 0px;">
                                 <div style="font-size: 12pt; margin-left: 5px;"></div>
@@ -450,13 +438,13 @@
                             <td style="border-left: 0px;">
                                 <table style="width: 100%; font-weight: bold;">
                                     <tr>
-                                        <td style="width: 30%">
+                                        <td style="width: 35%">
                                             <div
                                                 style="font-size: 12pt; margin-left: 5px; text-align: right; margin-right: 15px;">
                                                 Jumlah </div>
                                         </td>
                                         <td style="width: 5%">Rp</td>
-                                        <td>{{number_format($project_payments['total'], 0, ',', '.')}},-</td>
+                                        <td>{{number_format($project_payments['total'], 2, ',', '.')}}</td>
                                     </tr>
                                 </table>
                             </td>
@@ -501,6 +489,15 @@
                     </table>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <div style="margin-top: 10px;" class="text-left">
+                        Menyatakan bahwa ringkasan kontrak di atas sesuai dengan dokumen kontrak yang ada, jika terjadi
+                        kesalahan maka menjadi tanggungjawab kami sepenuhnya. Demikian ringkasan kontrak ini dibuat
+                        untuk dipergunakan sebagaimana mestinya.
+                    </div>
+                </td>
+            </tr>
             <tr style="font-size: 12pt;">
                 <table style="width: 100%; margin-top: 10px;">
                     <tr>
@@ -508,14 +505,14 @@
                         </td>
                         <td style="width: 50%" class="ttd text-center">
                             <div>
-                                Kuasa Pengguna Anggaran
+                                {{$project_detail['user_jabatan']}}
                             </div>
-                            <div style="height: 20mm"></div>
+                            <div style="height: 30mm"></div>
                             <div>
-                                <u>{{$contents['nama_kuasa_pengguna_anggaran']}}</u>
+                                <u>{{$project_detail['user_name']}}</u>
                             </div>
                             <div>
-                                NIP. {{$contents['nip_kuasa_pengguna_anggaran']}}
+                                NIP.{{$project_detail['user_nip']}}
                             </div>
                         </td>
                     </tr>
@@ -523,7 +520,7 @@
             </tr>
         </table>
     </div>
-
+    @include('printouts.footer')
 </body>
 
 </html>

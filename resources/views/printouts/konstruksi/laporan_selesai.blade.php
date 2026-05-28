@@ -1,489 +1,551 @@
-<style>
-    .container {
-        padding: 3rem 5rem;
-        padding-top: 5rem;
-    }
+<!DOCTYPE html>
+<html lang="en">
 
-    @page {
-        margin: 0px;
-        size: 24.13cm 27.94cm portrait;
-    }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        .container {
+            margin-top: 1rem;
+            padding: 5rem 4rem;
+        }
 
-    body {
-        margin: 0px;
-    }
+        @page {
+            margin: 0px;
+            size: 21cm 33cm portrait;
+        }
 
-    .table {
-        border: none;
-        width: 100%;
-    }
+        body {
+            margin: 0px;
+        }
 
-    .table-bordered,
-    .table-bordered th,
-    .table-bordered td {
-        border: 1px solid black;
-        border-collapse: collapse;
-    }
+        .table {
+            border: none;
+            width: 100%;
+        }
 
-    .table-border,
-    .table-border th.border,
-    .table-border td.border {
-        border: 1px solid black;
-        border-collapse: collapse;
-    }
+        .table-bordered,
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
 
-    .col {
-        border: 1px solid black;
-    }
+        .table-border,
+        .table-border th.border,
+        .table-border td.border {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
 
-    p {
-        margin: 12px 0px
-    }
+        .col {
+            border: 1px solid black;
+        }
 
-    .isi p {
-        margin: 0px 0px;
-    }
+        p {
+            margin: 12px 0px
+        }
 
-    .no-margin p {
-        margin: 0px 0px;
-    }
+        .isi p {
+            margin: 0px 0px;
+        }
 
-    .text-uppercase {
-        text-transform: uppercase;
-    }
+        .no-margin p {
+            margin: 0px 0px;
+        }
 
-    .text-capitalize {
-        text-transform: capitalize;
-    }
+        .text-uppercase {
+            text-transform: uppercase;
+        }
 
-    .text-center {
-        text-align: center;
-    }
+        .text-capitalize {
+            text-transform: capitalize;
+        }
 
-    .text-left {
-        text-align: left;
-    }
+        .text-center {
+            text-align: center;
+        }
 
-    .text-right {
-        text-align: right;
-    }
+        .text-left {
+            text-align: left;
+        }
 
-    .text-justify {
-        text-align: justify;
-        line-height: 1.6;
-    }
+        .text-right {
+            text-align: right;
+        }
 
-    .float-right {
-        float: right;
-    }
+        .text-justify {
+            text-align: justify;
+            line-height: 1.6;
+        }
 
-    .text-top {
-        vertical-align: text-top;
-    }
+        .float-right {
+            float: right;
+        }
 
-    .text-bottom {
-        vertical-align: text-bottom;
-    }
+        .text-top {
+            vertical-align: text-top;
+        }
 
-    .kop-surat p {
-        /* font-size: 12.1px; */
-        color: rgb(0, 0, 0);
-        /* font-weight: bold; */
-        font-style: normal;
-        text-decoration: none
-    }
+        .text-bottom {
+            vertical-align: text-bottom;
+        }
 
-    .paragraph {
-        padding-left: 40px;
-    }
+        .kop-surat p {
+            /* font-size: 12.1px; */
+            color: rgb(0, 0, 0);
+            /* font-weight: bold; */
+            font-style: normal;
+            text-decoration: none
+        }
 
-    .isi {
-        /* padding-left: 85px; */
-        margin-top: 1rem;
-    }
+        .paragraph {
+            padding-left: 40px;
+        }
 
-    .ttd {
-        width: 8.15cm;
-    }
+        .isi {
+            /* padding-left: 85px; */
+            margin-top: 1rem;
+        }
 
-    .catatan {
-        width: 5.15cm;
-        margin-top: 230px;
-    }
+        .ttd {
+            width: 8.15cm;
+        }
 
-    .d-inline {
-        display: inline;
-    }
+        .catatan {
+            width: 5.15cm;
+            margin-top: 230px;
+        }
 
-    .keep-together {
-        page-break-inside: avoid;
-    }
+        .d-inline {
+            display: inline;
+        }
 
-    .page-break-before {
-        page-break-before: always;
-    }
+        .keep-together {
+            page-break-inside: avoid;
+        }
 
-    .page-break-after {
-        page-break-after: always;
-    }
+        .page-break-before {
+            page-break-before: always;
+        }
 
-    ol {
-        padding-left: 20px;
-    }
+        .page-break-after {
+            page-break-after: always;
+        }
 
-    ol li::before {
-        text-align: justify;
-        line-height: 1.6;
-        display: block;
-        float: left;
-        margin-top: -0.25em;
-    }
-</style>
-<div class="container">
-    <div
-        style="position: absolute; right: 100px; top: 25px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
-        FPK-05</div>
-    <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
-        <tr>
-            <td style="width: 100%">
-                <div class="text-center">
-                    <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
-                        ANGGARAN PENDAPATAN DAN BELANJA DAERAH (APBD)
+        ol {
+            padding-left: 20px;
+        }
+
+        ol li::before {
+            text-align: justify;
+            line-height: 1.6;
+            display: block;
+            float: left;
+            margin-top: -0.25em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div
+            style="position: absolute; right: 100px; top: 50px; background-color: #000; color: #fff; display: inline; padding: 0.1rem 1rem; font-weight: bold; font-size: 14pt;">
+            FPK-07</div>
+        <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
+            <tr>
+                <td style="width: 100%">
+                    <div class="text-center">
+                        <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
+                            ANGGARAN PENDAPATAN DAN BELANJA DAERAH (APBD)
+                        </div>
+                        <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
+                            KABUPATEN TULUNGAGUNG TAHUN ANGGARAN
+                            {{\Carbon\Carbon::parse($project_detail['created_at'])->isoFormat('YYYY')}}
+                        </div>
+                        <hr style="width: 60%; margin-top: 0px;">
                     </div>
-                    <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
-                        KABUPATEN TULUNGAGUNG TAHUN ANGGARAN 2022
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 100%">
+                    <table border="1" cellspacing="0" cellpadding="5" style="width: 100%; margin-top: 15px;">
+                        <tr>
+                            <td colspan="3">
+                                <div class="text-center">
+                                    <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
+                                        LAPORAN PENYELESAIAN
+                                    </div>
+                                    <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
+                                        PELAKSANAAN PEKERJAAN KONSTRUKSI
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%">
+                                <div style="font-size: 11pt; margin-left: 5px">OPD</div>
+                            </td>
+                            <td style="width: 1%; text-align: center;">:</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['opd_nama']}}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%">
+                                <div style="font-size: 11pt; margin-left: 5px">Pekerjaan</div>
+                            </td>
+                            <td style="width: 1%; text-align: center;">:</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['name']}}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 15%">
+                                <div style="font-size: 11pt; margin-left: 5px">Nomor Laporan Penyelesaian</div>
+                            </td>
+                            <td style="width: 1%; text-align: center;">:</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%">
+                                <div style="font-size: 11pt; margin-left: 5px">Tanggal Laporan Penyelesaian</div>
+                            </td>
+                            <td style="width: 1%; text-align: center;">:</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">
+                                    {{\Carbon\Carbon::parse($contents['tanggal'])->isoFormat('DD MMMM YYYY')}}</div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 1rem;">
+                    <table border="0" cellspacing="3" cellpadding="0" style="width: 100%; font-size: 11pt;">
+                        <tr>
+                            <td rowspan="8" style="width: 3%;" class="text-top">A.</td>
+                            <td colspan="4">
+                                <div style="font-size: 11pt;">
+                                    Telah menyelesaikan Pelaksanaan Konstruksi untuk :
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 1%; text-align: center;">1.</td>
+                            <td style="width: 30%">
+                                <div style="font-size: 11pt; margin-left: 5px">Pekerjaan</div>
+                            </td>
+                            <td style="width: 1%; text-align: center;">:</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['name']}}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">2.</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">Lokasi (Desa/Kel - Instansi)</div>
+                            </td>
+                            <td style="text-align: center;">:</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['lokasi']}}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">3.</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">Organisasi Perangkat Daerah</div>
+                            </td>
+                            <td style="text-align: center;">:</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['opd_nama']}}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">4.</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">Pelaksana Pekerjaan Konstruksi</div>
+                            </td>
+                            <td style="text-align: center;">:</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">{{$project_detail['partner_name']}}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-top" style="text-align: center;">5.</td>
+                            <td class="text-top">
+                                <div style="font-size: 11pt; margin-left: 5px">Surat Perintah Kerja (SPK)/Surat
+                                    Perjanjian (Kontrak)</div>
+                            </td>
+                            <td class="text-top" style="text-align: center;">:</td>
+                            <td class="text-top">
+                                <table border="0" cellspacing="3" cellpadding="0">
+                                    <tr>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">Nomor</div>
+                                        </td>
+                                        <td>:</td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">
+                                                {{$project_detail['spk_number']}}</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">Tanggal</div>
+                                        </td>
+                                        <td>:</td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">
+                                                {{\Carbon\Carbon::parse($project_detail['spk_date'])->isoFormat('DD MMMM
+                                                YYYY')}}</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">6.</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">Biaya Konstruksi</div>
+                            </td>
+                            <td style="text-align: center;">:</td>
+                            <td>
+                                <div style="font-size: 11pt; margin-left: 5px">Rp
+                                    {{number_format($project_detail['spk_amount'], 2, ',', '.')}}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-top" style="text-align: center;">7.</td>
+                            <td class="text-top">
+                                <div style="font-size: 11pt; margin-left: 5px">Waktu Pelaksanaan</div>
+                            </td>
+                            <td class="text-top" style="text-align: center;">:</td>
+                            <td class="text-top">
+                                <table border="0" cellspacing="3" cellpadding="0">
+                                    <tr>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">Mulai</div>
+                                        </td>
+                                        <td>:</td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">
+                                                {{\Carbon\Carbon::parse($project_detail['spk_start'])->isoFormat('DD
+                                                MMMM YYYY')}}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">Selesai</div>
+                                        </td>
+                                        <td>:</td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">
+                                                {{\Carbon\Carbon::parse($project_detail['spk_end'])->isoFormat('DD MMMM
+                                                YYYY')}}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">Durasi</div>
+                                        </td>
+                                        <td>:</td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">
+                                                {{$project_detail['spk_days'] + 1}} hari</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 1rem;">
+                    <table border="0" cellspacing="3" cellpadding="0"
+                        style="width: 100%; font-size: 11pt; margin-top: -10px;">
+                        <tr>
+                            <td rowspan="7" style="width: 3%;" class="text-top">B.</td>
+                            <td>
+                                <div style="font-size: 11pt;">
+                                    Penyelesaian Pekerjaan Konstruksi tersebut meliputi :
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table border="1" cellspacing="0" cellpadding="2" style="width: 100%; font-size: 11pt;">
+                                    <tr style="text-align: center; font-weight: bold;">
+                                        <td style="width: 5%;">No</td>
+                                        <td style="width: 45%">
+                                            <div style="font-size: 11pt; margin-left: 5px">JENIS PEKERJAAN</div>
+                                        </td>
+                                        <td style="width: 15%;">BOBOT (%)</td>
+                                        <td style="width: 18%;">PRESTASI (%)</td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">PROGRES (%)</div>
+                                        </td>
+                                    </tr>
+                                    @php
+                                    $bobot = 0;
+                                    $jumlah_prestasi = 0;
+                                    $prestasi = 0;
+                                    @endphp
+                                    @foreach ($pekerjaan as $i => $item)
+                                    @php
+                                    $bobot += $item['bobot'];
+                                    $prestasi += $item['prestasi'];
+                                    $jumlah_prestasi += 1;
+                                    @endphp
+                                    <tr>
+                                        <td style="text-align: center;">{{$i + 1}}</td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px">{{$item['jenis']}}</div>
+                                        </td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px; text-align: center;">
+                                                {{$item['bobot']}}%
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px; text-align: center;">
+                                                {{$item['prestasi']}}%
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="font-size: 11pt; margin-left: 5px; text-align: center;">
+                                                {{$item['progress']}}%
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                    <tr style="font-weight: bold;">
+                                        <td colspan="2" style="text-align: right;">
+                                            <div style="font-size: 11pt; margin-left: 5px">Jumlah&nbsp;&nbsp;&nbsp;
+                                            </div>
+                                        </td>
+                                        <td style="text-align: center;">{{$bobot}}%</td>
+                                        <td style="text-align: center;">{{$prestasi}}%</td>
+                                        <td style="text-align: center;">{{number_format($prestasi /
+                                            $bobot * 100, 2)}}%</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    (Laporan lengkap dari Pelaksana dan Konsultan pengawasan disampaikan kepada
+                                    PA/KPA/PPKom)
+                                </div>
+                                @php
+                                $total_prosentase = number_format($prestasi / $bobot * 100, 2);
+                                $total_prosentase_word = str_replace(' ', ' ',
+                                App\Utils\NumberToWords::ntw($total_prosentase, 2));
+                                @endphp
+                                <div>Progres pekerjaan telah mencapai prestasi : {{$total_prosentase}}%
+                                    ({{$total_prosentase_word}} Persen)</div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div style="margin-top: -10px;">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Demikian laporan Penyelesaian Pekerjaan
+                        Konstruksi
+                        ini dibuat dengan sebenarnya untuk keperluan seperlunya.
                     </div>
-                    <hr style="width: 60%; margin-top: 0px;">
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 100%">
-                <table border="1" cellspacing="0" cellpadding="5" style="width: 100%; margin-top: 15px;">
-                    <tr>
-                        <td colspan="3">
-                            <div class="text-center">
-                                <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
-                                    LAPORAN PENYELESAIAN
+                </td>
+            </tr>
+            <tr style="font-size: 11pt;">
+                <td>
+                    <table style="width: 100%; margin-top: 10px;">
+                        <tr>
+                            <td style="width: 50%" class="ttd text-center">
+                                <div id="signature_jabatan">
+                                    diperiksa oleh Konsultan Pengawas
                                 </div>
-                                <div style="font-size: 12pt; font-weight: bold; margin-bottom: 3px">
-                                    PELAKSANAAN KONSTRUKSI
+                                <div>
+                                    {{$contents['konsultan_pengawas_nama']}}
                                 </div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 20%">
-                            <div style="font-size: 11pt; margin-left: 5px">OPD</div>
-                        </td>
-                        <td style="width: 1%; text-align: center;">:</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Dinas Perikanan</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 20%">
-                            <div style="font-size: 11pt; margin-left: 5px">Pekerjaan</div>
-                        </td>
-                        <td style="width: 1%; text-align: center;">:</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Nama Pekerjaan</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 15%">
-                            <div style="font-size: 11pt; margin-left: 5px">Nomor</div>
-                        </td>
-                        <td style="width: 1%; text-align: center;">:</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">600/ / / 2022</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 20%">
-                            <div style="font-size: 11pt; margin-left: 5px">Tanggal</div>
-                        </td>
-                        <td style="width: 1%; text-align: center;">:</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">12 Juli 2022</div>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td style="padding-top: 1rem;">
-                <table border="0" cellspacing="3" cellpadding="0" style="width: 100%; font-size: 11pt;">
-                    <tr>
-                        <td rowspan="8" style="width: 3%;" class="text-top">A.</td>
-                        <td colspan="4">
-                            <div style="font-size: 11pt;">
-                                Telah menyelesaikan Pelaksanaan Konstruksi untuk :
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 1%; text-align: center;">1.</td>
-                        <td style="width: 30%">
-                            <div style="font-size: 11pt; margin-left: 5px">Pekerjaan</div>
-                        </td>
-                        <td style="width: 1%; text-align: center;">:</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Dinas</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: center;">2.</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Lokasi (Desa/Kel - Instansi</div>
-                        </td>
-                        <td style="text-align: center;">:</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Dinas</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: center;">3.</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Organisai Perangkat Daerah</div>
-                        </td>
-                        <td style="text-align: center;">:</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Dinas</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: center;">4.</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Pelaksana</div>
-                        </td>
-                        <td style="text-align: center;">:</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Dinas</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-top" style="text-align: center;">5.</td>
-                        <td class="text-top">
-                            <div style="font-size: 11pt; margin-left: 5px">Surat Perintah Kerja (SPK)</div>
-                        </td>
-                        <td class="text-top" style="text-align: center;">:</td>
-                        <td class="text-top">
-                            <div style="font-size: 11pt; margin-left: 5px">Nomor</div>
-                            <div style="font-size: 11pt; margin-left: 5px">Tanggal</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: center;">6.</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Biaya Perencanaan</div>
-                        </td>
-                        <td style="text-align: center;">:</td>
-                        <td>
-                            <div style="font-size: 11pt; margin-left: 5px">Rp.</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-top" style="text-align: center;">7.</td>
-                        <td class="text-top">
-                            <div style="font-size: 11pt; margin-left: 5px">Waktu Pelaksanaan</div>
-                        </td>
-                        <td class="text-top" style="text-align: center;">:</td>
-                        <td class="text-top">
-                            <div style="font-size: 11pt; margin-left: 5px">Mulai&nbsp;&nbsp; :</div>
-                            <div style="font-size: 11pt; margin-left: 5px">Selesai :</div>
-                            <div style="font-size: 11pt; margin-left: 5px">Durasi&nbsp; :</div>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td style="padding-top: 1rem;">
-                <table border="0" cellspacing="3" cellpadding="0"
-                    style="width: 100%; font-size: 11pt; margin-top: -10px;">
-                    <tr>
-                        <td rowspan="7" style="width: 3%;" class="text-top">B.</td>
-                        <td>
-                            <div style="font-size: 11pt;">
-                                Penyelesaian Pekerjaan Konstruksi tersebut meliputi :
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <table border="1" cellspacing="0" cellpadding="2" style="width: 100%; font-size: 11pt;">
-                                <tr style="text-align: center; font-weight: bold;">
-                                    <td style="width: 5%;">No</td>
-                                    <td style="width: 45%">
-                                        <div style="font-size: 11pt; margin-left: 5px">JENIS PEKERJAAN</div>
-                                    </td>
-                                    <td style="width: 15%;">BOBOT (%)</td>
-                                    <td style="width: 18%;">PRESTASI (%)</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px">PROGRES (%)</div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center;">I.</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px">ABC</div>
-                                    </td>
-                                    <td style="text-align: center;">20%</td>
-                                    <td style="text-align: center;">20%</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px; text-align: center;">20%</div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center;">II.</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px">ABC</div>
-                                    </td>
-                                    <td style="text-align: center;">20%</td>
-                                    <td style="text-align: center;">20%</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px; text-align: center;">20%</div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center;">III.</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px">ABC</div>
-                                    </td>
-                                    <td style="text-align: center;">20%</td>
-                                    <td style="text-align: center;">20%</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px; text-align: center;">20%</div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center;">IV.</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px">ABC</div>
-                                    </td>
-                                    <td style="text-align: center;">20%</td>
-                                    <td style="text-align: center;">20%</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px; text-align: center;">20%</div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center;">V.</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px">ABC</div>
-                                    </td>
-                                    <td style="text-align: center;">20%</td>
-                                    <td style="text-align: center;">20%</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px; text-align: center;">20%</div>
-                                    </td>
-                                </tr>
-                                <tr style="font-weight: bold;">
-                                    <td colspan="2" style="text-align: right;">
-                                        <div style="font-size: 11pt; margin-left: 5px">Jumlah&nbsp;&nbsp;&nbsp;</div>
-                                    </td>
-                                    <td style="text-align: center;">100%</td>
-                                    <td style="text-align: center;">100%</td>
-                                    <td>
-                                        <div style="font-size: 11pt; margin-left: 5px; text-align: center;">100%</div>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div>
-                                (Laporan lengkap dari Pelaksana dan Konsultan pengawasan disampaikan kepada Pejabat
-                                Pembuat Komitmen - PPK)
-                            </div>
-                            <div>Progres pekerjaan telah mencapai prestasi : 100 % ( Seratus persen)</div>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <div style="margin-top: -10px;">
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Demikian laporan Penyelesaian Pekerjaan Konstruksi
-                    ini dibuat dengan sebenarnya untuk keperluan seperlunya.
-                </div>
-            </td>
-        </tr>
-        <tr style="font-size: 11pt;">
-            <td>
-                <table style="width: 100%; margin-top: 10px;">
-                    <tr>
-                        <td style="width: 50%" class="ttd text-center">
-                            <div id="signature_jabatan">
-                                diperiksa oleh Konsultan Pengawas
-                            </div>
-                            <div>
-                                CV. ... .. .. . . . ..
-                            </div>
-                            <div style="height: 20mm"></div>
-                            <div>
-                                <u>DIDIK SULAKSONO PUTRO. SE. M.Si</u>
-                            </div>
-                            <div>
-                                Direktur
-                            </div>
-                        </td>
-                        <td style="width: 50%" class="ttd text-center">
-                            <div id="signature_jabatan">
-                                dibuat oleh pelaksana :
-                            </div>
-                            <div>
-                                CV. ... .. .. . . . ..
-                            </div>
-                            <div style="height: 20mm"></div>
-                            <div>
-                                <u>DIDIK SULAKSONO PUTRO. SE. M.Si</u>
-                            </div>
-                            <div>
-                                Direktur
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr style="font-size: 11pt;">
-            <td>
-                <div class="text-center" style="margin-top: 50px">
-                    Mengetahui / menyetujui :
-                </div>
-                <table style="width: 100%; margin-top: 10px;">
-                    <tr>
-                        <td style="width: 50%" class="ttd text-center">
-                            <div>
-                                Pejabat Pembuat Komitmen / PPK
-                            </div>
-                            <div style="height: 20mm"></div>
-                            <div>
-                                <u>DIDIK SULAKSONO PUTRO. SE. M.Si</u>
-                            </div>
-                            <div>
-                                NIP. 19640225 199602 1 001
-                            </div>
-                        </td>
-                        <td style="width: 50%" class="ttd text-center">
-                            <div>
-                                a.n. Pejabat Pengendali Pekerjaan Konstruksi
-                            </div>
-                            <div style="height: 20mm"></div>
-                            <div>
-                                <u>DIDIK SULAKSONO PUTRO. SE. M.Si</u>
-                            </div>
-                            <div>
-                                NIP. 19640225 199602 1 001
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</div>
+                                <div style="height: 20mm"></div>
+                                <div>
+                                    <u>{{$contents['konsultan_pengawas_direktur']}}</u>
+                                </div>
+                                <div>
+                                    Direktur
+                                </div>
+                            </td>
+                            <td style="width: 50%" class="ttd text-center">
+                                <div id="signature_jabatan">
+                                    dibuat oleh pelaksana :
+                                </div>
+                                <div>
+                                    {{$project_detail['partner_name']}}
+                                </div>
+                                <div style="height: 20mm"></div>
+                                <div>
+                                    <u>{{$project_detail['director_partner'] ??
+                                        $project_detail['partner_director']}}</u>
+                                </div>
+                                <div>
+                                    Direktur
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr style="font-size: 11pt;">
+                <td>
+                    <div class="text-center" style="margin-top: 50px">
+                        Mengetahui :
+                    </div>
+                    <table style="width: 100%; margin-top: 10px;">
+                        <tr>
+                            <td style="width: 50%" class="ttd text-center">
+                                <div>
+                                    {{$project_detail['user_jabatan']}}
+                                </div>
+                                <div style="height: 20mm"></div>
+                                <div>
+                                    <u>{{$project_detail['user_name']}}</u>
+                                </div>
+                                <div>
+                                    NIP. {{$project_detail['user_nip']}}
+                                </div>
+                            </td>
+                            <td style="width: 50%" class="ttd text-center">
+                                <div>
+                                    a.n. Pejabat Pengendali Pekerjaan Konstruksi
+                                </div>
+                                <div style="height: 20mm"></div>
+                                <div>
+                                    <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>
+                                </div>
+                                <div>
+                                    NIP.
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    @include('printouts.footer')
+
+</body>
+
+</html>
