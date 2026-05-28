@@ -41,6 +41,7 @@
                                         <i class="fas fa-expand-alt"></i>
                                     </button>
                                 </th>
+                                <th rowspan="2" class="text-center" style="width: 130px; min-width: 130px;">Aksi</th>
                                 <th rowspan="2">Kode</th>
                                 <th rowspan="2">
                                     <div style="width: 300px">Uraian Urusan, Organisasi, Program,</div>
@@ -143,6 +144,38 @@
                 }
             },
             {
+                data: null,
+                render: function (data, type, row) {
+                    let html = '<div class="d-flex justify-content-center">';
+
+                    // If editing or creating, show Save and Cancel buttons
+                    if (row._editing || row._creating) {
+                        html += `<button onclick='saveInlineRow(${row.id || 'null'})' class='btn btn-success btn-xs mr-1' title='Simpan'><i class='fa fa-save mr-1'></i> Simpan</button>`;
+                        html += `<button onclick='cancelInlineEdit(${row.id || 'null'})' class='btn btn-secondary btn-xs' title='Batal'><i class='fa fa-times mr-1'></i> Batal</button>`;
+                        html += '</div>';
+                        return html;
+                    }
+
+                    // Show Add button - OPD can add Program, Program can add Kegiatan, Kegiatan can add Sub Kegiatan
+                    if (row.type === 'opd') {
+                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1' title='Tambah Program'><i class='fa fa-plus mr-1'></i> Program</button>`;
+                    } else if (row.type === 'program') {
+                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1' title='Tambah Kegiatan'><i class='fa fa-plus mr-1'></i> Kegiatan</button>`;
+                    } else if (row.type === 'kegiatan') {
+                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1' title='Tambah Sub Kegiatan'><i class='fa fa-plus mr-1'></i> Sub Kegiatan</button>`;
+                    }
+
+                    // OPD is fixed, can't be edited or deleted
+                    if (row.type !== 'opd') {
+                        html += `<button onclick='enableInlineEdit(${row.id})' class='btn btn-info btn-xs mr-1'><i class='fa fa-edit'></i></button>`;
+                        html += `<button onclick='modalDelete(${row.id})' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></button>`;
+                    }
+
+                    html += '</div>';
+                    return html;
+                }
+            },
+            {
                 data: 'code',
                 render: function (data, type, row) {
                     if (row._editing || row._creating) {
@@ -160,17 +193,21 @@
             {
                 data: 'uraian',
                 render: function (data, type, row) {
+                    let dispData = data || '';
+                    if (row.type === 'opd' || row.type === 'program') {
+                        dispData = dispData.toUpperCase();
+                    }
                     if (row._editing || row._creating) {
                         const level = getHierarchyLevel(row.type);
                         const indent = level * 20;
                         return `<div style="padding-left: ${indent}px">
-                            <textarea class="form-control form-control-sm" name="uraian" rows="2" style="min-width: 300px;">${data || ''}</textarea>
+                            <textarea class="form-control form-control-sm" name="uraian" rows="2" style="min-width: 300px;">${dispData}</textarea>
                         </div>`;
                     }
                     const level = getHierarchyLevel(row.type);
                     const indent = level * 20;
                     const fontWeight = row.has_children ? 'font-weight-bold' : '';
-                    return `<div style="padding-left: ${indent}px" class="${fontWeight}">${data || ''}</div>`;
+                    return `<div style="padding-left: ${indent}px" class="${fontWeight}">${dispData}</div>`;
                 }
             },
             {
@@ -237,10 +274,12 @@
                 data: 'keuangan',
                 render: function (data, type, row) {
                     if ((row._editing || row._creating) && row.type === 'sub_kegiatan') {
-                        // Auto-calculated field: (bulan_ini / pagu_anggaran) * 100
+                        // Auto-calculated field: (sd_bulan_ini / pagu_anggaran) * 100
                         const pagu = parseFloat(row.pagu_anggaran) || 0;
+                        const bulanLalu = parseFloat(row.bulan_lalu) || 0;
                         const bulanIni = parseFloat(row.bulan_ini) || 0;
-                        const calculated = pagu > 0 ? (bulanIni / pagu) * 100 : 0;
+                        const sdBulanIni = bulanLalu + bulanIni;
+                        const calculated = pagu > 0 ? (sdBulanIni / pagu) * 100 : 0;
                         const colorClass = calculated < 35 ? 'text-danger' : 'text-dark';
                         return `<div style="text-align: center;">
                             <input type="text" class="form-control form-control-sm calculated-field ${colorClass}" name="keuangan" value="${calculated.toFixed(2)}%" readonly style="width: 80px; text-align: center; background-color: #f8f9fa;">
@@ -257,7 +296,7 @@
                     if ((row._editing || row._creating) && row.type === 'sub_kegiatan') {
                         return `<div style="text-align: center;">
                             <input type="number" class="form-control form-control-sm" name="fisik" value="${parseFloat(data) || 0}" min="0" max="100" step="0.01" style="width: 80px; text-align: center;">
-                    </div>`;
+                        </div>`;
                     }
                     const val = parseFloat(data) || 0;
                     return `<div style="text-align: center;">${val.toFixed(2)}%</div>`;
@@ -269,41 +308,9 @@
                     if (row._editing || row._creating) {
                         return `<div>
                             <textarea class="form-control form-control-sm" name="keterangan" rows="1" style="width: 150px;">${data || ''}</textarea>
-                    </div>`;
+                        </div>`;
                     }
                     return `<div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${data || ''}</div>`;
-                }
-            },
-            {
-                data: null,
-                render: function (data, type, row) {
-                    let html = '<div class="d-flex justify-content-center">';
-
-                    // If editing or creating, show Save and Cancel buttons
-                    if (row._editing || row._creating) {
-                        html += `<button onclick='saveInlineRow(${row.id || 'null'})' class='btn btn-success btn-xs mr-1' title='Simpan'><i class='fa fa-save mr-1'></i> Simpan</button>`;
-                        html += `<button onclick='cancelInlineEdit(${row.id || 'null'})' class='btn btn-secondary btn-xs' title='Batal'><i class='fa fa-times mr-1'></i> Batal</button>`;
-                        html += '</div>';
-                    return html;
-                }
-
-                    // Show Add button - OPD can add Program, Program can add Kegiatan, Kegiatan can add Sub Kegiatan
-                    if (row.type === 'opd') {
-                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1' title='Tambah Program'><i class='fa fa-plus mr-1'></i> Program</button>`;
-                    } else if (row.type === 'program') {
-                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1' title='Tambah Kegiatan'><i class='fa fa-plus mr-1'></i> Kegiatan</button>`;
-                    } else if (row.type === 'kegiatan') {
-                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1' title='Tambah Sub Kegiatan'><i class='fa fa-plus mr-1'></i> Sub Kegiatan</button>`;
-                    }
-
-                    // OPD is fixed, can't be edited or deleted
-                    if (row.type !== 'opd') {
-                        html += `<button onclick='enableInlineEdit(${row.id})' class='btn btn-info btn-xs mr-1'><i class='fa fa-edit'></i></button>`;
-                        html += `<button onclick='modalDelete(${row.id})' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></button>`;
-                    }
-
-                    html += '</div>';
-                    return html;
                 }
             }
         ],
@@ -321,10 +328,10 @@
             const level = getHierarchyLevel(data.type);
             const indent = level * 20; // 20px per level
 
-            // Get the code and uraian cells (columns 1 and 2)
+            // Get the code and uraian cells (columns 2 and 3 after Actions)
             const $cells = $(row).find('td');
-            const $codeCell = $cells.eq(1);
-            const $uraianCell = $cells.eq(2);
+            const $codeCell = $cells.eq(2);
+            const $uraianCell = $cells.eq(3);
 
             // Apply padding-left for indentation
             $codeCell.css('padding-left', (indent + 8) + 'px');
@@ -338,17 +345,17 @@
 
             // Apply consistent column widths and alignment
             $cells.eq(0).css({'text-align': 'center'});  // Expand icon
-            $cells.eq(1).css({});  // Code
-            $cells.eq(2).css({'min-width': '300px'});  // Uraian
-            $cells.eq(3).css({'text-align': 'right'});  // Pagu Anggaran
-            $cells.eq(4).css({'text-align': 'right'});  // Bulan Lalu
-            $cells.eq(5).css({'text-align': 'right'});  // Bulan Ini
-            $cells.eq(6).css({'text-align': 'right'});  // sd Bulan Ini
-            $cells.eq(7).css({'text-align': 'right'});  // Sisa Anggaran
-            $cells.eq(8).css({'text-align': 'center'});  // Keuangan %
-            $cells.eq(9).css({'text-align': 'center'});  // Fisik %
-            $cells.eq(10).css({});  // Keterangan
-            $cells.eq(11).css({'text-align': 'center'});  // Actions
+            $cells.eq(1).css({'text-align': 'center'});  // Actions (moved to column 1)
+            $cells.eq(2).css({});  // Code (moved to column 2)
+            $cells.eq(3).css({'min-width': '300px'});  // Uraian (moved to column 3)
+            $cells.eq(4).css({'text-align': 'right'});  // Pagu Anggaran
+            $cells.eq(5).css({'text-align': 'right'});  // Bulan Lalu
+            $cells.eq(6).css({'text-align': 'right'});  // Bulan Ini
+            $cells.eq(7).css({'text-align': 'right'});  // sd Bulan Ini
+            $cells.eq(8).css({'text-align': 'right'});  // Sisa Anggaran
+            $cells.eq(9).css({'text-align': 'center'});  // Keuangan %
+            $cells.eq(10).css({'text-align': 'center'});  // Fisik %
+            $cells.eq(11).css({});  // Keterangan
         }
     });
 
@@ -828,8 +835,8 @@
             $sisaAnggaranInput.val(formatToCurrency(sisaAnggaran));
         }
 
-        // Calculate keuangan % (bulan_ini / pagu_anggaran * 100)
-        const keuangan = pagu > 0 ? (bulanIni / pagu) * 100 : 0;
+        // Calculate keuangan % (sd_bulan_ini / pagu_anggaran * 100)
+        const keuangan = pagu > 0 ? (sdBulanIni / pagu) * 100 : 0;
         const $keuanganInput = $row.find('input[name="keuangan"]');
         if ($keuanganInput.length) {
             const colorClass = keuangan < 35 ? 'text-danger' : 'text-dark';
@@ -871,14 +878,21 @@
         // Generate suggested code (will be overridden by server if empty)
         let suggestedCode = '';
         if (parentData.code) {
-            // Simple code generation - server will generate properly
-            const siblingCount = 0; // Will be calculated by server
+            // Count existing siblings from list_data (parse to int for type safety)
+            const siblingCount = list_data.filter(r =>
+                r && r.parent_id && parseInt(r.parent_id) === parseInt(parent_id) && r.type === childType
+            ).length;
+            const nextNumber = siblingCount + 1;
+
             if (parent_type === 'opd') {
-                suggestedCode = parentData.code + '01.';
+                // OPD → Program: {parent_code}.{count+1} (2 digits)
+                suggestedCode = parentData.code + '.' + String(nextNumber).padStart(2, '0');
             } else if (parent_type === 'program') {
-                suggestedCode = parentData.code + '1.01';
+                // Program → Kegiatan: {parent_code}.{count+1}
+                suggestedCode = parentData.code + '.' + nextNumber;
             } else if (parent_type === 'kegiatan') {
-                suggestedCode = parentData.code + '.01';
+                // Kegiatan → Sub Kegiatan: {parent_code}.{count+1}
+                suggestedCode = parentData.code + '.' + nextNumber;
             }
         }
 
@@ -904,6 +918,9 @@
 
         // Add row to table
         const newRow = table.row.add(newRowData).node();
+
+        // Add to list_data so that sibling count and other operations detect it
+        list_data.push(newRowData);
 
         // Insert after parent or after last child of parent
         if (parentTr) {
@@ -1243,6 +1260,12 @@
         }
 
         // Validate required fields
+        if (formData.type === 'opd' || formData.type === 'program') {
+            if (formData.uraian) {
+                formData.uraian = formData.uraian.toUpperCase();
+            }
+        }
+
         if (!formData.code || !formData.uraian) {
             toastr.error('Kode dan Uraian harus diisi');
             return;
@@ -1334,6 +1357,15 @@
                 if (rowData._creating) {
                     // Remove the row if it was a new creation
                     this.remove();
+
+                    // Remove from list_data
+                    for (let i = list_data.length - 1; i >= 0; i--) {
+                        const row = list_data[i];
+                        if (row && (row.id === null || row.id === undefined) && row._creating) {
+                            list_data.splice(i, 1);
+                            break;
+                        }
+                    }
                 }
                 table.draw(false);
                 return false; // Stop iteration

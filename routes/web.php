@@ -24,6 +24,10 @@ Auth::routes();
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 Route::get('/dashboard/rfk-data', 'DashboardController@getRFKData')->name('dashboard.rfk-data');
 
+Route::get('/dashboard-v2', 'DashboardV2Controller@index')->name('dashboard-v2');
+Route::get('/dashboard-v2/api-data', 'DashboardV2Controller@getApiData')->name('dashboard-v2.api-data');
+Route::get('/dashboard-v2/export/excel', 'DashboardV2Controller@exportExcel')->name('dashboard-v2.export.excel');
+
 // project
 Route::group(['middleware' => ['permission:project-write']], function () {
     Route::get('/project/modalAdd', [App\Http\Controllers\ProjectController::class, 'modalAdd'])->name('project.modalAdd');

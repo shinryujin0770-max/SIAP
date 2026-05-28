@@ -116,6 +116,7 @@ $defaultOpdId = $id_opd ?? null;
                                         <i class="fas fa-expand-alt"></i>
                                     </button>
                                 </th>
+                                <th rowspan="2" class="text-center" style="width: 130px; min-width: 130px;">Aksi</th>
                                 <th rowspan="2">Kode</th>
                                 <th rowspan="2">
                                     <div style="width: 300px">Uraian Urusan, Organisasi, Program,</div>
@@ -595,6 +596,19 @@ $defaultOpdId = $id_opd ?? null;
                     list_data.push(formattedData);
                 }
 
+                // Also update in child_data_cache if parent's cache is active
+                const parentId = formattedData.parent_id;
+                if (parentId && child_data_cache[parentId]) {
+                    const cacheIndex = child_data_cache[parentId].findIndex(c => parseInt(c.id) === parseInt(rowId));
+                    if (cacheIndex >= 0) {
+                        child_data_cache[parentId][cacheIndex] = newData;
+                    } else {
+                        child_data_cache[parentId].push(newData);
+                    }
+                    // Sort cache by code
+                    child_data_cache[parentId].sort((a, b) => (a.code || '').toString().localeCompare((b.code || '').toString()));
+                }
+
                 rowUpdated = true;
                 return false; // Stop iteration
             }
@@ -711,7 +725,7 @@ $defaultOpdId = $id_opd ?? null;
             },
             success: function (response) {
                 if (response.success && response.data) {
-                    opdAverageKeuangan = parseFloat(response.data.average_keuangan) || 0;
+                    opdAverageKeuangan = parseFloat(response.data.opd_keuangan) || 0;
                     const count = parseInt(response.data.count) || 0;
 
                     console.log('[AVERAGE KEUANGAN] Fetched from server (ALL OPDs):', opdAverageKeuangan.toFixed(2) + '%', 'from', count, 'sub_kegiatan');
@@ -855,6 +869,47 @@ $defaultOpdId = $id_opd ?? null;
                 }
             },
             {
+                data: null,
+                render: function (data, type, row) {
+                    let html = '<div class="d-flex justify-content-center">';
+                    const isDisabled = editingLocked;
+                    const disabledAttr = isDisabled ? 'disabled' : '';
+                    const disabledClass = isDisabled ? ' disabled' : '';
+
+                    const addTitleProgram = isDisabled ? OVERTIME_LOCK_MESSAGE : 'Tambah Program';
+                    const addTitleKegiatan = isDisabled ? OVERTIME_LOCK_MESSAGE : 'Tambah Kegiatan';
+                    const addTitleSubKegiatan = isDisabled ? OVERTIME_LOCK_MESSAGE : 'Tambah Sub Kegiatan';
+                    const editTitle = isDisabled ? OVERTIME_LOCK_MESSAGE : 'Edit';
+                    const deleteTitle = isDisabled ? OVERTIME_LOCK_MESSAGE : 'Hapus';
+
+                    // If editing or creating, show Save and Cancel buttons
+                    if (row._editing || row._creating) {
+                        html += `<button onclick='saveInlineRow(${row.id || 'null'})' class='btn btn-success btn-xs mr-1' title='Simpan'><i class='fa fa-save mr-1'></i> Simpan</button>`;
+                        html += `<button onclick='cancelInlineEdit(${row.id || 'null'})' class='btn btn-secondary btn-xs' title='Batal'><i class='fa fa-times mr-1'></i> Batal</button>`;
+                        html += '</div>';
+                        return html;
+                    }
+
+                    // Show Add button - OPD can add Program, Program can add Kegiatan, Kegiatan can add Sub Kegiatan
+                    if (row.type === 'opd') {
+                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1${disabledClass}' title='${addTitleProgram}' ${disabledAttr}><i class='fa fa-plus mr-1'></i> Program</button>`;
+                    } else if (row.type === 'program') {
+                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1${disabledClass}' title='${addTitleKegiatan}' ${disabledAttr}><i class='fa fa-plus mr-1'></i> Kegiatan</button>`;
+                    } else if (row.type === 'kegiatan') {
+                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1${disabledClass}' title='${addTitleSubKegiatan}' ${disabledAttr}><i class='fa fa-plus mr-1'></i> Sub Kegiatan</button>`;
+                    }
+
+                    // OPD is fixed, can't be edited or deleted
+                    if (row.type !== 'opd') {
+                        html += `<button onclick='enableInlineEdit(${row.id})' class='btn btn-info btn-xs mr-1${disabledClass}' title='${editTitle}' ${disabledAttr}><i class='fa fa-edit'></i></button>`;
+                        html += `<button onclick='modalDelete(${row.id})' class='btn btn-danger btn-xs${disabledClass}' title='${deleteTitle}' ${disabledAttr}><i class='fa fa-trash'></i></button>`;
+                    }
+
+                    html += '</div>';
+                    return html;
+                }
+            },
+            {
                 data: 'code',
                 render: function (data, type, row) {
                     if (row._editing || row._creating) {
@@ -872,17 +927,21 @@ $defaultOpdId = $id_opd ?? null;
             {
                 data: 'uraian',
                 render: function (data, type, row) {
+                    let dispData = data || '';
+                    if (row.type === 'opd' || row.type === 'program') {
+                        dispData = dispData.toUpperCase();
+                    }
                     if (row._editing || row._creating) {
                         const level = getHierarchyLevel(row.type);
                         const indent = level * 20;
                         return `<div style="padding-left: ${indent}px">
-                            <textarea class="form-control form-control-sm" name="uraian" rows="2" style="min-width: 300px;">${data || ''}</textarea>
+                            <textarea class="form-control form-control-sm" name="uraian" rows="2" style="min-width: 300px;">${dispData}</textarea>
                         </div>`;
                     }
                     const level = getHierarchyLevel(row.type);
                     const indent = level * 20;
                     const fontWeight = row.has_children ? 'font-weight-bold' : '';
-                    return `<div style="padding-left: ${indent}px" class="${fontWeight}">${data || ''}</div>`;
+                    return `<div style="padding-left: ${indent}px" class="${fontWeight}">${dispData}</div>`;
                 }
             },
             {
@@ -949,10 +1008,12 @@ $defaultOpdId = $id_opd ?? null;
                 data: 'keuangan',
                 render: function (data, type, row) {
                     if ((row._editing || row._creating) && row.type === 'sub_kegiatan') {
-                        // Auto-calculated field: (bulan_ini / pagu_anggaran) * 100
+                        // Auto-calculated field: (sd_bulan_ini / pagu_anggaran) * 100
                         const pagu = parseFloat(row.pagu_anggaran) || 0;
+                        const bulanLalu = parseFloat(row.bulan_lalu) || 0;
                         const bulanIni = parseFloat(row.bulan_ini) || 0;
-                        const calculated = pagu > 0 ? (bulanIni / pagu) * 100 : 0;
+                        const sdBulanIni = bulanLalu + bulanIni;
+                        const calculated = pagu > 0 ? (sdBulanIni / pagu) * 100 : 0;
                         const colorClass = getKeuanganColorClass(calculated);
                         return `<div style="text-align: center;">
                             <input type="text" class="form-control form-control-sm calculated-field ${colorClass}" name="keuangan" value="${calculated.toFixed(2)}%" readonly style="width: 80px; text-align: center; background-color: #f8f9fa;">
@@ -969,7 +1030,7 @@ $defaultOpdId = $id_opd ?? null;
                     if ((row._editing || row._creating) && row.type === 'sub_kegiatan') {
                         return `<div style="text-align: center;">
                             <input type="number" class="form-control form-control-sm" name="fisik" value="${parseFloat(data) || 0}" min="0" max="100" step="0.01" style="width: 80px; text-align: center;">
-                    </div>`;
+                        </div>`;
                     }
                     const val = parseFloat(data) || 0;
                     return `<div style="text-align: center;">${val.toFixed(2)}%</div>`;
@@ -981,50 +1042,9 @@ $defaultOpdId = $id_opd ?? null;
                     if (row._editing || row._creating) {
                         return `<div>
                             <textarea class="form-control form-control-sm" name="keterangan" rows="1" style="width: 150px;">${data || ''}</textarea>
-                    </div>`;
+                        </div>`;
                     }
                     return `<div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${data || ''}</div>`;
-                }
-            },
-            {
-                data: null,
-                render: function (data, type, row) {
-                    let html = '<div class="d-flex justify-content-center">';
-                    const isDisabled = editingLocked;
-                    const disabledAttr = isDisabled ? 'disabled' : '';
-                    const disabledClass = isDisabled ? ' disabled' : '';
-
-                    const addTitleProgram = isDisabled ? OVERTIME_LOCK_MESSAGE : 'Tambah Program';
-                    const addTitleKegiatan = isDisabled ? OVERTIME_LOCK_MESSAGE : 'Tambah Kegiatan';
-                    const addTitleSubKegiatan = isDisabled ? OVERTIME_LOCK_MESSAGE : 'Tambah Sub Kegiatan';
-                    const editTitle = isDisabled ? OVERTIME_LOCK_MESSAGE : 'Edit';
-                    const deleteTitle = isDisabled ? OVERTIME_LOCK_MESSAGE : 'Hapus';
-
-                    // If editing or creating, show Save and Cancel buttons
-                    if (row._editing || row._creating) {
-                        html += `<button onclick='saveInlineRow(${row.id || 'null'})' class='btn btn-success btn-xs mr-1' title='Simpan'><i class='fa fa-save mr-1'></i> Simpan</button>`;
-                        html += `<button onclick='cancelInlineEdit(${row.id || 'null'})' class='btn btn-secondary btn-xs' title='Batal'><i class='fa fa-times mr-1'></i> Batal</button>`;
-                        html += '</div>';
-                    return html;
-                }
-
-                    // Show Add button - OPD can add Program, Program can add Kegiatan, Kegiatan can add Sub Kegiatan
-                    if (row.type === 'opd') {
-                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1${disabledClass}' title='${addTitleProgram}' ${disabledAttr}><i class='fa fa-plus mr-1'></i> Program</button>`;
-                    } else if (row.type === 'program') {
-                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1${disabledClass}' title='${addTitleKegiatan}' ${disabledAttr}><i class='fa fa-plus mr-1'></i> Kegiatan</button>`;
-                    } else if (row.type === 'kegiatan') {
-                        html += `<button onclick='addInlineRow(${row.id}, "${row.type}")' class='btn btn-success btn-xs mr-1${disabledClass}' title='${addTitleSubKegiatan}' ${disabledAttr}><i class='fa fa-plus mr-1'></i> Sub Kegiatan</button>`;
-                    }
-
-                    // OPD is fixed, can't be edited or deleted
-                    if (row.type !== 'opd') {
-                        html += `<button onclick='enableInlineEdit(${row.id})' class='btn btn-info btn-xs mr-1${disabledClass}' title='${editTitle}' ${disabledAttr}><i class='fa fa-edit'></i></button>`;
-                        html += `<button onclick='modalDelete(${row.id})' class='btn btn-danger btn-xs${disabledClass}' title='${deleteTitle}' ${disabledAttr}><i class='fa fa-trash'></i></button>`;
-                    }
-
-                    html += '</div>';
-                    return html;
                 }
             }
         ],
@@ -1042,10 +1062,10 @@ $defaultOpdId = $id_opd ?? null;
             const level = getHierarchyLevel(data.type);
             const indent = level * 20; // 20px per level
 
-            // Get the code and uraian cells (columns 1 and 2)
+            // Get the code and uraian cells (columns 2 and 3 after Actions)
             const $cells = $(row).find('td');
-            const $codeCell = $cells.eq(1);
-            const $uraianCell = $cells.eq(2);
+            const $codeCell = $cells.eq(2);
+            const $uraianCell = $cells.eq(3);
 
             // Apply padding-left for indentation
             $codeCell.css('padding-left', (indent + 8) + 'px');
@@ -1059,17 +1079,17 @@ $defaultOpdId = $id_opd ?? null;
 
             // Apply consistent column widths and alignment
             $cells.eq(0).css({'text-align': 'center'});  // Expand icon
-            $cells.eq(1).css({});  // Code
-            $cells.eq(2).css({'min-width': '300px'});  // Uraian
-            $cells.eq(3).css({'text-align': 'right'});  // Pagu Anggaran
-            $cells.eq(4).css({'text-align': 'right'});  // Bulan Lalu
-            $cells.eq(5).css({'text-align': 'right'});  // Bulan Ini
-            $cells.eq(6).css({'text-align': 'right'});  // sd Bulan Ini
-            $cells.eq(7).css({'text-align': 'right'});  // Sisa Anggaran
-            $cells.eq(8).css({'text-align': 'center'});  // Keuangan %
-            $cells.eq(9).css({'text-align': 'center'});  // Fisik %
-            $cells.eq(10).css({});  // Keterangan
-            $cells.eq(11).css({'text-align': 'center'});  // Actions
+            $cells.eq(1).css({'text-align': 'center'});  // Actions (moved to column 1)
+            $cells.eq(2).css({});  // Code (moved to column 2)
+            $cells.eq(3).css({'min-width': '300px'});  // Uraian (moved to column 3)
+            $cells.eq(4).css({'text-align': 'right'});  // Pagu Anggaran
+            $cells.eq(5).css({'text-align': 'right'});  // Bulan Lalu
+            $cells.eq(6).css({'text-align': 'right'});  // Bulan Ini
+            $cells.eq(7).css({'text-align': 'right'});  // sd Bulan Ini
+            $cells.eq(8).css({'text-align': 'right'});  // Sisa Anggaran
+            $cells.eq(9).css({'text-align': 'center'});  // Keuangan %
+            $cells.eq(10).css({'text-align': 'center'});  // Fisik %
+            $cells.eq(11).css({});  // Keterangan
         }
     });
 
@@ -2181,8 +2201,8 @@ $defaultOpdId = $id_opd ?? null;
             $sisaAnggaranInput.val(formatToCurrency(sisaAnggaran));
         }
 
-        // Calculate keuangan % (bulan_ini / pagu_anggaran * 100)
-        const keuangan = pagu > 0 ? (bulanIni / pagu) * 100 : 0;
+        // Calculate keuangan % (sd_bulan_ini / pagu_anggaran * 100)
+        const keuangan = pagu > 0 ? (sdBulanIni / pagu) * 100 : 0;
         const $keuanganInput = $row.find('input[name="keuangan"]');
         if ($keuanganInput.length) {
             const colorClass = getKeuanganColorClass(keuangan);
@@ -2228,15 +2248,15 @@ $defaultOpdId = $id_opd ?? null;
         // Generate suggested code (will be overridden by server if empty)
         let suggestedCode = '';
         if (parentData.code) {
-            // Count existing siblings from list_data
+            // Count existing siblings from list_data (parse to int for type safety)
             const siblingCount = list_data.filter(r =>
-                r && r.parent_id === parent_id && r.type === childType
+                r && r.parent_id && parseInt(r.parent_id) === parseInt(parent_id) && r.type === childType
             ).length;
             const nextNumber = siblingCount + 1;
 
             if (parent_type === 'opd') {
-                // OPD → Program: {parent_code}{count+1}. (2 digits)
-                suggestedCode = parentData.code + String(nextNumber).padStart(2, '0')  + '.';
+                // OPD → Program: {parent_code}.{count+1} (2 digits)
+                suggestedCode = parentData.code + '.' + String(nextNumber).padStart(2, '0');
             } else if (parent_type === 'program') {
                 // Program → Kegiatan: {parent_code}.{count+1}
                 suggestedCode = parentData.code + '.' + nextNumber;
@@ -2269,6 +2289,9 @@ $defaultOpdId = $id_opd ?? null;
         // Add row to table
         const newRow = table.row.add(newRowData).node();
         const $newRow = $(newRow);
+
+        // Add to list_data so that sibling count and other operations detect it
+        list_data.push(newRowData);
 
         // Mark as child and add CSS class
         $newRow.attr('data-parent-id', newRowData.parent_id);
@@ -2699,6 +2722,12 @@ $defaultOpdId = $id_opd ?? null;
         }
 
         // Validate required fields
+        if (formData.type === 'opd' || formData.type === 'program') {
+            if (formData.uraian) {
+                formData.uraian = formData.uraian.toUpperCase();
+            }
+        }
+
         if (!formData.code || !formData.uraian) {
             toastr.error('Kode dan Uraian harus diisi');
             return;
@@ -2748,11 +2777,11 @@ $defaultOpdId = $id_opd ?? null;
                     if (isNewRow) {
                         // For new rows, find the row with _creating flag and update it
                         let newRowFound = false;
+                        const formattedData = formatServerDataToTableData(savedData);
                         table.rows({search: 'none'}).every(function() {
                             const currentRowData = this.data();
                             if (currentRowData && (currentRowData.id === null || currentRowData.id === undefined) && currentRowData._creating) {
                                 // This is the new row we just created
-                                const formattedData = formatServerDataToTableData(savedData);
                                 this.data(formattedData);
 
                                 // Update in list_data
@@ -2769,9 +2798,22 @@ $defaultOpdId = $id_opd ?? null;
                         if (!newRowFound) {
                             console.warn('[SAVE INLINE ROW] New row not found, adding to table');
                             // Add new row to table
-                            const formattedData = formatServerDataToTableData(savedData);
                             table.row.add(formattedData);
                             list_data.push(formattedData);
+                        }
+
+                        // Also add to child_data_cache of parent if parent's child cache is active
+                        const parentId = formattedData.parent_id;
+                        if (parentId && child_data_cache[parentId]) {
+                            // Check if already in child_data_cache to prevent duplicates
+                            const cacheIndex = child_data_cache[parentId].findIndex(c => c.id === savedData.id);
+                            if (cacheIndex === -1) {
+                                child_data_cache[parentId].push(savedData);
+                            } else {
+                                child_data_cache[parentId][cacheIndex] = savedData;
+                            }
+                            // Sort cache by code
+                            child_data_cache[parentId].sort((a, b) => (a.code || '').toString().localeCompare((b.code || '').toString()));
                         }
                     } else {
                         // For existing rows, update directly
@@ -2949,6 +2991,20 @@ $defaultOpdId = $id_opd ?? null;
 
         // Remove all collected rows
         idsToRemove.forEach(function(idToRemove) {
+            // Remove from child_data_cache of any parent
+            Object.keys(child_data_cache).forEach(function(parentId) {
+                if (child_data_cache[parentId]) {
+                    const cacheIndex = child_data_cache[parentId].findIndex(c => parseInt(c.id) === idToRemove);
+                    if (cacheIndex >= 0) {
+                        child_data_cache[parentId].splice(cacheIndex, 1);
+                    }
+                }
+            });
+            // If this ID itself has children in the cache, delete its cache entry
+            if (child_data_cache[idToRemove]) {
+                delete child_data_cache[idToRemove];
+            }
+
             table.rows({search: 'none'}).every(function() {
                 const rowData = this.data();
                 if (rowData && rowData.id && parseInt(rowData.id) === idToRemove) {

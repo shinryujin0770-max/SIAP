@@ -37,6 +37,12 @@ class EventServiceProvider extends ServiceProvider
                 'url'         => 'dashboard',
                 'icon'        => 'fas fa-fw fa-tachometer-alt',
             ]);
+            $event->menu->add([
+                'text'   => 'Dashboard V2',
+                'url'    => 'dashboard-v2',
+                'icon'   => 'fas fa-fw fa-chart-area',
+                'active' => ['dashboard-v2', 'dashboard-v2*'],
+            ]);
             $event->menu->add('MENU UTAMA');
             if ($user->hasAnyRole(['admin_opd'])) {
                 $event->menu->add([

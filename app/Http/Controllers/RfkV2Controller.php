@@ -209,7 +209,7 @@ class RfkV2Controller extends Controller
                     'parent_id' => null,
                     'type' => 'opd',
                     'code' => $opd->rfk_code,
-                    'uraian' => $opd->name,
+                    'uraian' => strtoupper($opd->name),
                     'year' => $tahun,
                     'pagu_anggaran' => 0,
                     'bulan_lalu' => 0,
@@ -536,6 +536,10 @@ class RfkV2Controller extends Controller
 
             Log::info('RFK record obtained', ['rfk_id' => $rfk->id, 'id_opd' => $id_opd, 'month' => $bulan, 'year' => $tahun]);
 
+            if (in_array($attr['type'], ['opd', 'program'])) {
+                $attr['uraian'] = strtoupper($attr['uraian']);
+            }
+
             // Process financial data
             $attr['pagu_anggaran'] = (float) str_replace(['.', ','], ['', '.'], $attr['pagu_anggaran']);
             $attr['bulan_ini'] = (float) str_replace(['.', ','], ['', '.'], $attr['bulan_ini']);
@@ -761,70 +765,53 @@ class RfkV2Controller extends Controller
 
     public function getOpdAverage(Request $request)
     {
-        $user = Auth::user();
-        $isSuperadmin = false;
-
-        if ($user instanceof User && method_exists($user, 'hasRole')) {
-            $isSuperadmin = $user->hasRole('superadmin');
-        }
-
         $date = $request->input('month');
         $periodDate = Carbon::parse($date)->startOfMonth();
         $bulan = $periodDate->format('m');
         $tahun = $periodDate->format('Y');
 
-        // Calculate average from ALL OPDs in Kabupaten Tulungagung, not just selected OPD
-        // Get all RFK records for the month/year
-        $rfkRecords = RfkV2::where('month', $bulan)
-            ->where('year', $tahun)
-            ->get();
-
-        if ($rfkRecords->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data RFK tidak ditemukan',
-                'data' => [
-                    'average_keuangan' => 0,
-                    'count' => 0,
-                ]
-            ], 404);
-        }
-
-        // Get all sub_kegiatan from ALL OPDs to calculate overall average
-        $rfkIds = $rfkRecords->pluck('id')->toArray();
-        $subKegiatan = RfkV2Detail::whereIn('id_rfk', $rfkIds)
-            ->where('type', 'sub_kegiatan')
-            ->get();
-
-        $totalKeuangan = 0;
-        $count = $subKegiatan->count();
-
-        foreach ($subKegiatan as $item) {
-            $totalKeuangan += floatval($item->keuangan);
-        }
-
-        $averageKeuangan = $count > 0 ? $totalKeuangan / $count : 0;
-
-        // Get overall OPD-level aggregate for reference (weighted average)
-        $allOpdRecords = RfkV2Detail::whereIn('id_rfk', $rfkIds)
-            ->where('type', 'opd')
-            ->whereNull('parent_id')
-            ->get();
+        // Fetch all active OPD IDs like the dashboard does
+        $opdIds = Opd::where('rfk_code', '!=', '')->pluck('id')->toArray();
 
         $totalPagu = 0;
         $totalRealisasi = 0;
-        foreach ($allOpdRecords as $opdRecord) {
-            $totalPagu += floatval($opdRecord->pagu_anggaran ?? 0);
-            $totalRealisasi += floatval($opdRecord->sd_bulan_ini ?? 0);
+        $count = 0;
+
+        foreach ($opdIds as $opdId) {
+            $rfkOpd = RfkV2Detail::select('rfk_v2_detail.pagu_anggaran', 'rfk_v2_detail.sd_bulan_ini')
+                ->leftJoin('rfk_v2', 'rfk_v2_detail.id_rfk', '=', 'rfk_v2.id')
+                ->where('rfk_v2.id_opd', $opdId)
+                ->where('rfk_v2.month', $bulan)
+                ->where('rfk_v2.year', $tahun)
+                ->where('rfk_v2_detail.type', 'opd')
+                ->whereNull('rfk_v2_detail.parent_id')
+                ->first();
+
+            if ($rfkOpd) {
+                $totalPagu += (float) ($rfkOpd->pagu_anggaran ?? 0);
+                $totalRealisasi += (float) ($rfkOpd->sd_bulan_ini ?? 0);
+                $count++;
+            }
         }
+
         $overallOpdKeuangan = $totalPagu > 0 ? ($totalRealisasi / $totalPagu) * 100 : 0;
+
+        // Also get sub_kegiatan count for frontend compatibility
+        $rfkRecords = RfkV2::whereIn('id_opd', $opdIds)
+            ->where('month', $bulan)
+            ->where('year', $tahun)
+            ->get();
+        $rfkIds = $rfkRecords->pluck('id')->toArray();
+        $subKegiatanCount = RfkV2Detail::whereIn('id_rfk', $rfkIds)
+            ->where('type', 'sub_kegiatan')
+            ->count();
 
         return response()->json([
             'success' => true,
             'data' => [
-                'average_keuangan' => round($averageKeuangan, 2),
-                'count' => $count,
-                'opd_keuangan' => round($overallOpdKeuangan, 2), // Overall OPD level weighted average
+                'average_keuangan' => round($overallOpdKeuangan, 2),
+                'count' => $subKegiatanCount,
+                'opd_keuangan' => round($overallOpdKeuangan, 2),
                 'opd_name' => 'Kabupaten Tulungagung (Semua OPD)',
             ]
         ]);
@@ -1040,9 +1027,8 @@ class RfkV2Controller extends Controller
             }
 
             // Fetch all details hierarchically
-            $details = RfkV2Detail::where('id_rfk', $rfk->id)
-                ->orderBy('code', 'asc')
-                ->get();
+            $details = RfkV2Detail::where('id_rfk', $rfk->id)->get();
+            $details = $this->sortDetailsHierarchically($details);
 
             if ($details->isEmpty()) {
                 continue;
@@ -1184,8 +1170,8 @@ class RfkV2Controller extends Controller
             // Fetch only OPD and Program level details
             $details = RfkV2Detail::where('id_rfk', $rfk->id)
                 ->whereIn('type', ['opd', 'program'])
-                ->orderBy('code', 'asc')
                 ->get();
+            $details = $this->sortDetailsHierarchically($details);
 
             if ($details->isEmpty()) {
                 continue;
@@ -1217,5 +1203,90 @@ class RfkV2Controller extends Controller
             new LaporanRFKV2Program($data, $bulan, $tahun),
             'laporan_rfk_v2_program_' . $bulan . '_' . $tahun . '.xlsx'
         );
+    }
+
+    /**
+     * Sort details hierarchically like the frontend sortListDataHierarchically.
+     *
+     * @param \Illuminate\Support\Collection $details
+     * @return \Illuminate\Support\Collection
+     */
+    private function sortDetailsHierarchically($details)
+    {
+        if ($details->isEmpty()) {
+            return collect();
+        }
+
+        $sorted = [];
+        $processed = [];
+        $dataMap = [];
+
+        // Create a map for quick lookup
+        foreach ($details as $row) {
+            $dataMap[(int) $row->id] = $row;
+        }
+
+        // Recursive helper function
+        $addRowAndChildren = function ($rowId) use (&$addRowAndChildren, &$sorted, &$processed, $dataMap, $details) {
+            if (isset($processed[$rowId])) {
+                return;
+            }
+
+            $row = $dataMap[$rowId] ?? null;
+            if (!$row) {
+                return;
+            }
+
+            // Add the row itself
+            $sorted[] = $row;
+            $processed[$rowId] = true;
+
+            // Find all direct children in $details
+            $children = [];
+            foreach ($details as $r) {
+                if ($r->parent_id && (int) $r->parent_id === $rowId) {
+                    $children[] = $r;
+                }
+            }
+
+            // Sort children by code
+            usort($children, function ($a, $b) {
+                $codeA = (string) ($a->code ?? '');
+                $codeB = (string) ($b->code ?? '');
+                return strcasecmp($codeA, $codeB);
+            });
+
+            // Recursively add children
+            foreach ($children as $child) {
+                $addRowAndChildren((int) $child->id);
+            }
+        };
+
+        // Get top-level rows (parent_id is null or parent is not in the collection)
+        $topLevelRows = [];
+        foreach ($details as $row) {
+            if (!$row->parent_id) {
+                $topLevelRows[] = $row;
+            } else {
+                $parentId = (int) $row->parent_id;
+                if (!isset($dataMap[$parentId])) {
+                    $topLevelRows[] = $row;
+                }
+            }
+        }
+
+        // Sort top-level rows by code
+        usort($topLevelRows, function ($a, $b) {
+            $codeA = (string) ($a->code ?? '');
+            $codeB = (string) ($b->code ?? '');
+            return strcasecmp($codeA, $codeB);
+        });
+
+        // Add all top-level rows and their descendants
+        foreach ($topLevelRows as $row) {
+            $addRowAndChildren((int) $row->id);
+        }
+
+        return collect($sorted);
     }
 }

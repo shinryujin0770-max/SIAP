@@ -575,23 +575,64 @@
             <!-- Nama OPD Table -->
             <div class="col-md-12 mt-3">
                 <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">Nama OPD</h5>
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
+                        <h5 class="card-title m-0">Nama OPD</h5>
+                        <input type="text" id="rfk-opd-search" class="form-control form-control-sm" placeholder="Cari OPD..." style="width: 200px; display: inline-block;">
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table id="rfk-opd-table" class="table table-bordered table-hover">
                                 <thead class="text-center font-weight-bold">
                                     <tr>
+                                        <th style="width: 50px;">#</th>
                                         <th>Nama OPD</th>
                                         <th>Pagu Anggaran</th>
-                                        <th>Bulan Ini</th>
-                                        <th>Realisasi sd Bulan ini</th>
-                                        <th style="cursor: pointer;" onclick="sortRFKTable('keu')">
-                                            Keu % <i class="fa fa-sort"></i>
+                                        <th class="position-relative">
+                                            <div class="d-flex align-items-center justify-content-center" style="gap: 5px;">
+                                                <span>Bulan Ini</span>
+                                                <a href="#" class="text-muted ml-1" id="rfk-opd-filter-btn-bulan-ini" title="Tampilkan OPD belum input realisasi" onclick="event.stopPropagation(); showBelumInputModal();">
+                                                    <i class="fas fa-filter fa-xs"></i>
+                                                </a>
+                                            </div>
                                         </th>
-                                        <th style="cursor: pointer;" onclick="sortRFKTable('fisik')">
-                                            Fisik % <i class="fa fa-sort"></i>
+                                        <th>Realisasi sd Bulan ini</th>
+                                        <th style="cursor: pointer;" onclick="sortRFKTable('keu')" class="position-relative">
+                                            <div class="d-flex align-items-center justify-content-center" style="gap: 5px;">
+                                                <span>Keu %</span>
+                                                <i class="fa fa-sort mr-1"></i>
+                                                <div class="dropdown d-inline-block" onclick="event.stopPropagation();">
+                                                    <a href="#" class="text-muted" id="rfk-opd-filter-btn-keu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-filter fa-xs"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-right" style="min-width: 180px; padding: 8px;">
+                                                        <h6 class="dropdown-header px-2 py-1" style="font-size: 0.78rem;">Filter Progres Keu</h6>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val active" href="#" data-filter-type="keu" data-filter-val="all" style="font-size: 0.82rem;">Semua</a>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val" href="#" data-filter-type="keu" data-filter-val="zero" style="font-size: 0.82rem;">Masih 0%</a>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val" href="#" data-filter-type="keu" data-filter-val="low" style="font-size: 0.82rem;">Rendah (&lt; 50%)</a>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val" href="#" data-filter-type="keu" data-filter-val="high" style="font-size: 0.82rem;">Tinggi (&gt;= 50%)</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th style="cursor: pointer;" onclick="sortRFKTable('fisik')" class="position-relative">
+                                            <div class="d-flex align-items-center justify-content-center" style="gap: 5px;">
+                                                <span>Fisik %</span>
+                                                <i class="fa fa-sort mr-1"></i>
+                                                <div class="dropdown d-inline-block" onclick="event.stopPropagation();">
+                                                    <a href="#" class="text-muted" id="rfk-opd-filter-btn-fisik" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-filter fa-xs"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-right" style="min-width: 180px; padding: 8px;">
+                                                        <h6 class="dropdown-header px-2 py-1" style="font-size: 0.78rem;">Filter Progres Fisik</h6>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val active" href="#" data-filter-type="fisik" data-filter-val="all" style="font-size: 0.82rem;">Semua</a>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val" href="#" data-filter-type="fisik" data-filter-val="zero" style="font-size: 0.82rem;">Masih 0%</a>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val" href="#" data-filter-type="fisik" data-filter-val="low" style="font-size: 0.82rem;">Rendah (&lt; 50%)</a>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val" href="#" data-filter-type="fisik" data-filter-val="high" style="font-size: 0.82rem;">Tinggi (&gt;= 50%)</a>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </th>
                                     </tr>
                                 </thead>
@@ -599,7 +640,7 @@
                                 </tbody>
                                 <tfoot class="font-weight-bold">
                                     <tr>
-                                        <td>Total</td>
+                                        <td colspan="2">Total</td>
                                         <td class="text-right" id="rfk-opd-total-pagu">Rp0</td>
                                         <td class="text-right" id="rfk-opd-total-bulan-ini">Rp0</td>
                                         <td class="text-right" id="rfk-opd-total-realisasi">Rp0</td>
@@ -615,8 +656,9 @@
             <!-- Program OPD Table -->
             <div class="col-md-12 mt-3">
                 <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">Program OPD yang Dijalankan</h5>
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
+                        <h5 class="card-title m-0">Program OPD yang Dijalankan</h5>
+                        <input type="text" id="rfk-program-search" class="form-control form-control-sm" placeholder="Cari Program..." style="width: 200px; display: inline-block;">
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -779,6 +821,45 @@
         </div>
     </div>
     @endif
+
+    {{-- ===== MODAL BELUM INPUT REALISASI ===== --}}
+    <div class="modal fade" id="modal-belum-input-realisasi" tabindex="-1" role="dialog" aria-labelledby="modalBelumInputLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 12px; overflow: hidden; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="modalBelumInputLabel">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Daftar OPD Belum Input Realisasi
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Berikut adalah daftar OPD yang belum menginput realisasi anggaran pada periode <strong id="modal-belum-input-periode">-</strong> (realisasi Bulan Ini = Rp 0):</p>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-bordered table-striped" id="table-belum-input-detail">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th style="width: 50px;" class="text-center">No</th>
+                                    <th>Nama OPD</th>
+                                    <th class="text-right" style="width: 220px;">Pagu Anggaran</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dinamis -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" id="btn-copy-belum-input">
+                        <i class="fas fa-copy mr-1"></i>Salin Daftar OPD
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -1003,10 +1084,16 @@
     @endif
 
     // RFK Dashboard Functions
+    var rfkDashboardData = null;
     var rfkOpdSortColumn = null;
     var rfkOpdSortDirection = 'asc';
     var rfkProgramSortColumn = null;
     var rfkProgramSortDirection = 'asc';
+    var rfkOpdFilters = {
+        bulan_ini: 'all', // 'all', 'zero', 'active'
+        keu: 'all',       // 'all', 'zero', 'low', 'high'
+        fisik: 'all'      // 'all', 'zero', 'low', 'high'
+    };
 
     function formatToCurrencyRFK(number) {
         return new Intl.NumberFormat('id-ID', {
@@ -1016,6 +1103,220 @@
             maximumFractionDigits: 0
         }).format(number);
     }
+
+    function populateRFKOpdTable(opdData) {
+        var opdTbody = $('#rfk-opd-table tbody');
+        opdTbody.empty();
+        
+        var searchQuery = $('#rfk-opd-search').val() || '';
+        searchQuery = searchQuery.toLowerCase().trim();
+        
+        var filteredData = opdData;
+        if (searchQuery !== '') {
+            filteredData = opdData.filter(function(item) {
+                return (item.opd_name || '').toLowerCase().indexOf(searchQuery) !== -1;
+            });
+        }
+
+        // Apply "Bulan Ini" filter
+        if (rfkOpdFilters.bulan_ini === 'zero') {
+            filteredData = filteredData.filter(function(item) {
+                return parseFloat(item.bulan_ini || 0) === 0;
+            });
+        } else if (rfkOpdFilters.bulan_ini === 'active') {
+            filteredData = filteredData.filter(function(item) {
+                return parseFloat(item.bulan_ini || 0) > 0;
+            });
+        }
+
+        // Apply "Keu %" filter
+        if (rfkOpdFilters.keu === 'zero') {
+            filteredData = filteredData.filter(function(item) {
+                return parseFloat(item.keuangan || 0) === 0;
+            });
+        } else if (rfkOpdFilters.keu === 'low') {
+            filteredData = filteredData.filter(function(item) {
+                return parseFloat(item.keuangan || 0) < 50;
+            });
+        } else if (rfkOpdFilters.keu === 'high') {
+            filteredData = filteredData.filter(function(item) {
+                return parseFloat(item.keuangan || 0) >= 50;
+            });
+        }
+
+        // Apply "Fisik %" filter
+        if (rfkOpdFilters.fisik === 'zero') {
+            filteredData = filteredData.filter(function(item) {
+                return parseFloat(item.fisik || 0) === 0;
+            });
+        } else if (rfkOpdFilters.fisik === 'low') {
+            filteredData = filteredData.filter(function(item) {
+                return parseFloat(item.fisik || 0) < 50;
+            });
+        } else if (rfkOpdFilters.fisik === 'high') {
+            filteredData = filteredData.filter(function(item) {
+                return parseFloat(item.fisik || 0) >= 50;
+            });
+        }
+        
+        if (filteredData && filteredData.length > 0) {
+            // Sort by Keuangan descending by default
+            filteredData.sort(function(a, b) {
+                var kA = parseFloat(a.keuangan || 0);
+                var kB = parseFloat(b.keuangan || 0);
+                return kB - kA;
+            });
+
+            var totalBulanIni = 0;
+            var totalPagu = 0;
+            var totalRealisasi = 0;
+            var totalFisikRupiah = 0;
+            
+            filteredData.forEach(function(item, index) {
+                var rank = index + 1;
+                var rankClass = 'badge badge-secondary';
+                if (rank === 1) rankClass = 'badge badge-warning'; // Gold
+                else if (rank === 2) rankClass = 'badge badge-light'; // Silver
+                else if (rank === 3) rankClass = 'badge-danger'; // Bronze (using dark badge/custom style)
+
+                var rankStyle = rank <= 3 ? 'font-size: 0.85rem; padding: 4px 8px; font-weight: 800; border: 1px solid rgba(0,0,0,0.1);' : 'font-size: 0.8rem; padding: 3px 6px;';
+                var rankHtml = '<span class="' + rankClass + '" style="' + rankStyle + '">' + rank + '</span>';
+
+                var keuangan = (item.keuangan != null && !isNaN(item.keuangan)) ? Number(item.keuangan).toFixed(2) : '0.00';
+                var fisik = (item.fisik != null && !isNaN(item.fisik)) ? Number(item.fisik).toFixed(2) : '0.00';
+                var pagu = parseFloat(item.pagu_anggaran || 0);
+                var realisasi = parseFloat(item.sd_bulan_ini || 0);
+                
+                totalBulanIni += parseFloat(item.bulan_ini || 0);
+                totalPagu += pagu;
+                totalRealisasi += realisasi;
+                totalFisikRupiah += (parseFloat(fisik) / 100) * pagu;
+
+                var row = '<tr>' +
+                    '<td class="text-center">' + rankHtml + '</td>' +
+                    '<td>' + (item.opd_name || '') + '</td>' +
+                    '<td class="text-right">' + formatToCurrencyRFK(pagu) + '</td>' +
+                    '<td class="text-right">' + formatToCurrencyRFK(item.bulan_ini || 0) + '</td>' +
+                    '<td class="text-right">' + formatToCurrencyRFK(realisasi) + '</td>' +
+                    '<td class="text-center">' + keuangan + '%</td>' +
+                    '<td class="text-center">' + fisik + '%</td>' +
+                    '</tr>';
+                opdTbody.append(row);
+            });
+            
+            $('#rfk-opd-total-bulan-ini').text(formatToCurrencyRFK(totalBulanIni));
+            $('#rfk-opd-total-pagu').text(formatToCurrencyRFK(totalPagu));
+            $('#rfk-opd-total-realisasi').text(formatToCurrencyRFK(totalRealisasi));
+            
+            var totalKeu = totalPagu > 0 ? (totalRealisasi / totalPagu) * 100 : 0;
+            var totalFisik = totalPagu > 0 ? (totalFisikRupiah / totalPagu) * 100 : 0;
+            
+            $('#rfk-opd-total-keu').text(totalKeu.toFixed(2) + '%');
+            $('#rfk-opd-total-fisik').text(totalFisik.toFixed(2) + '%');
+        } else {
+            opdTbody.append('<tr><td colspan="7" class="text-center text-muted">Tidak ada data OPD yang cocok</td></tr>');
+            $('#rfk-opd-total-bulan-ini').text('Rp0');
+            $('#rfk-opd-total-pagu').text('Rp0');
+            $('#rfk-opd-total-realisasi').text('Rp0');
+            $('#rfk-opd-total-keu').text('0.00%');
+            $('#rfk-opd-total-fisik').text('0.00%');
+        }
+    }
+
+    function populateRFKProgramTable(programData, programSummary) {
+        var programTbody = $('#rfk-program-table tbody');
+        programTbody.empty();
+        
+        var searchQuery = $('#rfk-program-search').val() || '';
+        searchQuery = searchQuery.toLowerCase().trim();
+        
+        var filteredData = programData;
+        if (searchQuery !== '') {
+            filteredData = programData.filter(function(item) {
+                return (item.program_name || '').toLowerCase().indexOf(searchQuery) !== -1;
+            });
+        }
+        
+        if (filteredData && filteredData.length > 0) {
+            var totalPagu = 0;
+            var totalRealisasi = 0;
+            var totalFisikRupiah = 0;
+            
+            filteredData.forEach(function(item) {
+                var keuangan = (item.keuangan != null && !isNaN(item.keuangan)) ? Number(item.keuangan).toFixed(2) : '0.00';
+                var fisik = (item.fisik != null && !isNaN(item.fisik)) ? Number(item.fisik).toFixed(2) : '0.00';
+                var pagu = parseFloat(item.pagu_anggaran || 0);
+                var realisasi = parseFloat(item.sd_bulan_ini || 0);
+                
+                totalPagu += pagu;
+                totalRealisasi += realisasi;
+                totalFisikRupiah += (parseFloat(fisik) / 100) * pagu;
+
+                var row = '<tr>' +
+                    '<td>' + (item.program_name || '') + '</td>' +
+                    '<td class="text-right">' + formatToCurrencyRFK(pagu) + '</td>' +
+                    '<td class="text-right">' + formatToCurrencyRFK(realisasi) + '</td>' +
+                    '<td class="text-center">' + keuangan + '%</td>' +
+                    '<td class="text-center">' + fisik + '%</td>' +
+                    '</tr>';
+                programTbody.append(row);
+            });
+            
+            $('#rfk-program-total-pagu').text(formatToCurrencyRFK(totalPagu));
+            $('#rfk-program-total-realisasi').text(formatToCurrencyRFK(totalRealisasi));
+            
+            var totalKeu = totalPagu > 0 ? (totalRealisasi / totalPagu) * 100 : 0;
+            var totalFisik = totalPagu > 0 ? (totalFisikRupiah / totalPagu) * 100 : 0;
+            
+            $('#rfk-program-total-keu').text(totalKeu.toFixed(2) + '%');
+            $('#rfk-program-total-fisik').text(totalFisik.toFixed(2) + '%');
+        } else {
+            programTbody.append('<tr><td colspan="5" class="text-center text-muted">Tidak ada data program yang cocok</td></tr>');
+            $('#rfk-program-total-pagu').text('Rp0');
+            $('#rfk-program-total-realisasi').text('Rp0');
+            $('#rfk-program-total-keu').text('0.00%');
+            $('#rfk-program-total-fisik').text('0.00%');
+        }
+    }
+
+    function showBelumInputModal() {
+        if (!rfkDashboardData || !rfkDashboardData.opd_data) {
+            toastr.warning('Data belum dimuat atau tidak tersedia');
+            return;
+        }
+
+        var month = $('#filter-month').val() || '{{date("m")}}';
+        var year = $('#filter-year').val() || '{{date("Y")}}';
+        var monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        var m = parseInt(month, 10);
+        var periodText = (m >= 1 && m <= 12 ? monthNames[m - 1] : '') + ' ' + year;
+        
+        $('#modal-belum-input-periode').text(periodText);
+
+        var tableBody = $('#table-belum-input-detail tbody');
+        tableBody.empty();
+
+        var belumInputOpds = rfkDashboardData.opd_data.filter(function(item) {
+            return parseFloat(item.bulan_ini || 0) === 0;
+        });
+
+        if (belumInputOpds.length > 0) {
+            belumInputOpds.forEach(function(item, index) {
+                var pagu = parseFloat(item.pagu_anggaran || 0);
+                var row = '<tr>' +
+                    '<td class="text-center">' + (index + 1) + '</td>' +
+                    '<td>' + (item.opd_name || '') + '</td>' +
+                    '<td class="text-right">' + formatToCurrencyRFK(pagu) + '</td>' +
+                    '</tr>';
+                tableBody.append(row);
+            });
+        } else {
+            tableBody.append('<tr><td colspan="3" class="text-center text-muted">Semua OPD sudah menginput realisasi bulan ini.</td></tr>');
+        }
+
+        $('#modal-belum-input-realisasi').modal('show');
+    }
+    window.showBelumInputModal = showBelumInputModal;
 
     function loadRFKDashboard() {
         var opd = $('#filter-opd').val() || '';
@@ -1036,6 +1337,7 @@
             },
             success: function(response) {
                 $('.loader').hide();
+                rfkDashboardData = response;
 
                 // Update summary cards
                 $('#rfk-total-pagu').text(formatToCurrencyRFK(response.summary.total_pagu || 0));
@@ -1043,59 +1345,8 @@
                 $('#rfk-total-keu').text((response.summary.total_keu || 0).toFixed(2) + '%');
                 $('#rfk-total-realisasi').text(formatToCurrencyRFK(response.summary.total_realisasi || 0));
 
-                // Update OPD table
-                var opdTbody = $('#rfk-opd-table tbody');
-                opdTbody.empty();
-                if (response.opd_data && response.opd_data.length > 0) {
-                    var totalBulanIni = 0;
-                    response.opd_data.forEach(function(item) {
-                        var keuangan = (item.keuangan != null && !isNaN(item.keuangan)) ? Number(item.keuangan).toFixed(2) : '0.00';
-                        var fisik = (item.fisik != null && !isNaN(item.fisik)) ? Number(item.fisik).toFixed(2) : '0.00';
-                        totalBulanIni += parseFloat(item.bulan_ini || 0);
-
-                        var row = '<tr>' +
-                            '<td>' + (item.opd_name || '') + '</td>' +
-                            '<td class="text-right">' + formatToCurrencyRFK(item.pagu_anggaran || 0) + '</td>' +
-                            '<td class="text-right">' + formatToCurrencyRFK(item.bulan_ini || 0) + '</td>' +
-                            '<td class="text-right">' + formatToCurrencyRFK(item.sd_bulan_ini || 0) + '</td>' +
-                            '<td class="text-center">' + keuangan + '%</td>' +
-                            '<td class="text-center">' + fisik + '%</td>' +
-                            '</tr>';
-                        opdTbody.append(row);
-                    });
-                    $('#rfk-opd-total-bulan-ini').text(formatToCurrencyRFK(totalBulanIni));
-                }
-
-                // Update OPD totals
-                $('#rfk-opd-total-pagu').text(formatToCurrencyRFK(response.summary.total_pagu || 0));
-                $('#rfk-opd-total-realisasi').text(formatToCurrencyRFK(response.summary.total_realisasi || 0));
-                $('#rfk-opd-total-keu').text((response.summary.total_keu || 0).toFixed(2) + '%');
-                $('#rfk-opd-total-fisik').text((response.summary.total_fisik || 0).toFixed(2) + '%');
-
-                // Update Program table
-                var programTbody = $('#rfk-program-table tbody');
-                programTbody.empty();
-                if (response.program_data && response.program_data.length > 0) {
-                    response.program_data.forEach(function(item) {
-                        var keuangan = (item.keuangan != null && !isNaN(item.keuangan)) ? Number(item.keuangan).toFixed(2) : '0.00';
-                        var fisik = (item.fisik != null && !isNaN(item.fisik)) ? Number(item.fisik).toFixed(2) : '0.00';
-
-                        var row = '<tr>' +
-                            '<td>' + (item.program_name || '') + '</td>' +
-                            '<td class="text-right">' + formatToCurrencyRFK(item.pagu_anggaran || 0) + '</td>' +
-                            '<td class="text-right">' + formatToCurrencyRFK(item.sd_bulan_ini || 0) + '</td>' +
-                            '<td class="text-center">' + keuangan + '%</td>' +
-                            '<td class="text-center">' + fisik + '%</td>' +
-                            '</tr>';
-                        programTbody.append(row);
-                    });
-                }
-
-                // Update Program totals
-                $('#rfk-program-total-pagu').text(formatToCurrencyRFK(response.program_summary.total_pagu || 0));
-                $('#rfk-program-total-realisasi').text(formatToCurrencyRFK(response.program_summary.total_realisasi || 0));
-                $('#rfk-program-total-keu').text((response.program_summary.total_keu || 0).toFixed(2) + '%');
-                $('#rfk-program-total-fisik').text((response.program_summary.total_fisik || 0).toFixed(2) + '%');
+                populateRFKOpdTable(response.opd_data || []);
+                populateRFKProgramTable(response.program_data || [], response.program_summary || {});
 
                 // === Dynamic OPD Ranking Update ===
                 updateRankingUI(response.rank_info);
@@ -1779,6 +2030,81 @@
         if ($('#rfk-tab').hasClass('active')) {
             loadRFKDashboard();
         }
+
+        // Search event bindings
+        $('#rfk-opd-search').on('keyup input', function() {
+            if (rfkDashboardData) {
+                populateRFKOpdTable(rfkDashboardData.opd_data || []);
+            }
+        });
+
+        $('#rfk-program-search').on('keyup input', function() {
+            if (rfkDashboardData) {
+                populateRFKProgramTable(rfkDashboardData.program_data || [], rfkDashboardData.program_summary || {});
+            }
+        });
+
+        // Column Filter event bindings
+        $('.rfk-opd-filter-val').on('click', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            var type = $this.data('filter-type');
+            var val = $this.data('filter-val');
+
+            // Update active state in dropdown UI
+            $this.siblings('.rfk-opd-filter-val').removeClass('active');
+            $this.addClass('active');
+
+            // Save filter state
+            rfkOpdFilters[type] = val;
+
+            // Highlight filter icon if filter is active (not 'all')
+            var icon = $('#rfk-opd-filter-btn-' + type);
+            if (val !== 'all') {
+                icon.removeClass('text-muted').addClass('text-warning');
+            } else {
+                icon.removeClass('text-warning').addClass('text-muted');
+            }
+
+            // Re-populate table
+            if (rfkDashboardData) {
+                populateRFKOpdTable(rfkDashboardData.opd_data || []);
+            }
+        });
+
+        // Copy button inside Belum Input modal
+        $('#btn-copy-belum-input').on('click', function() {
+            if (!rfkDashboardData || !rfkDashboardData.opd_data) return;
+
+            var month = $('#filter-month').val() || '{{date("m")}}';
+            var year = $('#filter-year').val() || '{{date("Y")}}';
+            var monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+            var m = parseInt(month, 10);
+            var periodText = (m >= 1 && m <= 12 ? monthNames[m - 1] : '') + ' ' + year;
+
+            var belumInputOpds = rfkDashboardData.opd_data.filter(function(item) {
+                return parseFloat(item.bulan_ini || 0) === 0;
+            });
+
+            if (belumInputOpds.length === 0) {
+                toastr.info('Tidak ada OPD yang belum menginput realisasi.');
+                return;
+            }
+
+            var textToCopy = 'Daftar OPD belum menginput realisasi anggaran periode: ' + periodText + '\n\n';
+            belumInputOpds.forEach(function(item, index) {
+                textToCopy += (index + 1) + '. ' + item.opd_name + '\n';
+            });
+
+            // Copy to clipboard
+            var tempTextarea = $('<textarea>');
+            $('body').append(tempTextarea);
+            tempTextarea.val(textToCopy).select();
+            document.execCommand('copy');
+            tempTextarea.remove();
+
+            toastr.success('Daftar OPD belum input realisasi disalin ke clipboard');
+        });
     });
 
     // Filter button for dashboard
@@ -1809,11 +2135,11 @@
         rows.sort(function(a, b) {
             var aVal, bVal;
             if (column === 'keu') {
-                aVal = parseFloat($(a).find('td').eq(4).text().replace('%', ''));
-                bVal = parseFloat($(b).find('td').eq(4).text().replace('%', ''));
-            } else if (column === 'fisik') {
                 aVal = parseFloat($(a).find('td').eq(5).text().replace('%', ''));
                 bVal = parseFloat($(b).find('td').eq(5).text().replace('%', ''));
+            } else if (column === 'fisik') {
+                aVal = parseFloat($(a).find('td').eq(6).text().replace('%', ''));
+                bVal = parseFloat($(b).find('td').eq(6).text().replace('%', ''));
             }
 
             if (rfkOpdSortColumn === column && rfkOpdSortDirection === 'asc') {
@@ -1831,6 +2157,20 @@
         }
 
         tbody.empty().append(rows);
+
+        // Update rank badges after sorting
+        tbody.find('tr').each(function(idx) {
+            var rank = idx + 1;
+            var rankCell = $(this).find('td').eq(0);
+            
+            var rankClass = 'badge badge-secondary';
+            if (rank === 1) rankClass = 'badge badge-warning'; // Gold
+            else if (rank === 2) rankClass = 'badge badge-light'; // Silver
+            else if (rank === 3) rankClass = 'badge-danger'; // Bronze
+            
+            var rankStyle = rank <= 3 ? 'font-size: 0.85rem; padding: 4px 8px; font-weight: 800; border: 1px solid rgba(0,0,0,0.1);' : 'font-size: 0.8rem; padding: 3px 6px;';
+            rankCell.html('<span class="' + rankClass + '" style="' + rankStyle + '">' + rank + '</span>');
+        });
     }
 
     function sortRFKProgramTable(column) {

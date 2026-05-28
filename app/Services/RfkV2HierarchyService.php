@@ -127,7 +127,7 @@ class RfkV2HierarchyService
             $newRecord->parent_id = $new_parent_id;
             $newRecord->type = $record->type;
             $newRecord->code = $record->code;
-            $newRecord->uraian = $record->uraian;
+            $newRecord->uraian = in_array($record->type, ['opd', 'program']) ? strtoupper($record->uraian) : $record->uraian;
             $newRecord->year = $record->year;
 
             // Copy financial data with adjustments
