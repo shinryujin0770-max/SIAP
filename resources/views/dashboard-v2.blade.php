@@ -11,6 +11,9 @@
         <p class="text-muted mb-0 mt-1" style="font-size: 0.9rem;">Ringkasan eksekutif realisasi fisik &amp; keuangan</p>
     </div>
     <div class="d-flex align-items-center mt-2 mt-md-0">
+        <button class="btn btn-warning font-weight-bold text-dark mr-2 shadow-sm" id="dv2-btn-briefing" data-toggle="modal" data-target="#dv2BriefingModal">
+            <i class="fas fa-chalkboard-teacher mr-1"></i> Executive Briefing
+        </button>
         <button class="btn dv2-btn-export mr-2" id="dv2-export-pdf" title="Export PDF">
             <i class="fas fa-file-pdf mr-1"></i> PDF
         </button>
@@ -23,6 +26,7 @@
 
 @section('css')
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 <style>
     /* ===== CSS VARIABLES ===== */
     :root {
@@ -464,6 +468,54 @@
         text-decoration: none;
     }
 
+    /* ===== TABLE EXPORT BUTTONS ===== */
+    .dv2-table-export-btn {
+        background: var(--dv2-card-bg);
+        border: 1.5px solid #e2e8f0;
+        color: var(--dv2-text);
+        border-radius: 8px;
+        padding: 5px 14px;
+        font-weight: 600;
+        font-size: 0.78rem;
+        transition: var(--dv2-transition);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+    }
+    .dv2-table-export-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-decoration: none;
+    }
+    .dv2-table-export-btn.btn-excel {
+        border-color: #10b981;
+        color: #10b981;
+    }
+    .dv2-table-export-btn.btn-excel:hover {
+        background: #10b981;
+        color: #fff;
+    }
+    .dv2-table-export-btn.btn-pdf {
+        border-color: #f43f5e;
+        color: #f43f5e;
+    }
+    .dv2-table-export-btn.btn-pdf:hover {
+        background: #f43f5e;
+        color: #fff;
+    }
+    .dv2-active-filter-badge {
+        display: inline-block;
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--dv2-accent);
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 12px;
+        margin-left: 6px;
+    }
+
     /* ===== LOADING SKELETON ===== */
     .dv2-skeleton {
         background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
@@ -491,15 +543,183 @@
     .dv2-delay-4 { animation-delay: 0.4s; }
     .dv2-delay-5 { animation-delay: 0.5s; }
 
+    /* ===== EXECUTIVE SNAPSHOT BANNER ===== */
+    .dv2-snapshot-banner {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f4c75 100%);
+        border-radius: var(--dv2-radius);
+        padding: 20px 28px;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
+    }
+    .dv2-snapshot-banner::before {
+        content: '';
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.12), transparent 70%);
+        border-radius: 50%;
+    }
+    .dv2-snapshot-icon {
+        font-size: 1.8rem;
+        color: var(--dv2-accent);
+        margin-right: 16px;
+        flex-shrink: 0;
+    }
+    .dv2-snapshot-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--dv2-accent);
+        margin-bottom: 4px;
+    }
+    .dv2-snapshot-text {
+        font-size: 0.92rem;
+        color: rgba(255, 255, 255, 0.92);
+        line-height: 1.55;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ===== TAB NAVIGATION ===== */
+    .dv2-tab-nav {
+        display: flex;
+        gap: 0;
+        margin-bottom: 24px;
+        background: var(--dv2-card-bg);
+        border-radius: var(--dv2-radius);
+        box-shadow: var(--dv2-shadow);
+        border: 1px solid var(--dv2-border);
+        padding: 6px;
+        overflow-x: auto;
+    }
+    .dv2-tab-btn {
+        flex: 1;
+        padding: 14px 20px;
+        border: none;
+        background: transparent;
+        color: var(--dv2-text-muted);
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--dv2-transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        white-space: nowrap;
+        position: relative;
+    }
+    .dv2-tab-btn:hover {
+        background: #f1f5f9;
+        color: var(--dv2-navy);
+    }
+    .dv2-tab-btn.active {
+        background: linear-gradient(135deg, var(--dv2-navy), var(--dv2-navy-light));
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+    }
+    .dv2-tab-btn .dv2-tab-icon {
+        font-size: 1rem;
+    }
+    .dv2-tab-btn .dv2-tab-badge {
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 10px;
+        background: rgba(244, 63, 94, 0.15);
+        color: var(--dv2-coral);
+    }
+    .dv2-tab-btn.active .dv2-tab-badge {
+        background: rgba(255,255,255,0.2);
+        color: #fff;
+    }
+    .dv2-tab-panel {
+        display: none;
+    }
+    .dv2-tab-panel.active {
+        display: block;
+        animation: dv2FadeIn 0.3s ease forwards;
+    }
+
+    /* ===== ENHANCED METRIC CARDS ===== */
+    .dv2-card-value {
+        font-size: 1.55rem;
+        font-weight: 900;
+        color: var(--dv2-navy);
+        line-height: 1.15;
+        letter-spacing: -0.03em;
+    }
+    .dv2-card-meta {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    .dv2-card-target-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--dv2-text-muted);
+        margin-bottom: 4px;
+    }
+    .dv2-card-target-row .dv2-deviasi-val {
+        font-weight: 700;
+    }
+    .dv2-deviasi-val.positive { color: var(--dv2-emerald); }
+    .dv2-deviasi-val.negative { color: var(--dv2-coral); }
+    .dv2-card-progress {
+        width: 100%;
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 6px;
+    }
+    .dv2-card-progress-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-pagu .dv2-card-progress-fill { background: linear-gradient(90deg, var(--dv2-blue), var(--dv2-cyan)); }
+    .card-realisasi .dv2-card-progress-fill { background: linear-gradient(90deg, var(--dv2-emerald), var(--dv2-emerald-light)); }
+    .card-keuangan .dv2-card-progress-fill { background: linear-gradient(90deg, var(--dv2-accent), #fbbf24); }
+    .card-fisik .dv2-card-progress-fill { background: linear-gradient(90deg, var(--dv2-purple), #a78bfa); }
+    .card-sisa .dv2-card-progress-fill { background: linear-gradient(90deg, var(--dv2-coral), #fb7185); }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
         .dv2-page-title { font-size: 1.2rem; }
-        .dv2-card-value { font-size: 1.1rem; }
+        .dv2-card-value { font-size: 1.2rem; }
         .dv2-rank-banner { padding: 20px; }
         .dv2-rank-circle { width: 60px; height: 60px; }
         .dv2-rank-num { font-size: 1.5rem; }
         .dv2-progress-ring-container { gap: 24px; }
         .dv2-chart-body { padding: 12px 16px 16px 16px; }
+        .dv2-tab-nav { flex-direction: column; }
+        .dv2-tab-btn { justify-content: flex-start; }
+        .dv2-snapshot-banner { padding: 16px 20px; }
+        .dv2-snapshot-text { font-size: 0.82rem; }
+    }
+    /* Tablet landscape */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .dv2-summary-grid { grid-template-columns: repeat(3, 1fr); }
+        .dv2-card-value { font-size: 1.3rem; }
+        .dv2-tab-btn { font-size: 0.8rem; padding: 12px 14px; }
+    }
+    /* TV / Large monitor */
+    @media (min-width: 1600px) {
+        .dv2-card-value { font-size: 1.8rem; }
+        .dv2-summary-grid { gap: 24px; }
+        .dv2-snapshot-text { font-size: 1.05rem; }
+        .dv2-tab-btn { font-size: 0.95rem; padding: 16px 24px; }
     }
 
     /* ===== PRINT STYLES ===== */
@@ -539,7 +759,7 @@
                     @endforeach
                 </select>
             </div>
-            @if (auth()->user()->hasRole('superadmin'))
+            @if (auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('admin_rfk'))
             <div class="col-sm-6 col-lg-3 mb-2 mb-lg-0">
                 <label for="dv2-filter-opd">OPD</label>
                 <select name="filter_opd" class="form-control select2" id="dv2-filter-opd" style="width:100%">
@@ -561,6 +781,23 @@
         </form>
     </div>
 
+    {{-- ===== EXECUTIVE SNAPSHOT BANNER ===== --}}
+    <div class="dv2-snapshot-banner dv2-fade-in" id="dv2-snapshot-banner">
+        <div class="d-flex align-items-center">
+            <div class="dv2-snapshot-icon">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div class="dv2-snapshot-label">
+                    <i class="fas fa-chart-line mr-1"></i> Executive Strategic Snapshot
+                </div>
+                <div class="dv2-snapshot-text" id="dv2-snapshot-text">
+                    Memuat ringkasan eksekutif perkembangan realisasi pembangunan daerah...
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ===== SUMMARY CARDS ===== --}}
     <div class="dv2-summary-grid" id="dv2-summary-cards">
         <div class="dv2-summary-card card-pagu dv2-fade-in dv2-delay-1">
@@ -569,12 +806,28 @@
             <div class="dv2-card-value" id="dv2-val-pagu">
                 <span class="dv2-skeleton" style="display:inline-block;width:140px;height:22px;"></span>
             </div>
+            <div class="dv2-card-meta">
+                <div class="dv2-card-target-row text-muted">
+                    <span>APBD Kab. Tulungagung</span>
+                </div>
+                <div class="dv2-card-progress">
+                    <div class="dv2-card-progress-fill" id="dv2-prog-pagu" style="width: 100%;"></div>
+                </div>
+            </div>
         </div>
         <div class="dv2-summary-card card-realisasi dv2-fade-in dv2-delay-2">
             <div class="dv2-card-icon"><i class="fas fa-money-bill-wave"></i></div>
             <div class="dv2-card-label">Realisasi sd Bulan Ini</div>
             <div class="dv2-card-value" id="dv2-val-realisasi">
                 <span class="dv2-skeleton" style="display:inline-block;width:140px;height:22px;"></span>
+            </div>
+            <div class="dv2-card-meta">
+                <div class="dv2-card-target-row">
+                    <span>Target: <strong id="dv2-realisasi-target-amount">-</strong></span>
+                </div>
+                <div class="dv2-card-progress">
+                    <div class="dv2-card-progress-fill" id="dv2-prog-realisasi" style="width: 0%;"></div>
+                </div>
             </div>
         </div>
         <div class="dv2-summary-card card-keuangan dv2-fade-in dv2-delay-3">
@@ -583,12 +836,32 @@
             <div class="dv2-card-value" id="dv2-val-keuangan">
                 <span class="dv2-skeleton" style="display:inline-block;width:80px;height:22px;"></span>
             </div>
+            <div class="dv2-card-meta">
+                <div class="dv2-card-target-row">
+                    <span>Target: <strong id="dv2-keu-target">-%</strong></span>
+                    <span>•</span>
+                    <span>Deviasi: <strong id="dv2-keu-deviasi" class="dv2-deviasi-val">-%</strong></span>
+                </div>
+                <div class="dv2-card-progress">
+                    <div class="dv2-card-progress-fill" id="dv2-prog-keuangan" style="width: 0%;"></div>
+                </div>
+            </div>
         </div>
         <div class="dv2-summary-card card-fisik dv2-fade-in dv2-delay-4">
             <div class="dv2-card-icon"><i class="fas fa-hard-hat"></i></div>
             <div class="dv2-card-label">Realisasi Fisik</div>
             <div class="dv2-card-value" id="dv2-val-fisik">
                 <span class="dv2-skeleton" style="display:inline-block;width:80px;height:22px;"></span>
+            </div>
+            <div class="dv2-card-meta">
+                <div class="dv2-card-target-row">
+                    <span>Target: <strong id="dv2-fisik-target">-%</strong></span>
+                    <span>•</span>
+                    <span>Deviasi: <strong id="dv2-fisik-deviasi" class="dv2-deviasi-val">-%</strong></span>
+                </div>
+                <div class="dv2-card-progress">
+                    <div class="dv2-card-progress-fill" id="dv2-prog-fisik" style="width: 0%;"></div>
+                </div>
             </div>
         </div>
         <div class="dv2-summary-card card-sisa dv2-fade-in dv2-delay-5">
@@ -597,8 +870,36 @@
             <div class="dv2-card-value" id="dv2-val-sisa">
                 <span class="dv2-skeleton" style="display:inline-block;width:140px;height:22px;"></span>
             </div>
+            <div class="dv2-card-meta">
+                <div class="dv2-card-target-row">
+                    <span>Sisa: <strong id="dv2-sisa-pct">-%</strong> dari pagu</span>
+                </div>
+                <div class="dv2-card-progress">
+                    <div class="dv2-card-progress-fill" id="dv2-prog-sisa" style="width: 0%;"></div>
+                </div>
+            </div>
         </div>
     </div>
+
+    {{-- ===== EXECUTIVE TAB NAVIGATION ===== --}}
+    <div class="dv2-tab-nav dv2-fade-in">
+        <button type="button" class="dv2-tab-btn active" data-tab="tab-macro">
+            <i class="fas fa-chart-pie dv2-tab-icon"></i>
+            <span>Tab 1 • Ringkasan Makro &amp; Ranking OPD</span>
+        </button>
+        <button type="button" class="dv2-tab-btn" data-tab="tab-ews">
+            <i class="fas fa-exclamation-triangle dv2-tab-icon"></i>
+            <span>Tab 2 • Early Warning System (EWS)</span>
+            <span class="dv2-tab-badge" id="tab-ews-badge">0 OPD</span>
+        </button>
+        <button type="button" class="dv2-tab-btn" data-tab="tab-gis">
+            <i class="fas fa-map-marked-alt dv2-tab-icon"></i>
+            <span>Tab 3 • Peta Geospasial &amp; Matriks Dokumen</span>
+        </button>
+    </div>
+
+    {{-- ===== TAB 1: RINGKASAN MAKRO & RANKING OPD ===== --}}
+    <div class="dv2-tab-panel active" id="tab-macro">
 
     {{-- ===== RANKING BANNER (OPD) ===== --}}
     <div class="dv2-rank-banner dv2-fade-in" id="dv2-rank-banner">
@@ -766,10 +1067,17 @@
                     Filter: <span id="dv2-opd-drilldown-opd-name"></span>
                     <i class="fas fa-times ml-1" style="cursor:pointer;" onclick="resetDrillDown(event)" title="Reset Drill Down"></i>
                 </span>
+                <span id="dv2-opd-active-filter-info" class="dv2-active-filter-badge" style="display:none;"></span>
             </h6>
             <div class="d-flex align-items-center" style="gap: 10px;">
                 <input type="text" id="dv2-opd-search" class="form-control form-control-sm" placeholder="Cari OPD..." style="width: 200px; border-radius: 8px;">
                 <span class="badge badge-light" id="dv2-opd-count" style="font-size:0.8rem;">0 OPD</span>
+                <button class="dv2-table-export-btn btn-excel" id="dv2-table-export-excel" title="Export tabel ke Excel">
+                    <i class="fas fa-file-excel"></i> Excel
+                </button>
+                <button class="dv2-table-export-btn btn-pdf" id="dv2-table-export-pdf" title="Export tabel ke PDF">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
             </div>
         </div>
         <div class="table-responsive">
@@ -783,9 +1091,22 @@
                             <div class="d-flex align-items-center justify-content-end" style="gap: 5px;">
                                 <span>Realisasi</span>
                                 <i class="fas fa-sort ml-1" style="opacity:0.4;"></i>
-                                <a href="#" class="text-muted ml-1" id="dv2-opd-filter-btn-realisasi" title="Tampilkan OPD belum input realisasi" onclick="event.stopPropagation(); showBelumInputModalV2();">
-                                    <i class="fas fa-filter fa-xs"></i>
-                                </a>
+                                <div class="dropdown d-inline-block" onclick="event.stopPropagation();">
+                                    <a href="#" class="text-muted" id="dv2-opd-filter-btn-realisasi" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-filter fa-xs"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right" style="min-width: 200px; padding: 8px;">
+                                        <h6 class="dropdown-header px-2 py-1" style="font-size: 0.78rem;">Filter Realisasi</h6>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item px-2 py-1 dv2-opd-filter-val active" href="#" data-filter-type="realisasi" data-filter-val="all" style="font-size: 0.82rem;">Semua</a>
+                                        <a class="dropdown-item px-2 py-1 dv2-opd-filter-val" href="#" data-filter-type="realisasi" data-filter-val="zero" style="font-size: 0.82rem;">Belum Input (Rp 0)</a>
+                                        <a class="dropdown-item px-2 py-1 dv2-opd-filter-val" href="#" data-filter-type="realisasi" data-filter-val="active" style="font-size: 0.82rem;">Sudah Input (&gt; Rp 0)</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item px-2 py-1 text-primary text-center font-weight-bold" href="#" onclick="event.preventDefault(); showBelumInputModalV2();" style="font-size: 0.82rem;">
+                                            <i class="fas fa-list mr-1"></i> Detail Belum Input
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </th>
                         <th class="text-center" style="width:180px; cursor: pointer;" onclick="dv2SortOpdTable('keu')">
@@ -896,6 +1217,7 @@
             </table>
         </div>
     </div>
+    </div> {{-- Close Tab 1: tab-macro --}}
 
     {{-- ===== MODAL BELUM INPUT REALISASI V2 ===== --}}
     <div class="modal fade" id="dv2-modal-belum-input-realisasi" tabindex="-1" role="dialog" aria-labelledby="dv2ModalBelumInputLabel" aria-hidden="true">
@@ -926,11 +1248,238 @@
                         </table>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                    <button type="button" class="btn btn-primary" id="dv2-btn-copy-belum-input">
-                        <i class="fas fa-copy mr-1"></i>Salin Daftar OPD
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="dv2-btn-copy-belum-input">
+                        <i class="fas fa-copy mr-1"></i> Salin Daftar OPD
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== TAB 2: EARLY WARNING SYSTEM (EWS) ===== --}}
+    <div class="dv2-tab-panel" id="tab-ews">
+    {{-- ===== EWS WATCHLIST & FORECASTING ===== --}}
+    <div class="row mb-4">
+        {{-- EWS Watchlist --}}
+        <div class="col-lg-8 mb-3 mb-lg-0 dv2-fade-in">
+            <div class="dv2-chart-card h-100 border-left-danger" style="border-left: 4px solid #f43f5e;">
+                <div class="dv2-chart-header border-bottom pb-3">
+                    <div>
+                        <h6 class="dv2-chart-title text-danger">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Early Warning System (EWS) - OPD Deviasi Kritis
+                        </h6>
+                        <div class="dv2-chart-subtitle">Daftar OPD dengan realisasi keuangan/fisik minus >10% dari target bulanan</div>
+                    </div>
+                    <span class="badge badge-danger badge-pill px-3 py-2" id="ews-count-badge">0 OPD</span>
+                </div>
+                <div class="dv2-chart-body p-0">
+                    <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+                        <table class="table table-hover mb-0" id="dv2-ews-table">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th style="font-size: 0.75rem;">Nama OPD</th>
+                                    <th class="text-right" style="font-size: 0.75rem;">Pagu</th>
+                                    <th class="text-center" style="font-size: 0.75rem;">Realisasi Keu</th>
+                                    <th class="text-center" style="font-size: 0.75rem;">Realisasi Fisik</th>
+                                    <th class="text-center" style="font-size: 0.75rem;">Deviasi vs Target</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dinamis via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Forecasting & SiLPA Projection --}}
+        <div class="col-lg-4 dv2-fade-in">
+            <div class="dv2-chart-card h-100 text-white p-4" style="background: linear-gradient(135deg, #0f172a, #1e3a5f); border-radius: 16px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="font-weight-bold mb-0 text-warning" style="font-size: 1.05rem;">
+                        <i class="fas fa-chart-line mr-2"></i>Proyeksi Akhir Tahun
+                    </h6>
+                    <span class="badge badge-warning text-dark font-weight-bold" id="forecast-target-badge">Target: 100%</span>
+                </div>
+                <p class="text-white-50 small mb-4">Estimasi pencapaian akhir tahun berdasarkan kecepatan realisasi (*run-rate*) bulanan saat ini.</p>
+
+                <div class="mb-3">
+                    <small class="text-white-50 text-uppercase d-block mb-1" style="letter-spacing: 0.05em;">Proyeksi Realisasi s.d Desember</small>
+                    <h3 class="font-weight-bold text-success mb-0" id="forecast-projected-amount">Rp 0</h3>
+                    <div class="progress mt-2" style="height: 6px; background: rgba(255,255,255,0.15);">
+                        <div class="progress-bar bg-success" id="forecast-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <small class="text-white-50 float-right mt-1" id="forecast-projected-pct">0%</small>
+                </div>
+
+                <hr style="border-color: rgba(255,255,255,0.15);" class="my-4">
+
+                <div>
+                    <small class="text-white-50 text-uppercase d-block mb-1" style="letter-spacing: 0.05em;">Estimasi SiLPA (Sisa Lebih)</small>
+                    <h4 class="font-weight-bold text-warning mb-0" id="forecast-silpa-amount">Rp 0</h4>
+                    <small class="text-white-50" id="forecast-silpa-note">Laju bulanan: Rp 0 / bln</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div> {{-- Close Tab 2: tab-ews --}}
+
+    {{-- ===== TAB 3: PETA GEOSPASIAL & MATRIKS DOKUMEN ===== --}}
+    <div class="dv2-tab-panel" id="tab-gis">
+    {{-- ===== PETA GIS PEMBANGUNAN DAERAH ===== --}}
+    <div class="row mb-4">
+        <div class="col-12 dv2-fade-in">
+            <div class="dv2-chart-card">
+                <div class="dv2-chart-header border-bottom pb-3">
+                    <div>
+                        <h6 class="dv2-chart-title text-primary">
+                            <i class="fas fa-map-marked-alt mr-2" style="color: #3b82f6;"></i>Peta Interaktif Pembangunan Daerah (Spatial GIS Mapping)
+                        </h6>
+                        <div class="dv2-chart-subtitle">Sebaran sebaran lokasi proyek fisik di 19 Kecamatan Kabupaten Tulungagung</div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="mr-3 small text-muted"><i class="fas fa-circle text-success mr-1"></i>Dokumen >80%</span>
+                        <span class="mr-3 small text-muted"><i class="fas fa-circle text-warning mr-1"></i>50-80%</span>
+                        <span class="small text-muted"><i class="fas fa-circle text-danger mr-1"></i>&lt;50%</span>
+                    </div>
+                </div>
+                <div class="dv2-chart-body p-0">
+                    <div id="dv2-gis-map" style="height: 420px; width: 100%; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 1;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== MATRIKS KELENGKAPAN DOKUMEN PROYEK ===== --}}
+    <div class="row mb-4">
+        <div class="col-12 dv2-fade-in">
+            <div class="dv2-chart-card">
+                <div class="dv2-chart-header border-bottom pb-3">
+                    <div>
+                        <h6 class="dv2-chart-title text-purple">
+                            <i class="fas fa-folder-open mr-2" style="color: #8b5cf6;"></i>Matriks Kelengkapan Dokumen Proyek per OPD
+                        </h6>
+                        <div class="dv2-chart-subtitle">Status verifikasi kelengkapan berkas (Ringkasan Kontrak, BAST, Berita Acara, Pengantar)</div>
+                    </div>
+                </div>
+                <div class="dv2-chart-body p-0">
+                    <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0" id="dv2-doc-matrix-table">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th style="font-size: 0.78rem;">Nama OPD</th>
+                                    <th class="text-center" style="font-size: 0.78rem;">Jumlah Proyek</th>
+                                    <th class="text-center" style="font-size: 0.78rem;">Total Berkas Terverifikasi</th>
+                                    <th style="font-size: 0.78rem;">Persentase Kelengkapan</th>
+                                    <th class="text-center" style="font-size: 0.78rem;">Status Administrasi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dinamis via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div> {{-- Close Tab 3: tab-gis --}}
+
+    {{-- ===== MODAL EXECUTIVE BRIEFING ===== --}}
+    <div class="modal fade" id="dv2BriefingModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header bg-navy text-white p-4" style="background: #0f172a; border-top-left-radius: 16px; border-top-right-radius: 16px;">
+                    <div>
+                        <h5 class="modal-title font-weight-bold" style="color: #f59e0b;">
+                            <i class="fas fa-chalkboard-teacher mr-2"></i>Laporan Executive Briefing Pimpinan
+                        </h5>
+                        <small class="text-white-50">Ringkasan Eksekutif untuk Bupati &amp; Sekda Kabupaten Tulungagung</small>
+                    </div>
+                    <button type="button" class="close text-white opacity-8" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4" id="printable-briefing-area">
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="font-weight-bold mb-1 text-dark">Ringkasan Kinerja Realisasi Anggaran Daerah</h4>
+                            <p class="text-muted mb-0" id="briefing-period-label">Periode Evaluasi: -</p>
+                        </div>
+                        <div class="col-md-4 text-md-right mt-3 mt-md-0">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="window.print();">
+                                <i class="fas fa-print mr-1"></i> Cetak Briefing
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Summary Key Cards --}}
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded text-center border">
+                                <small class="text-muted font-weight-bold text-uppercase d-block mb-1">Total Pagu</small>
+                                <h5 class="font-weight-bold text-dark mb-0" id="briefing-pagu">Rp 0</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded text-center border">
+                                <small class="text-muted font-weight-bold text-uppercase d-block mb-1">Realisasi Keuangan</small>
+                                <h5 class="font-weight-bold text-warning mb-0" id="briefing-keuangan">0%</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded text-center border">
+                                <small class="text-muted font-weight-bold text-uppercase d-block mb-1">Realisasi Fisik</small>
+                                <h5 class="font-weight-bold text-purple mb-0" id="briefing-fisik">0%</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded text-center border">
+                                <small class="text-muted font-weight-bold text-uppercase d-block mb-1">Estimasi SiLPA</small>
+                                <h5 class="font-weight-bold text-danger mb-0" id="briefing-silpa">Rp 0</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Top & Bottom 3 Highlights --}}
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card card-outline card-success shadow-none border">
+                                <div class="card-header font-weight-bold text-success">
+                                    <i class="fas fa-award mr-2"></i>Top 3 OPD Kinerja Terbaik
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush" id="briefing-top-opd">
+                                        <!-- JS -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card card-outline card-danger shadow-none border">
+                                <div class="card-header font-weight-bold text-danger">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>3 OPD Perlu Perhatian Khusus
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush" id="briefing-bottom-opd">
+                                        <!-- JS -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Rekomendasi Eksekutif --}}
+                    <div class="p-3 rounded border border-warning" style="background: rgba(245, 158, 11, 0.1);">
+                        <h6 class="font-weight-bold text-dark mb-2"><i class="fas fa-lightbulb text-warning mr-2"></i>Rekomendasi Tindakan Eksekutif:</h6>
+                        <ul class="mb-0 small text-dark pl-3" id="briefing-recommendations">
+                            <li>OPD dalam zona deviasi kritis perlu dipanggil untuk klarifikasi kendala penyerapan anggaran.</li>
+                            <li>Percepat proses verifikasi dokumen administrasi (BAST &amp; Kontrak) pada proyek yang telah selesai fisik.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -942,6 +1491,12 @@
 {{-- html2canvas & jsPDF for PDF export --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+{{-- jspdf-autotable for table PDF export --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+{{-- SheetJS for client-side Excel export --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+{{-- Leaflet JS for Spatial GIS Mapping --}}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 (function() {
     'use strict';
@@ -1020,7 +1575,7 @@
 
     // ===== DATA STORAGE =====
     var currentData = null;
-    var opdSortCol = 'keu';
+    var opdSortCol = 'custom';
     var opdSortDir = 'desc';
     var dv2OpdFilters = {
         realisasi: 'all', // 'all', 'zero', 'active'
@@ -1056,6 +1611,16 @@
             },
             success: function(resp) {
                 currentData = resp;
+
+                // Executive Snapshot Banner
+                if (resp.narrative_snapshot) {
+                    $('#dv2-snapshot-text').text(resp.narrative_snapshot);
+                }
+
+                // Tab 2 EWS Badge
+                var ewsCount = resp.watchlist_kritis ? resp.watchlist_kritis.length : 0;
+                $('#tab-ews-badge').text(ewsCount + ' OPD');
+
                 updateSummaryCards(resp.summary);
                 updateRanking(resp.rank_info);
                 updateProgressRings(resp.summary);
@@ -1065,6 +1630,10 @@
                 updateOpdTable(resp.opd_ranking || resp.opd_data || []);
                 updateProgramTable(resp.program_data || [], resp.program_summary || {});
                 updateExcelLink();
+                renderEwsWatchlist(resp.watchlist_kritis || []);
+                renderForecastingCard(resp.forecasting || {});
+                renderGisMap(resp.gis_projects || []);
+                renderDocumentMatrixTable(resp.document_matrix || []);
             },
             error: function() {
                 toastr.error('Gagal memuat data dashboard');
@@ -1075,11 +1644,50 @@
     // ===== UPDATE SUMMARY CARDS =====
     function updateSummaryCards(summary) {
         if (!summary) return;
-        animateValue(document.getElementById('dv2-val-pagu'), 0, summary.total_pagu || 0, 800, fmtMoney);
-        animateValue(document.getElementById('dv2-val-realisasi'), 0, summary.total_realisasi || 0, 800, fmtMoney);
-        animateValue(document.getElementById('dv2-val-keuangan'), 0, summary.pct_keuangan || summary.total_keu || 0, 600, fmtPct);
-        animateValue(document.getElementById('dv2-val-fisik'), 0, summary.pct_fisik || summary.total_fisik || 0, 600, fmtPct);
-        animateValue(document.getElementById('dv2-val-sisa'), 0, summary.sisa_anggaran || 0, 800, fmtMoney);
+        var pagu = summary.total_pagu || 0;
+        var realisasi = summary.total_realisasi || 0;
+        var keuPct = summary.pct_keuangan || summary.total_keu || 0;
+        var fisikPct = summary.pct_fisik || summary.total_fisik || 0;
+        var sisa = summary.sisa_anggaran || 0;
+
+        // Animate values
+        animateValue(document.getElementById('dv2-val-pagu'), 0, pagu, 800, fmtMoney);
+        animateValue(document.getElementById('dv2-val-realisasi'), 0, realisasi, 800, fmtMoney);
+        animateValue(document.getElementById('dv2-val-keuangan'), 0, keuPct, 600, fmtPct);
+        animateValue(document.getElementById('dv2-val-fisik'), 0, fisikPct, 600, fmtPct);
+        animateValue(document.getElementById('dv2-val-sisa'), 0, sisa, 800, fmtMoney);
+
+        // Expected Target & Deviasi Calculation
+        var monthVal = parseInt($('#dv2-filter-month').val() || '{{ date("m") }}', 10);
+        var expectedTarget = summary.expected_target !== undefined ? summary.expected_target : ((monthVal / 12) * 100);
+        var targetAmount = pagu * (expectedTarget / 100);
+
+        $('#dv2-realisasi-target-amount').text(fmtMoney(targetAmount));
+
+        // Keuangan target & deviasi
+        $('#dv2-keu-target').text(expectedTarget.toFixed(2) + '%');
+        var keuDev = summary.deviasi !== undefined ? summary.deviasi : (keuPct - expectedTarget);
+        var $keuDevEl = $('#dv2-keu-deviasi');
+        $keuDevEl.text((keuDev >= 0 ? '+' : '') + keuDev.toFixed(2) + '%');
+        $keuDevEl.removeClass('positive negative').addClass(keuDev >= 0 ? 'positive' : 'negative');
+
+        // Fisik target & deviasi
+        $('#dv2-fisik-target').text(expectedTarget.toFixed(2) + '%');
+        var fisikDev = fisikPct - expectedTarget;
+        var $fisikDevEl = $('#dv2-fisik-deviasi');
+        $fisikDevEl.text((fisikDev >= 0 ? '+' : '') + fisikDev.toFixed(2) + '%');
+        $fisikDevEl.removeClass('positive negative').addClass(fisikDev >= 0 ? 'positive' : 'negative');
+
+        // Sisa percentage
+        var sisaPct = pagu > 0 ? ((sisa / pagu) * 100) : 0;
+        $('#dv2-sisa-pct').text(sisaPct.toFixed(2) + '%');
+
+        // Mini Progress Bars
+        $('#dv2-prog-pagu').css('width', '100%');
+        $('#dv2-prog-realisasi').css('width', Math.min(100, Math.max(0, keuPct)) + '%');
+        $('#dv2-prog-keuangan').css('width', Math.min(100, Math.max(0, keuPct)) + '%');
+        $('#dv2-prog-fisik').css('width', Math.min(100, Math.max(0, fisikPct)) + '%');
+        $('#dv2-prog-sisa').css('width', Math.min(100, Math.max(0, sisaPct)) + '%');
     }
 
     // ===== UPDATE RANKING =====
@@ -1414,11 +2022,42 @@
         }
 
         // Sort
-        var sorted = opdData.slice().sort(function(a, b) {
-            var kA = a.keuangan || a.keuangan_pct || 0;
-            var kB = b.keuangan || b.keuangan_pct || 0;
-            return kB - kA;
-        });
+        var sorted = opdData.slice();
+        if (opdSortCol !== 'custom') {
+            sorted.sort(function(a, b) {
+                var vA, vB;
+                switch(opdSortCol) {
+                    case 'name': 
+                        vA = (a.opd_name || '').toLowerCase(); 
+                        vB = (b.opd_name || '').toLowerCase();
+                        return opdSortDir === 'asc' ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                    case 'pagu': 
+                        vA = a.pagu_anggaran || a.pagu || 0; 
+                        vB = b.pagu_anggaran || b.pagu || 0; 
+                        break;
+                    case 'realisasi': 
+                        vA = a.sd_bulan_ini || a.realisasi || 0; 
+                        vB = b.sd_bulan_ini || b.realisasi || 0; 
+                        break;
+                    case 'keu': 
+                        vA = a.keuangan || a.keuangan_pct || 0; 
+                        vB = b.keuangan || b.keuangan_pct || 0; 
+                        break;
+                    case 'fisik': 
+                        vA = a.fisik || a.fisik_pct || 0; 
+                        vB = b.fisik || b.fisik_pct || 0; 
+                        break;
+                    case 'deviasi':
+                        vA = (a.fisik || a.fisik_pct || 0) - (a.keuangan || a.keuangan_pct || 0);
+                        vB = (b.fisik || b.fisik_pct || 0) - (b.keuangan || b.keuangan_pct || 0);
+                        break;
+                    default: 
+                        vA = a.keuangan || 0; 
+                        vB = b.keuangan || 0;
+                }
+                return opdSortDir === 'asc' ? vA - vB : vB - vA;
+            });
+        }
 
         // Apply Drill-down filter: only show the selected OPD
         if (selectedDrillDownOpdId) {
@@ -1538,7 +2177,7 @@
                 '<td class="text-right">' + fmtMoney(pagu) + '</td>' +
                 '<td class="text-right">' + fmtMoney(realisasi) + '</td>' +
                 '<td class="text-center"><div class="d-flex align-items-center justify-content-center"><div class="dv2-pct-bar"><div class="dv2-pct-bar-fill pct-keu" style="width:' + Math.min(keu, 100) + '%"></div></div><span style="min-width:50px;font-weight:600;">' + keu.toFixed(2) + '%</span></div></td>' +
-                '<td class="text-center"><div class="d-flex align-items-center justify-content-center"><div class="dv2-pct-bar"><div class="dv2-pct-bar-fill pct-fisik" style="width:' + Math.min(fisik, 100) + '%"></div></div><span style="min-width:50px;font-weight:600;">' + fisik.toFixed(2) + '%</span></div></td>' +
+                '<td class="text-center"><div class="d-flex align-items-center justify-content-center"><div class="dv2-pct-bar"><div class="dv2-pct-bar-fill pct-fisik" style="width:' + Math.min(fisik, 100) + '%"></div></div><span style="min-width:50px;font-weight:600;' + (fisik < keu ? 'color:#f43f5e;' : '') + '">' + fisik.toFixed(2) + '%</span></div></td>' +
                 '<td class="text-center">' + deviasiHtml + '</td>' +
                 '</tr>';
             tbody.append(row);
@@ -1559,7 +2198,7 @@
         $('#dv2-opd-total-pagu').text(fmtMoney(totalPagu));
         $('#dv2-opd-total-realisasi').text(fmtMoney(totalRealisasi));
         $('#dv2-opd-total-keu').text(fmtPct(totalKeu));
-        $('#dv2-opd-total-fisik').text(fmtPct(totalFisik));
+        $('#dv2-opd-total-fisik').html('<span style="' + (totalFisik < totalKeu ? 'color:#f43f5e;font-weight:700;' : '') + '">' + fmtPct(totalFisik) + '</span>');
         $('#dv2-opd-total-deviasi').html(totalDeviasiHtml);
         $('#dv2-opd-count').text(sorted.length + ' OPD');
     }
@@ -1888,6 +2527,299 @@
         });
     }
 
+    // ===== TABLE-SPECIFIC EXPORT FUNCTIONS =====
+    function getFilteredOpdTableData() {
+        if (!currentData) return [];
+        var data = currentData.opd_ranking || currentData.opd_data || [];
+        var filtered = data.slice();
+
+        // Sort
+        if (opdSortCol !== 'custom') {
+            filtered.sort(function(a, b) {
+                var vA, vB;
+                switch(opdSortCol) {
+                    case 'name': 
+                        vA = (a.opd_name || '').toLowerCase(); 
+                        vB = (b.opd_name || '').toLowerCase();
+                        return opdSortDir === 'asc' ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                    case 'pagu': 
+                        vA = a.pagu_anggaran || a.pagu || 0; 
+                        vB = b.pagu_anggaran || b.pagu || 0; 
+                        break;
+                    case 'realisasi': 
+                        vA = a.sd_bulan_ini || a.realisasi || 0; 
+                        vB = b.sd_bulan_ini || b.realisasi || 0; 
+                        break;
+                    case 'keu': 
+                        vA = a.keuangan || a.keuangan_pct || 0; 
+                        vB = b.keuangan || b.keuangan_pct || 0; 
+                        break;
+                    case 'fisik': 
+                        vA = a.fisik || a.fisik_pct || 0; 
+                        vB = b.fisik || b.fisik_pct || 0; 
+                        break;
+                    case 'deviasi':
+                        vA = (a.fisik || a.fisik_pct || 0) - (a.keuangan || a.keuangan_pct || 0);
+                        vB = (b.fisik || b.fisik_pct || 0) - (b.keuangan || b.keuangan_pct || 0);
+                        break;
+                    default: 
+                        vA = a.keuangan || 0; 
+                        vB = b.keuangan || 0;
+                }
+                return opdSortDir === 'asc' ? vA - vB : vB - vA;
+            });
+        }
+
+        // Drill-down filter
+        if (selectedDrillDownOpdId) {
+            filtered = filtered.filter(function(item) {
+                return item.opd_id == selectedDrillDownOpdId;
+            });
+        }
+
+        // Search filter
+        var searchQuery = ($('#dv2-opd-search').val() || '').toLowerCase().trim();
+        if (searchQuery !== '') {
+            filtered = filtered.filter(function(item) {
+                return (item.opd_name || '').toLowerCase().indexOf(searchQuery) !== -1;
+            });
+        }
+
+        // Realisasi filter
+        if (dv2OpdFilters.realisasi === 'zero') {
+            filtered = filtered.filter(function(item) {
+                return parseFloat(item.sd_bulan_ini || item.realisasi || 0) === 0;
+            });
+        } else if (dv2OpdFilters.realisasi === 'active') {
+            filtered = filtered.filter(function(item) {
+                return parseFloat(item.sd_bulan_ini || item.realisasi || 0) > 0;
+            });
+        }
+
+        // Keu filter
+        if (dv2OpdFilters.keu === 'zero') {
+            filtered = filtered.filter(function(item) { return parseFloat(item.keuangan || item.keuangan_pct || 0) === 0; });
+        } else if (dv2OpdFilters.keu === 'low') {
+            filtered = filtered.filter(function(item) { return parseFloat(item.keuangan || item.keuangan_pct || 0) < 50; });
+        } else if (dv2OpdFilters.keu === 'high') {
+            filtered = filtered.filter(function(item) { return parseFloat(item.keuangan || item.keuangan_pct || 0) >= 50; });
+        }
+
+        // Fisik filter
+        if (dv2OpdFilters.fisik === 'zero') {
+            filtered = filtered.filter(function(item) { return parseFloat(item.fisik || item.fisik_pct || 0) === 0; });
+        } else if (dv2OpdFilters.fisik === 'low') {
+            filtered = filtered.filter(function(item) { return parseFloat(item.fisik || item.fisik_pct || 0) < 50; });
+        } else if (dv2OpdFilters.fisik === 'high') {
+            filtered = filtered.filter(function(item) { return parseFloat(item.fisik || item.fisik_pct || 0) >= 50; });
+        }
+
+        return filtered;
+    }
+
+    function exportOpdTableExcel() {
+        var data = getFilteredOpdTableData();
+        if (data.length === 0) {
+            toastr.warning('Tidak ada data untuk diexport.');
+            return;
+        }
+
+        var year = $('#dv2-filter-year').val() || '{{ date("Y") }}';
+        var month = $('#dv2-filter-month').val() || '{{ date("m") }}';
+        var m = parseInt(month, 10);
+        var periodText = (m >= 1 && m <= 12 ? monthNames[m - 1] : '') + ' ' + year;
+
+        // Build rows for Excel
+        var rows = [];
+        // Title row
+        rows.push(['Laporan Realisasi per OPD - Periode: ' + periodText]);
+        rows.push([]); // empty row
+        // Header row
+        rows.push(['No', 'Nama OPD', 'Pagu Anggaran', 'Realisasi sd Bulan Ini', 'Keuangan (%)', 'Fisik (%)', 'Deviasi (%)']);
+
+        var totalPagu = 0, totalRealisasi = 0, totalFisikRupiah = 0;
+        data.forEach(function(item, idx) {
+            var pagu = item.pagu_anggaran || item.pagu || 0;
+            var realisasi = item.sd_bulan_ini || item.realisasi || 0;
+            var keu = item.keuangan || item.keuangan_pct || 0;
+            var fisik = item.fisik || item.fisik_pct || 0;
+            var deviasi = fisik - keu;
+            totalPagu += pagu;
+            totalRealisasi += realisasi;
+            totalFisikRupiah += (fisik / 100) * pagu;
+
+            rows.push([
+                idx + 1,
+                item.opd_name || '',
+                pagu,
+                realisasi,
+                parseFloat(keu.toFixed(2)),
+                parseFloat(fisik.toFixed(2)),
+                parseFloat(deviasi.toFixed(2))
+            ]);
+        });
+
+        // Total row
+        var totalKeu = totalPagu > 0 ? ((totalRealisasi / totalPagu) * 100) : 0;
+        var totalFisik = totalPagu > 0 ? ((totalFisikRupiah / totalPagu) * 100) : 0;
+        var totalDeviasi = totalFisik - totalKeu;
+        rows.push([]);
+        rows.push(['', 'TOTAL', totalPagu, totalRealisasi, parseFloat(totalKeu.toFixed(2)), parseFloat(totalFisik.toFixed(2)), parseFloat(totalDeviasi.toFixed(2))]);
+
+        // Active filters info
+        var activeFilters = [];
+        if (dv2OpdFilters.realisasi !== 'all') activeFilters.push('Realisasi: ' + (dv2OpdFilters.realisasi === 'zero' ? 'Belum Input' : 'Sudah Input'));
+        if (dv2OpdFilters.keu !== 'all') activeFilters.push('Keu: ' + dv2OpdFilters.keu);
+        if (dv2OpdFilters.fisik !== 'all') activeFilters.push('Fisik: ' + dv2OpdFilters.fisik);
+        if (activeFilters.length > 0) {
+            rows.push([]);
+            rows.push(['Filter aktif: ' + activeFilters.join(', ')]);
+        }
+
+        // Create workbook
+        var ws = XLSX.utils.aoa_to_sheet(rows);
+
+        // Set column widths
+        ws['!cols'] = [
+            { wch: 5 },   // No
+            { wch: 45 },  // Nama OPD
+            { wch: 20 },  // Pagu
+            { wch: 22 },  // Realisasi
+            { wch: 14 },  // Keu %
+            { wch: 14 },  // Fisik %
+            { wch: 14 }   // Deviasi %
+        ];
+
+        // Merge title row
+        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }];
+
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Realisasi OPD');
+        XLSX.writeFile(wb, 'Realisasi_OPD_' + year + '_' + month + '.xlsx');
+
+        toastr.success('Excel berhasil diunduh');
+    }
+
+    function exportOpdTablePDF() {
+        var data = getFilteredOpdTableData();
+        if (data.length === 0) {
+            toastr.warning('Tidak ada data untuk diexport.');
+            return;
+        }
+
+        var btn = $('#dv2-table-export-pdf');
+        var origText = btn.html();
+        btn.html('<i class="fas fa-spinner fa-spin mr-1"></i> ...').prop('disabled', true);
+
+        var year = $('#dv2-filter-year').val() || '{{ date("Y") }}';
+        var month = $('#dv2-filter-month').val() || '{{ date("m") }}';
+        var m = parseInt(month, 10);
+        var periodText = (m >= 1 && m <= 12 ? monthNames[m - 1] : '') + ' ' + year;
+
+        var pdf = new jspdf.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+        // Title
+        pdf.setFontSize(14);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Laporan Realisasi per OPD', 14, 15);
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        pdf.text('Periode: ' + periodText, 14, 22);
+
+        // Active filters
+        var activeFilters = [];
+        if (dv2OpdFilters.realisasi !== 'all') activeFilters.push('Realisasi: ' + (dv2OpdFilters.realisasi === 'zero' ? 'Belum Input' : 'Sudah Input'));
+        if (dv2OpdFilters.keu !== 'all') activeFilters.push('Keu: ' + dv2OpdFilters.keu);
+        if (dv2OpdFilters.fisik !== 'all') activeFilters.push('Fisik: ' + dv2OpdFilters.fisik);
+        if (activeFilters.length > 0) {
+            pdf.setFontSize(9);
+            pdf.setTextColor(100);
+            pdf.text('Filter: ' + activeFilters.join(' | '), 14, 27);
+            pdf.setTextColor(0);
+        }
+
+        // Build table data
+        var tableBody = [];
+        var totalPagu = 0, totalRealisasi = 0, totalFisikRupiah = 0;
+        data.forEach(function(item, idx) {
+            var pagu = item.pagu_anggaran || item.pagu || 0;
+            var realisasi = item.sd_bulan_ini || item.realisasi || 0;
+            var keu = item.keuangan || item.keuangan_pct || 0;
+            var fisik = item.fisik || item.fisik_pct || 0;
+            var deviasi = fisik - keu;
+            totalPagu += pagu;
+            totalRealisasi += realisasi;
+            totalFisikRupiah += (fisik / 100) * pagu;
+
+            tableBody.push([
+                idx + 1,
+                item.opd_name || '',
+                fmtMoney(pagu),
+                fmtMoney(realisasi),
+                keu.toFixed(2) + '%',
+                fisik.toFixed(2) + '%',
+                deviasi.toFixed(2) + '%'
+            ]);
+        });
+
+        // Total row
+        var totalKeu = totalPagu > 0 ? ((totalRealisasi / totalPagu) * 100) : 0;
+        var totalFisik = totalPagu > 0 ? ((totalFisikRupiah / totalPagu) * 100) : 0;
+        var totalDeviasi = totalFisik - totalKeu;
+        tableBody.push([
+            { content: 'TOTAL', colSpan: 2, styles: { fontStyle: 'bold', halign: 'center' } },
+            { content: fmtMoney(totalPagu), styles: { fontStyle: 'bold' } },
+            { content: fmtMoney(totalRealisasi), styles: { fontStyle: 'bold' } },
+            { content: totalKeu.toFixed(2) + '%', styles: { fontStyle: 'bold' } },
+            { content: totalFisik.toFixed(2) + '%', styles: { fontStyle: 'bold' } },
+            { content: totalDeviasi.toFixed(2) + '%', styles: { fontStyle: 'bold' } }
+        ]);
+
+        pdf.autoTable({
+            startY: activeFilters.length > 0 ? 31 : 26,
+            head: [['No', 'Nama OPD', 'Pagu Anggaran', 'Realisasi', 'Keu %', 'Fisik %', 'Deviasi']],
+            body: tableBody,
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 3, font: 'helvetica' },
+            headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+            columnStyles: {
+                0: { halign: 'center', cellWidth: 12 },
+                1: { cellWidth: 75 },
+                2: { halign: 'right' },
+                3: { halign: 'right' },
+                4: { halign: 'center' },
+                5: { halign: 'center' },
+                6: { halign: 'center' }
+            },
+            alternateRowStyles: { fillColor: [245, 247, 250] },
+            margin: { left: 14, right: 14 }
+        });
+
+        pdf.save('Realisasi_OPD_' + year + '_' + month + '.pdf');
+        btn.html(origText).prop('disabled', false);
+        toastr.success('PDF berhasil diunduh');
+    }
+
+    // Update active filter info badge
+    function updateActiveFilterBadge() {
+        var badge = $('#dv2-opd-active-filter-info');
+        var labels = [];
+        if (dv2OpdFilters.realisasi !== 'all') labels.push('Realisasi: ' + (dv2OpdFilters.realisasi === 'zero' ? 'Belum Input' : 'Sudah Input'));
+        if (dv2OpdFilters.keu !== 'all') {
+            var keuMap = { zero: '0%', low: '<50%', high: '≥50%' };
+            labels.push('Keu: ' + (keuMap[dv2OpdFilters.keu] || dv2OpdFilters.keu));
+        }
+        if (dv2OpdFilters.fisik !== 'all') {
+            var fisikMap = { zero: '0%', low: '<50%', high: '≥50%' };
+            labels.push('Fisik: ' + (fisikMap[dv2OpdFilters.fisik] || dv2OpdFilters.fisik));
+        }
+        if (labels.length > 0) {
+            badge.text('⚡ ' + labels.join(' • ')).show();
+        } else {
+            badge.hide();
+        }
+    }
+
     // ===== EVENT BINDINGS =====
     $(document).ready(function() {
         // Init select2
@@ -1908,10 +2840,20 @@
             loadDashboardData();
         });
 
-        // PDF export
+        // PDF export (full dashboard)
         $('#dv2-export-pdf').on('click', function(e) {
             e.preventDefault();
             exportPDF();
+        });
+
+        // Table-specific export buttons
+        $('#dv2-table-export-excel').on('click', function(e) {
+            e.preventDefault();
+            exportOpdTableExcel();
+        });
+        $('#dv2-table-export-pdf').on('click', function(e) {
+            e.preventDefault();
+            exportOpdTablePDF();
         });
 
         // Search event bindings
@@ -1949,10 +2891,168 @@
                 icon.removeClass('text-warning').addClass('text-muted');
             }
 
+            // Update active filter badge
+            updateActiveFilterBadge();
+
             // Re-populate table
             if (currentData) {
                 updateOpdTable(currentData.opd_ranking || currentData.opd_data || []);
             }
+        });
+
+        // ===== RENDER EWS WATCHLIST =====
+        function renderEwsWatchlist(watchlist) {
+            var tbody = $('#dv2-ews-table tbody');
+            tbody.empty();
+            $('#ews-count-badge').text((watchlist ? watchlist.length : 0) + ' OPD');
+
+            if (!watchlist || watchlist.length === 0) {
+                tbody.html('<tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-check-circle text-success mr-2"></i>Tidak ada OPD dalam zona deviasi kritis bulan ini.</td></tr>');
+                return;
+            }
+
+            watchlist.forEach(function(item) {
+                var tr = $('<tr>');
+                tr.append('<td class="font-weight-bold" style="font-size:0.85rem;">' + item.opd_name + '</td>');
+                tr.append('<td class="text-right small">' + fmtMoney(item.pagu_anggaran) + '</td>');
+                tr.append('<td class="text-center font-weight-bold text-danger small">' + fmtPct(item.keuangan) + '</td>');
+                tr.append('<td class="text-center font-weight-bold text-purple small">' + fmtPct(item.fisik) + '</td>');
+                tr.append('<td class="text-center"><span class="badge badge-danger px-2 py-1"><i class="fas fa-arrow-down mr-1"></i>' + item.keu_diff + '%</span></td>');
+                tbody.append(tr);
+            });
+        }
+
+        // ===== RENDER FORECASTING =====
+        function renderForecastingCard(fc) {
+            if (!fc) return;
+            $('#forecast-projected-amount').text(fmtMoney(fc.projected_realisasi || 0));
+            $('#forecast-projected-pct').text(fmtPct(fc.projected_pct_keuangan || 0));
+            $('#forecast-progress-bar').css('width', Math.min(100, fc.projected_pct_keuangan || 0) + '%');
+            $('#forecast-silpa-amount').text(fmtMoney(fc.projected_silpa || 0));
+            $('#forecast-silpa-note').text('Laju realisasi: ' + fmtMoney(fc.monthly_rate || 0) + ' / bulan');
+        }
+
+        // ===== RENDER GIS MAP =====
+        var gisMapInstance = null;
+        var gisMarkersGroup = null;
+
+        function renderGisMap(projects) {
+            if (!document.getElementById('dv2-gis-map')) return;
+
+            if (!gisMapInstance) {
+                gisMapInstance = L.map('dv2-gis-map').setView([-8.0664, 111.9015], 11);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 18,
+                    attribution: '&copy; OpenStreetMap & SIAP Tulungagung'
+                }).addTo(gisMapInstance);
+                gisMarkersGroup = L.layerGroup().addTo(gisMapInstance);
+            } else {
+                gisMarkersGroup.clearLayers();
+            }
+
+            if (!projects || projects.length === 0) return;
+
+            projects.forEach(function(proj) {
+                var colorHex = '#10b981';
+                if (proj.status_color === 'danger') colorHex = '#f43f5e';
+                if (proj.status_color === 'warning') colorHex = '#f59e0b';
+
+                var marker = L.circleMarker([proj.lat, proj.lng], {
+                    radius: 8,
+                    fillColor: colorHex,
+                    color: '#ffffff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                });
+
+                var popupContent = '<div style="font-family:Inter,sans-serif; min-width:200px;">' +
+                    '<strong style="color:#0f172a; font-size:0.9rem;">' + proj.name + '</strong><br/>' +
+                    '<small class="text-muted"><i class="fas fa-building mr-1"></i>' + proj.opd_name + '</small><br/>' +
+                    '<small class="text-muted"><i class="fas fa-map-marker-alt mr-1"></i>Kec. ' + proj.kecamatan_nama + '</small><hr class="my-1"/>' +
+                    '<strong>Nilai SPK: ' + fmtMoney(proj.amount) + '</strong><br/>' +
+                    '<small>Partner: ' + proj.partner_name + '</small><br/>' +
+                    '<small>Dokumen: <span class="badge badge-' + proj.status_color + '">' + proj.doc_pct + '% (' + proj.doc_count + '/5)</span></small>' +
+                    '</div>';
+
+                marker.bindPopup(popupContent);
+                gisMarkersGroup.addLayer(marker);
+            });
+        }
+
+        // ===== RENDER DOCUMENT MATRIX =====
+        function renderDocumentMatrixTable(matrix) {
+            var tbody = $('#dv2-doc-matrix-table tbody');
+            tbody.empty();
+
+            if (!matrix || matrix.length === 0) {
+                tbody.html('<tr><td colspan="5" class="text-center text-muted py-4">Belum ada data dokumen proyek.</td></tr>');
+                return;
+            }
+
+            matrix.forEach(function(item) {
+                var badgeClass = 'badge-success';
+                var statusText = 'Lengkap';
+                if (item.doc_completeness_pct < 50) {
+                    badgeClass = 'badge-danger';
+                    statusText = 'Belum Lengkap';
+                } else if (item.doc_completeness_pct < 80) {
+                    badgeClass = 'badge-warning';
+                    statusText = 'Sebagian';
+                }
+
+                var tr = $('<tr>');
+                tr.append('<td class="font-weight-bold" style="font-size:0.85rem;">' + item.opd_name + '</td>');
+                tr.append('<td class="text-center">' + item.total_projects + ' Paket</td>');
+                tr.append('<td class="text-center">' + item.doc_filled + ' Berkas</td>');
+                tr.append('<td>' +
+                    '<div class="d-flex align-items-center">' +
+                    '<div class="progress flex-grow-1 mr-2" style="height:6px;">' +
+                    '<div class="progress-bar bg-' + (item.doc_completeness_pct >= 80 ? 'success' : (item.doc_completeness_pct >= 50 ? 'warning' : 'danger')) + '" style="width:' + item.doc_completeness_pct + '%"></div>' +
+                    '</div>' +
+                    '<span class="small font-weight-bold">' + item.doc_completeness_pct + '%</span>' +
+                    '</div>' +
+                    '</td>');
+                tr.append('<td class="text-center"><span class="badge ' + badgeClass + ' px-3 py-1">' + statusText + '</span></td>');
+                tbody.append(tr);
+            });
+        }
+
+        // ===== RENDER BRIEFING MODAL =====
+        function updateBriefingModal() {
+            if (!currentData) return;
+            var year = $('#dv2-filter-year').val() || '{{ date("Y") }}';
+            var month = $('#dv2-filter-month').val() || '{{ date("m") }}';
+            var m = parseInt(month, 10);
+            var periodText = (m >= 1 && m <= 12 ? monthNames[m - 1] : '') + ' ' + year;
+
+            $('#briefing-period-label').text('Periode Evaluasi: ' + periodText);
+            $('#briefing-pagu').text(fmtMoney(currentData.summary ? currentData.summary.total_pagu : 0));
+            $('#briefing-keuangan').text(fmtPct(currentData.summary ? currentData.summary.pct_keuangan : 0));
+            $('#briefing-fisik').text(fmtPct(currentData.summary ? currentData.summary.pct_fisik : 0));
+            $('#briefing-silpa').text(fmtMoney(currentData.forecasting ? currentData.forecasting.projected_silpa : 0));
+
+            // Top 3
+            var topList = $('#briefing-top-opd');
+            topList.empty();
+            var ranking = currentData.opd_ranking || [];
+            var sortedBest = ranking.slice().sort(function(a,b) { return b.keuangan - a.keuangan; }).slice(0, 3);
+            sortedBest.forEach(function(opd, idx) {
+                topList.append('<li class="list-group-item d-flex justify-content-between align-items-center py-2"><span class="small font-weight-bold">#' + (idx+1) + ' ' + opd.opd_name + '</span><span class="badge badge-success font-weight-bold">' + fmtPct(opd.keuangan) + '</span></li>');
+            });
+
+            // Bottom 3 / Watchlist
+            var bottomList = $('#briefing-bottom-opd');
+            bottomList.empty();
+            var watchlist = currentData.watchlist_kritis || [];
+            var worst3 = watchlist.length > 0 ? watchlist.slice(0, 3) : ranking.slice().sort(function(a,b) { return a.keuangan - b.keuangan; }).slice(0, 3);
+            worst3.forEach(function(opd, idx) {
+                bottomList.append('<li class="list-group-item d-flex justify-content-between align-items-center py-2"><span class="small font-weight-bold text-danger">#' + (idx+1) + ' ' + opd.opd_name + '</span><span class="badge badge-danger font-weight-bold">' + fmtPct(opd.keuangan) + '</span></li>');
+            });
+        }
+
+        $('#dv2BriefingModal').on('show.bs.modal', function() {
+            updateBriefingModal();
         });
 
         // Copy button inside Belum Input modal for V2
@@ -1988,6 +3088,26 @@
             tempTextarea.remove();
 
             toastr.success('Daftar OPD belum input realisasi disalin ke clipboard');
+        });
+
+        // Tab switching logic
+        $(document).on('click', '.dv2-tab-btn', function(e) {
+            e.preventDefault();
+            var targetTab = $(this).data('tab');
+            if (!targetTab) return;
+
+            $('.dv2-tab-btn').removeClass('active');
+            $(this).addClass('active');
+
+            $('.dv2-tab-panel').removeClass('active');
+            $('#' + targetTab).addClass('active');
+
+            // Invalidate Leaflet GIS map size if tab-gis is activated
+            if (targetTab === 'tab-gis' && gisMapInstance) {
+                setTimeout(function() {
+                    gisMapInstance.invalidateSize();
+                }, 200);
+            }
         });
     });
 

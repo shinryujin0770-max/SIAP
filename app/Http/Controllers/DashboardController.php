@@ -10,6 +10,8 @@ use App\Models\Rfk_detail;
 use App\Models\RfkV2;
 use App\Models\RfkV2Detail;
 use App\Models\User;
+use App\Exports\DashboardExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
@@ -87,7 +89,7 @@ class DashboardController extends Controller
             $find = $hps_sum->filter(fn ($item) => $item['month_year'] == $year_month)->values();
             $find_checlist = $checklist_sum->filter(fn ($item) => $item['month_year'] == $year_month)->values();
 
-            $chart_hps[] =  count($find) ? ($find[0]['spk_sum'] / $find[0]['hps_sum'] * 100) : 0;
+            $chart_hps[] =  count($find) && $find[0]['hps_sum'] != 0 ? ($find[0]['spk_sum'] / $find[0]['hps_sum'] * 100) : 0;
             $chart_avarage_hps[] =  count($find) ? $find[0]['hps_sum'] : 0;
             $chart_avarage_spk[] =  count($find) ? $find[0]['spk_sum'] : 0;
             $chart_avarage_pagu_anggaran[] =  count($find) ? $find[0]['pagu_anggaran_sum'] : 0;
@@ -202,6 +204,7 @@ class DashboardController extends Controller
 
             if ($rfkOpd) {
                 $opdData[] = [
+                    'opd_id' => $opdId,
                     'opd_name' => $opd->name,
                     'pagu_anggaran' => $rfkOpd->pagu_anggaran ?? 0,
                     'bulan_ini' => $rfkOpd->bulan_ini ?? 0,
@@ -255,6 +258,14 @@ class DashboardController extends Controller
                 $programSummary['total_realisasi'] += $program->sd_bulan_ini ?? 0;
             }
         }
+
+        // Apply custom OPD sort order
+        $opdSortOrder = config('opd_sort_order');
+        usort($opdData, function($a, $b) use ($opdSortOrder) {
+            $orderA = $opdSortOrder[$a['opd_id']] ?? 999;
+            $orderB = $opdSortOrder[$b['opd_id']] ?? 999;
+            return $orderA - $orderB;
+        });
 
         // Calculate percentages for summary
         if ($summary['total_pagu'] > 0) {
@@ -493,5 +504,97 @@ class DashboardController extends Controller
             'top5_fisik' => $top5Fisik,
             'bottom5_fisik' => $bottom5Fisik,
         ];
+    }
+
+    /**
+     * Export Dashboard V1 summary to Excel.
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportExcel(Request $request)
+    {
+        $user = Auth::user();
+        $month = $request->input('month', date('Y-m'));
+        $opdFilter = $request->input('opd', '');
+
+        $bulan = Carbon::parse($month)->format('m');
+        $tahun = Carbon::parse($month)->format('Y');
+
+        if ($user instanceof User && method_exists($user, 'hasRole') && $user->hasRole('admin_opd') && !$user->hasRole('superadmin')) {
+            $opdIds = [$user->id_opd];
+        } else {
+            if ($opdFilter) {
+                $opdIds = [$opdFilter];
+            } else {
+                $opdIds = Opd::where('rfk_code', '!=', '')->pluck('id')->toArray();
+            }
+        }
+
+        $opdData = [];
+        $summary = [
+            'total_pagu' => 0,
+            'total_bulan_ini' => 0,
+            'total_realisasi' => 0,
+            'total_keu' => 0,
+            'total_fisik' => 0,
+        ];
+
+        foreach ($opdIds as $opdId) {
+            $opd = Opd::find($opdId);
+            if (!$opd) continue;
+
+            $rfkOpd = RfkV2Detail::select('rfk_v2_detail.*')
+                ->leftJoin('rfk_v2', 'rfk_v2_detail.id_rfk', '=', 'rfk_v2.id')
+                ->where('rfk_v2.id_opd', $opdId)
+                ->where('rfk_v2.month', $bulan)
+                ->where('rfk_v2.year', $tahun)
+                ->where('rfk_v2_detail.type', 'opd')
+                ->whereNull('rfk_v2_detail.parent_id')
+                ->first();
+
+            if ($rfkOpd) {
+                $opdData[] = [
+                    'opd_id' => $opdId,
+                    'opd_name' => $opd->name,
+                    'pagu_anggaran' => (float)($rfkOpd->pagu_anggaran ?? 0),
+                    'bulan_ini' => (float)($rfkOpd->bulan_ini ?? 0),
+                    'sd_bulan_ini' => (float)($rfkOpd->sd_bulan_ini ?? 0),
+                    'keuangan' => (float)($rfkOpd->keuangan ?? 0),
+                    'fisik' => (float)($rfkOpd->fisik ?? 0),
+                ];
+
+                $summary['total_pagu'] += $rfkOpd->pagu_anggaran ?? 0;
+                $summary['total_bulan_ini'] += $rfkOpd->bulan_ini ?? 0;
+                $summary['total_realisasi'] += $rfkOpd->sd_bulan_ini ?? 0;
+            }
+        }
+
+        // Apply custom OPD sort order
+        $opdSortOrder = config('opd_sort_order');
+        usort($opdData, function($a, $b) use ($opdSortOrder) {
+            $orderA = $opdSortOrder[$a['opd_id']] ?? 999;
+            $orderB = $opdSortOrder[$b['opd_id']] ?? 999;
+            return $orderA - $orderB;
+        });
+
+        if ($summary['total_pagu'] > 0) {
+            $summary['total_keu'] = ($summary['total_realisasi'] / $summary['total_pagu']) * 100;
+
+            $totalFisikRupiah = 0;
+            foreach ($opdData as $opd) {
+                $totalFisikRupiah += ($opd['fisik'] / 100) * $opd['pagu_anggaran'];
+            }
+            $summary['total_fisik'] = ($totalFisikRupiah / $summary['total_pagu']) * 100;
+        }
+
+        $data = [
+            'summary' => $summary,
+            'opd_data' => $opdData,
+        ];
+
+        $bulanName = Carbon::createFromFormat('m', $bulan)->locale('id')->translatedFormat('F');
+        $filename = 'Laporan_Dashboard_' . $bulanName . '_' . $tahun . '.xlsx';
+
+        return Excel::download(new DashboardExport($data, $bulan, $tahun), $filename);
     }
 }

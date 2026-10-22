@@ -3,7 +3,17 @@
 @section('title', 'Sistem Informasi Administrasi Pembangunan')
 
 @section('content_header')
-<h1 class="m-0 text-dark">Sistem Informasi Administrasi Pembangunan</h1>
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+    <h1 class="m-0 text-dark">Sistem Informasi Administrasi Pembangunan</h1>
+    <div class="d-flex align-items-center mt-2 mt-md-0">
+        <button class="btn btn-sm btn-danger mr-2" id="rfk-export-pdf" title="Export PDF" style="border-radius: 8px; font-weight: 600; padding: 6px 14px;">
+            <i class="fas fa-file-pdf mr-1"></i> PDF
+        </button>
+        <a href="#" class="btn btn-sm btn-success" id="rfk-export-excel" title="Export Excel" style="border-radius: 8px; font-weight: 600; padding: 6px 14px;">
+            <i class="fas fa-file-excel mr-1"></i> Excel
+        </a>
+    </div>
+</div>
 @stop
 
 @section('css')
@@ -118,7 +128,7 @@
 @stop
 
 @section('content')
-<div class="row justify-content-center">
+<div class="row justify-content-center" id="dashboard-app-content">
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
@@ -156,7 +166,7 @@
                             </select>
                         </div>
 
-                        @if (auth()->user()->hasRole('superadmin'))
+                        @if (auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('admin_rfk'))
                         <div class="col-sm-12 col-lg-3">
                             <label>OPD</label>
                             <select name="filter_opd" class="form-control select2" id="filter-opd" style="width: 100%">
@@ -584,22 +594,36 @@
                             <table id="rfk-opd-table" class="table table-bordered table-hover">
                                 <thead class="text-center font-weight-bold">
                                     <tr>
-                                        <th style="width: 50px;">#</th>
-                                        <th>Nama OPD</th>
-                                        <th>Pagu Anggaran</th>
-                                        <th class="position-relative">
+                                        <th style="width: 50px; cursor: pointer;" onclick="sortRFKTable('rank')"># <i class="fa fa-sort ml-1" style="opacity:0.4;"></i></th>
+                                        <th style="cursor: pointer;" onclick="sortRFKTable('name')">Nama OPD <i class="fa fa-sort ml-1" style="opacity:0.4;"></i></th>
+                                        <th style="cursor: pointer;" onclick="sortRFKTable('pagu')">Pagu Anggaran <i class="fa fa-sort ml-1" style="opacity:0.4;"></i></th>
+                                        <th class="position-relative" style="cursor: pointer;" onclick="sortRFKTable('bulan_ini')">
                                             <div class="d-flex align-items-center justify-content-center" style="gap: 5px;">
                                                 <span>Bulan Ini</span>
-                                                <a href="#" class="text-muted ml-1" id="rfk-opd-filter-btn-bulan-ini" title="Tampilkan OPD belum input realisasi" onclick="event.stopPropagation(); showBelumInputModal();">
-                                                    <i class="fas fa-filter fa-xs"></i>
-                                                </a>
+                                                <i class="fa fa-sort mr-1" style="opacity:0.4;"></i>
+                                                <div class="dropdown d-inline-block" onclick="event.stopPropagation();">
+                                                    <a href="#" class="text-muted" id="rfk-opd-filter-btn-bulan_ini" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-filter fa-xs"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-right" style="min-width: 200px; padding: 8px;">
+                                                        <h6 class="dropdown-header px-2 py-1" style="font-size: 0.78rem;">Filter Realisasi Bulan Ini</h6>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val active" href="#" data-filter-type="bulan_ini" data-filter-val="all" style="font-size: 0.82rem;">Semua</a>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val" href="#" data-filter-type="bulan_ini" data-filter-val="zero" style="font-size: 0.82rem;">Belum Input (Rp 0)</a>
+                                                        <a class="dropdown-item px-2 py-1 rfk-opd-filter-val" href="#" data-filter-type="bulan_ini" data-filter-val="active" style="font-size: 0.82rem;">Sudah Input (&gt; Rp 0)</a>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item px-2 py-1 text-primary text-center font-weight-bold" href="#" onclick="event.preventDefault(); showBelumInputModal();" style="font-size: 0.82rem;">
+                                                            <i class="fas fa-list mr-1"></i> Detail Belum Input
+                                                        </a>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </th>
-                                        <th>Realisasi sd Bulan ini</th>
+                                        <th style="cursor: pointer;" onclick="sortRFKTable('realisasi')">Realisasi sd Bulan ini <i class="fa fa-sort ml-1" style="opacity:0.4;"></i></th>
                                         <th style="cursor: pointer;" onclick="sortRFKTable('keu')" class="position-relative">
                                             <div class="d-flex align-items-center justify-content-center" style="gap: 5px;">
                                                 <span>Keu %</span>
-                                                <i class="fa fa-sort mr-1"></i>
+                                                <i class="fa fa-sort mr-1" style="opacity:0.4;"></i>
                                                 <div class="dropdown d-inline-block" onclick="event.stopPropagation();">
                                                     <a href="#" class="text-muted" id="rfk-opd-filter-btn-keu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                         <i class="fas fa-filter fa-xs"></i>
@@ -618,7 +642,7 @@
                                         <th style="cursor: pointer;" onclick="sortRFKTable('fisik')" class="position-relative">
                                             <div class="d-flex align-items-center justify-content-center" style="gap: 5px;">
                                                 <span>Fisik %</span>
-                                                <i class="fa fa-sort mr-1"></i>
+                                                <i class="fa fa-sort mr-1" style="opacity:0.4;"></i>
                                                 <div class="dropdown d-inline-block" onclick="event.stopPropagation();">
                                                     <a href="#" class="text-muted" id="rfk-opd-filter-btn-fisik" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                         <i class="fas fa-filter fa-xs"></i>
@@ -864,6 +888,8 @@
 @endsection
 
 @section('js')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
     var projectChart = new Chart(
         $('#project-chart'),
@@ -1160,12 +1186,44 @@
         }
         
         if (filteredData && filteredData.length > 0) {
-            // Sort by Keuangan descending by default
-            filteredData.sort(function(a, b) {
-                var kA = parseFloat(a.keuangan || 0);
-                var kB = parseFloat(b.keuangan || 0);
-                return kB - kA;
-            });
+            // Sort according to rfkOpdSortColumn
+            var col = rfkOpdSortColumn || 'custom';
+            var dir = rfkOpdSortDirection || 'desc';
+            var vA, vB;
+
+            if (col !== 'custom') {
+                filteredData.sort(function(a, b) {
+                    if (col === 'name') {
+                        vA = (a.opd_name || '').toLowerCase();
+                        vB = (b.opd_name || '').toLowerCase();
+                        return dir === 'asc' ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                    } else if (col === 'pagu') {
+                        vA = parseFloat(a.pagu_anggaran || 0);
+                        vB = parseFloat(b.pagu_anggaran || 0);
+                    } else if (col === 'bulan_ini') {
+                        vA = parseFloat(a.bulan_ini || 0);
+                        vB = parseFloat(b.bulan_ini || 0);
+                    } else if (col === 'realisasi') {
+                        vA = parseFloat(a.sd_bulan_ini || 0);
+                        vB = parseFloat(b.sd_bulan_ini || 0);
+                    } else if (col === 'keu') {
+                        vA = parseFloat(a.keuangan || 0);
+                        vB = parseFloat(b.keuangan || 0);
+                    } else if (col === 'fisik') {
+                        vA = parseFloat(a.fisik || 0);
+                        vB = parseFloat(b.fisik || 0);
+                    } else if (col === 'rank') {
+                        vA = parseFloat(a.keuangan || 0);
+                        vB = parseFloat(b.keuangan || 0);
+                        return dir === 'asc' ? vB - vA : vA - vB;
+                    } else {
+                        vA = parseFloat(a.keuangan || 0);
+                        vB = parseFloat(b.keuangan || 0);
+                    }
+
+                    return dir === 'asc' ? vA - vB : vB - vA;
+                });
+            }
 
             var totalBulanIni = 0;
             var totalPagu = 0;
@@ -1192,6 +1250,10 @@
                 totalRealisasi += realisasi;
                 totalFisikRupiah += (parseFloat(fisik) / 100) * pagu;
 
+                 var keuanganNum = parseFloat(keuangan);
+                var fisikNum = parseFloat(fisik);
+                var fisikSpanClass = fisikNum < keuanganNum ? 'text-danger font-weight-bold' : '';
+
                 var row = '<tr>' +
                     '<td class="text-center">' + rankHtml + '</td>' +
                     '<td>' + (item.opd_name || '') + '</td>' +
@@ -1199,7 +1261,7 @@
                     '<td class="text-right">' + formatToCurrencyRFK(item.bulan_ini || 0) + '</td>' +
                     '<td class="text-right">' + formatToCurrencyRFK(realisasi) + '</td>' +
                     '<td class="text-center">' + keuangan + '%</td>' +
-                    '<td class="text-center">' + fisik + '%</td>' +
+                    '<td class="text-center"><span class="' + fisikSpanClass + '">' + fisik + '%</span></td>' +
                     '</tr>';
                 opdTbody.append(row);
             });
@@ -1211,8 +1273,10 @@
             var totalKeu = totalPagu > 0 ? (totalRealisasi / totalPagu) * 100 : 0;
             var totalFisik = totalPagu > 0 ? (totalFisikRupiah / totalPagu) * 100 : 0;
             
+            var totalFisikSpanClass = totalFisik < totalKeu ? 'text-danger font-weight-bold' : '';
+
             $('#rfk-opd-total-keu').text(totalKeu.toFixed(2) + '%');
-            $('#rfk-opd-total-fisik').text(totalFisik.toFixed(2) + '%');
+            $('#rfk-opd-total-fisik').html('<span class="' + totalFisikSpanClass + '">' + totalFisik.toFixed(2) + '%</span>');
         } else {
             opdTbody.append('<tr><td colspan="7" class="text-center text-muted">Tidak ada data OPD yang cocok</td></tr>');
             $('#rfk-opd-total-bulan-ini').text('Rp0');
@@ -1319,6 +1383,10 @@
     window.showBelumInputModal = showBelumInputModal;
 
     function loadRFKDashboard() {
+        // Reset sort column to default Keuangan DESC on new data load
+        rfkOpdSortColumn = 'keu';
+        rfkOpdSortDirection = 'desc';
+
         var opd = $('#filter-opd').val() || '';
         var month = $('#filter-month').val() || '{{date('m')}}';
         var year = $('#filter-year').val() || '{{date('Y')}}';
@@ -1350,6 +1418,9 @@
 
                 // === Dynamic OPD Ranking Update ===
                 updateRankingUI(response.rank_info);
+
+                // Update Excel download link
+                updateRFKExcelLink();
 
                 // Render charts
                 if (response.chart_data) {
@@ -2105,6 +2176,15 @@
 
             toastr.success('Daftar OPD belum input realisasi disalin ke clipboard');
         });
+
+        // Inisialisasi tautan unduhan Excel saat halaman dimuat
+        updateRFKExcelLink();
+
+        // Handler tombol ekspor PDF
+        $('#rfk-export-pdf').on('click', function(e) {
+            e.preventDefault();
+            exportRFKPDF();
+        });
     });
 
     // Filter button for dashboard
@@ -2119,58 +2199,26 @@
         }
     });
 
-    // Reload RFK data when filter changes (for RFK tab only)
+    // Reload RFK data ketika filter berubah
     $('#filter-opd, #filter-month, #filter-year').on('change', function() {
         if ($('#rfk-tab').hasClass('active')) {
             loadRFKDashboard();
+        } else {
+            updateRFKExcelLink();
         }
     });
 
     function sortRFKTable(column) {
-        // Simple client-side sorting for OPD table
-        var table = $('#rfk-opd-table');
-        var tbody = table.find('tbody');
-        var rows = tbody.find('tr').toArray();
-
-        rows.sort(function(a, b) {
-            var aVal, bVal;
-            if (column === 'keu') {
-                aVal = parseFloat($(a).find('td').eq(5).text().replace('%', ''));
-                bVal = parseFloat($(b).find('td').eq(5).text().replace('%', ''));
-            } else if (column === 'fisik') {
-                aVal = parseFloat($(a).find('td').eq(6).text().replace('%', ''));
-                bVal = parseFloat($(b).find('td').eq(6).text().replace('%', ''));
-            }
-
-            if (rfkOpdSortColumn === column && rfkOpdSortDirection === 'asc') {
-                return bVal - aVal;
-            } else {
-                return aVal - bVal;
-            }
-        });
+        if (!rfkDashboardData || !rfkDashboardData.opd_data) return;
 
         if (rfkOpdSortColumn === column) {
             rfkOpdSortDirection = rfkOpdSortDirection === 'asc' ? 'desc' : 'asc';
         } else {
             rfkOpdSortColumn = column;
-            rfkOpdSortDirection = 'asc';
+            rfkOpdSortDirection = (column === 'name') ? 'asc' : 'desc'; // Default text to asc, numbers to desc
         }
 
-        tbody.empty().append(rows);
-
-        // Update rank badges after sorting
-        tbody.find('tr').each(function(idx) {
-            var rank = idx + 1;
-            var rankCell = $(this).find('td').eq(0);
-            
-            var rankClass = 'badge badge-secondary';
-            if (rank === 1) rankClass = 'badge badge-warning'; // Gold
-            else if (rank === 2) rankClass = 'badge badge-light'; // Silver
-            else if (rank === 3) rankClass = 'badge-danger'; // Bronze
-            
-            var rankStyle = rank <= 3 ? 'font-size: 0.85rem; padding: 4px 8px; font-weight: 800; border: 1px solid rgba(0,0,0,0.1);' : 'font-size: 0.8rem; padding: 3px 6px;';
-            rankCell.html('<span class="' + rankClass + '" style="' + rankStyle + '">' + rank + '</span>');
-        });
+        populateRFKOpdTable(rfkDashboardData.opd_data);
     }
 
     function sortRFKProgramTable(column) {
@@ -2204,6 +2252,72 @@
         }
 
         tbody.empty().append(rows);
+    }
+
+    // ===== EXCEL EXPORT LINK =====
+    function updateRFKExcelLink() {
+        var year = $('#filter-year').val() || '{{ date("Y") }}';
+        var month = $('#filter-month').val() || '{{ date("m") }}';
+        var opd = $('#filter-opd').val() || '';
+        var url = '{{ url("/dashboard/export/excel") }}?month=' + year + '-' + month + '&opd=' + opd;
+        $('#rfk-export-excel').attr('href', url);
+    }
+
+    // ===== PDF EXPORT (Client-side with html2canvas + jsPDF) =====
+    function exportRFKPDF() {
+        var btn = $('#rfk-export-pdf');
+        var origText = btn.html();
+        btn.html('<i class="fas fa-spinner fa-spin mr-1"></i> Generating...').prop('disabled', true);
+
+        var element = document.getElementById('dashboard-app-content');
+
+        html2canvas(element, {
+            scale: 1.5,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#f4f6f9', // Default AdminLTE body bg
+            scrollY: -window.scrollY,
+            windowHeight: element.scrollHeight
+        }).then(function(canvas) {
+            var imgData = canvas.toDataURL('image/jpeg', 0.85);
+            var pdf = new jspdf.jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            var pageWidth = pdf.internal.pageSize.getWidth();
+            var pageHeight = pdf.internal.pageSize.getHeight();
+            var margin = 10;
+            var contentWidth = pageWidth - (margin * 2);
+
+            var imgWidth = canvas.width;
+            var imgHeight = canvas.height;
+            var ratio = contentWidth / imgWidth;
+            var scaledHeight = imgHeight * ratio;
+
+            var position = 0;
+            var remainingHeight = scaledHeight;
+
+            while (remainingHeight > 0) {
+                if (position > 0) pdf.addPage();
+                pdf.addImage(imgData, 'JPEG', margin, margin - (position * (pageHeight - margin * 2)),
+                    contentWidth, scaledHeight);
+                remainingHeight -= (pageHeight - margin * 2);
+                position++;
+            }
+
+            var year = $('#filter-year').val() || '{{ date("Y") }}';
+            var month = $('#filter-month').val() || '{{ date("m") }}';
+            pdf.save('Laporan_Dashboard_' + year + '_' + month + '.pdf');
+
+            btn.html(origText).prop('disabled', false);
+            toastr.success('PDF berhasil diunduh');
+        }).catch(function(err) {
+            console.error('PDF export error:', err);
+            btn.html(origText).prop('disabled', false);
+            toastr.error('Gagal menghasilkan PDF');
+        });
     }
 </script>
 @endsection

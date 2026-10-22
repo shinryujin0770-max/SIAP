@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
 
 class RfkV2Controller extends Controller
@@ -35,7 +36,7 @@ class RfkV2Controller extends Controller
     protected function isOvertimePeriod(): bool
     {
         $now = Carbon::now();
-        $cutoffDay = (int) env('OVERTIME_RFK_DATE', 15);
+        $cutoffDay = (int) env('OVERTIME_RFK_DATE', 8);
 
         $cutoff = Carbon::create($now->year, $now->month, $cutoffDay, 23, 59, 59);
 
@@ -45,7 +46,7 @@ class RfkV2Controller extends Controller
     protected function calculatePeriodWindows(Carbon $period): array
     {
         $nextMonth = $period->copy()->addMonthNoOverflow();
-        $overtimeDaySetting = (int) env('OVERTIME_RFK_DATE', 15);
+        $overtimeDaySetting = (int) env('OVERTIME_RFK_DATE', 8);
         $overtimeDay = min($overtimeDaySetting, $nextMonth->daysInMonth);
         $windowEnd = $nextMonth->copy()->day($overtimeDay)->endOfDay();
 
@@ -75,10 +76,8 @@ class RfkV2Controller extends Controller
         $allowEdit = true;
         if ($isSuperadmin) {
             $allowEdit = true;
-        } elseif ($isAdminRfk) {
-            $allowEdit = $allowAdminEdit;
         } else {
-            $allowEdit = true;
+            $allowEdit = $allowAdminEdit;
         }
 
         $canToggle = $isSuperadmin && $isOvertime;
@@ -104,7 +103,7 @@ class RfkV2Controller extends Controller
 
         $allowEdit = $isSuperadmin
             ? true
-            : ($isAdminRfk ? $allowAdminEdit : true);
+            : $allowAdminEdit;
 
         return $this->serializeMeta([
             'is_overtime' => $isOvertime,
@@ -142,6 +141,26 @@ class RfkV2Controller extends Controller
         $data['is_overtime'] = $this->isOvertimePeriod();
 
         return view('pages/rfk/v2/browse', $data);
+    }
+
+    public function modernIndex()
+    {
+        $user = Auth::user();
+        $data['page_title'] = "RFK Modern & Interaktif";
+        $data['page_subtitle'] = "Tampilan Interaktif dan Memudahkan Pengoperasian";
+        $data['opds'] = Opd::where('rfk_code', '!=', '')->get();
+        $data['id_opd'] = $user ? $user->id_opd : null;
+        $data['is_admin_rfk'] = false;
+        if ($user instanceof User && method_exists($user, 'hasRole')) {
+            $data['is_admin_rfk'] = $user->hasRole('admin_rfk');
+        }
+        $data['is_superadmin'] = $user instanceof User && method_exists($user, 'hasRole')
+            ? $user->hasRole('superadmin')
+            : false;
+
+        $data['is_overtime'] = $this->isOvertimePeriod();
+
+        return view('pages/rfk/v2/modern/index', $data);
     }
 
     public function modalAdd()
@@ -196,7 +215,10 @@ class RfkV2Controller extends Controller
             'status' => 'draft',
         ]);
 
-        // Create initial OPD-level entry if no data exists
+        // Automatically ensure month data is populated from previous month or synchronized
+        RfkV2HierarchyService::ensureAndAutoSyncMonthData($rfk->id, $auth, $bulan, $tahun);
+
+        // Fallback: Create initial OPD-level entry if still no data exists (e.g. month 01 or no previous data)
         $hasData = RfkV2Detail::where('id_rfk', $rfk->id)->exists();
         if (!$hasData) {
             RfkV2Detail::create([
@@ -472,7 +494,7 @@ class RfkV2Controller extends Controller
         $rfk = RfkV2Detail::select('month', DB::raw("AVG(pagu_anggaran) as pagu_anggaran"), DB::raw("AVG(keuangan) as keuangan"), DB::raw("AVG(fisik) as fisik"))
             ->leftJoin('rfk', 'rfk_detail.id_rfk', '=', 'rfk.id')
             ->where('uraian', 'TOTAL')
-            ->where('year', Carbon::parse()->format('Y'))
+            ->where('rfk.year', Carbon::now()->format('Y'))
             ->groupBy('month');
         if ($opd) {
             $rfk = $rfk->where('id_opd', $opd);
@@ -590,6 +612,18 @@ class RfkV2Controller extends Controller
 
             Log::info('RFK record obtained', ['rfk_id' => $rfk->id, 'id_opd' => $id_opd, 'month' => $bulan, 'year' => $tahun]);
 
+            // Enforce edit lock: after period window ends, only superadmin (or opened overtime) may edit
+            if (!User::find(Auth::id())->hasRole('superadmin')) {
+                $windows = $this->calculatePeriodWindows(Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth());
+                $isOvertime = Carbon::now()->greaterThan($windows['window_end']);
+                if ($isOvertime && !$rfk->open_overtime) {
+                    return Response::json([
+                        'success' => false,
+                        'message' => 'Waktu pengisian data RFK sudah berakhir. Hubungi Super Admin untuk membuka kunci akses.',
+                    ], 403);
+                }
+            }
+
             if (in_array($attr['type'], ['opd', 'program'])) {
                 $attr['uraian'] = strtoupper($attr['uraian']);
             }
@@ -622,7 +656,14 @@ class RfkV2Controller extends Controller
                 }
             }
 
-            $attr['bulan_lalu'] = $bulan_lalu_calculated;
+            // All roles can override bulan_lalu if provided
+            $isSuperadminEdit = true;
+            if (isset($attr['bulan_lalu']) && $attr['bulan_lalu'] !== '' && $attr['bulan_lalu'] !== null) {
+                $attr['bulan_lalu'] = (float) str_replace(['.', ','], ['', '.'], $attr['bulan_lalu']);
+                Log::info('bulan_lalu manually overridden by superadmin', ['bulan_lalu' => $attr['bulan_lalu']]);
+            } else {
+                $attr['bulan_lalu'] = $bulan_lalu_calculated;
+            }
             $attr['sd_bulan_ini'] = $attr['bulan_lalu'] + $attr['bulan_ini'];
             $attr['sisa_anggaran'] = $attr['pagu_anggaran'] - $attr['sd_bulan_ini'];
             $attr['angkas'] = isset($attr['angkas']) ? (float) str_replace(['.', ','], ['', '.'], $attr['angkas']) : 0;
@@ -707,6 +748,9 @@ class RfkV2Controller extends Controller
                 }
             }
 
+            // Automatically cascade update any subsequent months (e.g. Sep, Oct, Nov, Dec)
+            RfkV2HierarchyService::cascadeUpdateSubsequentMonths($id_opd, $tahun, (int)$bulan);
+
             DB::commit();
 
             // Reload the saved record with fresh data
@@ -773,6 +817,192 @@ class RfkV2Controller extends Controller
         $data['type_label'] = RfkV2HierarchyService::getTypeLabel($rfk_detail->type);
 
         return view('pages/rfk/v2/delete', $data);
+    }
+
+    public function fetchTree(Request $request)
+    {
+        $user = Auth::user();
+        $isSuperadmin = false;
+        $isAdminRfk = false;
+
+        if ($user instanceof User && method_exists($user, 'hasRole')) {
+            $isSuperadmin = $user->hasRole('superadmin');
+            $isAdminRfk = $user->hasRole('admin_rfk');
+        }
+
+        $date = $request->input('month');
+        $periodDate = Carbon::parse($date)->startOfMonth();
+        $bulan = $periodDate->format('m');
+        $tahun = $periodDate->format('Y');
+
+        $opdId = $isSuperadmin ? $request->input('opd') : ($user ? $user->id_opd : null);
+        $defaultMeta = $this->buildMetaWithoutRfk($periodDate, $isSuperadmin, $isAdminRfk);
+
+        if (!$opdId) {
+            return response()->json(['data' => [], 'meta' => $defaultMeta]);
+        }
+
+        $opd = Opd::find($opdId);
+        if (!$opd || !$opd['rfk_code']) {
+            return response()->json(['data' => [], 'meta' => $defaultMeta]);
+        }
+
+        $rfk = RfkV2::firstOrCreate([
+            'id_opd' => $opdId,
+            'month' => $bulan,
+            'year' => $tahun,
+        ], [
+            'status' => 'draft',
+        ]);
+
+        RfkV2HierarchyService::ensureAndAutoSyncMonthData($rfk->id, $opdId, $bulan, $tahun);
+
+        $hasData = RfkV2Detail::where('id_rfk', $rfk->id)->exists();
+        if (!$hasData) {
+            RfkV2Detail::create([
+                'id_rfk' => $rfk->id,
+                'parent_id' => null,
+                'type' => 'opd',
+                'code' => $opd->rfk_code,
+                'uraian' => strtoupper($opd->name),
+                'year' => $tahun,
+                'pagu_anggaran' => 0,
+                'bulan_lalu' => 0,
+                'bulan_ini' => 0,
+                'sd_bulan_ini' => 0,
+                'sisa_anggaran' => 0,
+                'angkas' => 0,
+                'angkas_prosentase' => 0,
+                'keuangan' => 0,
+                'fisik' => 0,
+                'fisik_rupiah' => 0,
+                'keterangan' => '',
+            ]);
+        }
+
+        $meta = $this->buildAccessMeta($rfk, $periodDate, $isSuperadmin, $isAdminRfk);
+        $rankInfo = \App\Models\Opd::getRank($opdId, $bulan, $tahun);
+        $meta['rank_info'] = $rankInfo;
+
+        // Fetch previous month pagu map for history/delta display
+        $prevPaguMap = [];
+        $prevMonthInt = (int)$bulan - 1;
+        if ($prevMonthInt > 0) {
+            $prevMonthStr = str_pad($prevMonthInt, 2, '0', STR_PAD_LEFT);
+            $prevRfk = RfkV2::where(['id_opd' => $opdId, 'month' => $prevMonthStr, 'year' => $tahun])->first();
+            if ($prevRfk) {
+                $prevPaguMap = RfkV2Detail::where('id_rfk', $prevRfk->id)
+                    ->pluck('pagu_anggaran', 'code')
+                    ->toArray();
+            }
+        }
+
+        $details = RfkV2Detail::where('id_rfk', $rfk->id)->orderBy('code', 'asc')->get();
+
+        $byParent = [];
+        foreach ($details as $detail) {
+            $key = $detail->parent_id ? $detail->parent_id : 0;
+            $row = $detail->toArray();
+            $row['has_children'] = $detail->hasChildren();
+            $row['status'] = $rfk->status;
+            $row['open_overtime'] = $meta['open_overtime'];
+            $row['allow_edit'] = $meta['allow_edit'];
+            
+            // Attach pagu history info
+            $prevPagu = $prevPaguMap[$detail->code] ?? null;
+            $paguDelta = 0;
+            if ($prevPagu !== null) {
+                $paguDelta = (float)$detail->pagu_anggaran - (float)$prevPagu;
+            }
+            $row['prev_pagu'] = $prevPagu;
+            $row['pagu_delta'] = $paguDelta;
+
+            $byParent[$key][] = $row;
+        }
+
+        $build = function ($parentId) use (&$build, $byParent) {
+            $out = [];
+            foreach ($byParent[$parentId] ?? [] as $row) {
+                $children = $build($row['id']);
+                $row['children'] = $children;
+                $row['has_children'] = count($children) > 0;
+                $out[] = $row;
+            }
+            return $out;
+        };
+
+        $tree = $build(0);
+
+        return response()->json([
+            'data' => $tree,
+            'meta' => $meta,
+        ]);
+    }
+
+    public function paguHistory(Request $request)
+    {
+        $code = $request->input('code');
+        $opdId = $request->input('opd');
+        $year = $request->input('year');
+
+        if (!$code || !$opdId || !$year) {
+            return response()->json(['data' => []]);
+        }
+
+        $results = DB::table('rfk_v2')
+            ->join('rfk_v2_detail', 'rfk_v2.id', '=', 'rfk_v2_detail.id_rfk')
+            ->where('rfk_v2.id_opd', $opdId)
+            ->where('rfk_v2.year', $year)
+            ->where('rfk_v2_detail.code', $code)
+            ->select('rfk_v2.month', 'rfk_v2_detail.pagu_anggaran', 'rfk_v2_detail.uraian')
+            ->orderBy('rfk_v2.month', 'asc')
+            ->get();
+
+        $byMonth = [];
+        foreach ($results as $row) {
+            $byMonth[(int)$row->month] = (float)$row->pagu_anggaran;
+        }
+
+        $monthNames = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+
+        $history = [];
+        $lastPagu = null;
+        for ($m = 1; $m <= 12; $m++) {
+            $hasData = isset($byMonth[$m]);
+            $pagu = $hasData ? $byMonth[$m] : null;
+            $delta = 0;
+            $status = '-';
+            if ($pagu !== null) {
+                if ($lastPagu !== null) {
+                    $delta = $pagu - $lastPagu;
+                    if ($delta > 0) $status = 'bertambah';
+                    elseif ($delta < 0) $status = 'berkurang';
+                    else $status = 'tetap';
+                } else {
+                    $status = 'awal';
+                }
+                $lastPagu = $pagu;
+            }
+
+            $history[] = [
+                'month' => $m,
+                'month_name' => $monthNames[$m],
+                'pagu' => $pagu,
+                'delta' => $delta,
+                'status' => $status,
+                'has_data' => $hasData,
+            ];
+        }
+
+        return response()->json([
+            'code' => $code,
+            'uraian' => count($results) > 0 ? $results[0]->uraian : '',
+            'history' => $history,
+        ]);
     }
 
     public function fetchChildren(Request $request)
@@ -932,7 +1162,7 @@ class RfkV2Controller extends Controller
     {
         DB::beginTransaction();
         try {
-            $record = RfkV2Detail::find($id);
+            $record = RfkV2Detail::with('rfk')->find($id);
 
             if (!$record) {
                 return response()->json([
@@ -940,6 +1170,10 @@ class RfkV2Controller extends Controller
                     'message' => 'Record not found',
                 ], 404);
             }
+
+            $delOpdId = $record->rfk ? $record->rfk->id_opd : null;
+            $delMonth = $record->rfk ? $record->rfk->month : null;
+            $delYear = $record->rfk ? $record->rfk->year : null;
 
             $parent_id = $record->parent_id;
 
@@ -1010,6 +1244,10 @@ class RfkV2Controller extends Controller
                 }
             }
 
+            if ($delOpdId && $delMonth && $delYear) {
+                RfkV2HierarchyService::cascadeUpdateSubsequentMonths($delOpdId, $delYear, (int)$delMonth);
+            }
+
             DB::commit();
 
             return response()->json([
@@ -1070,6 +1308,12 @@ class RfkV2Controller extends Controller
             // Admin RFK: Only their own OPD
             $opds = Opd::where('id', $user->id_opd)->get();
         }
+
+        // Apply custom OPD sort order
+        $opdSortOrder = config('opd_sort_order');
+        $opds = $opds->sortBy(function ($opd) use ($opdSortOrder) {
+            return $opdSortOrder[$opd->id] ?? 999;
+        })->values();
 
         $data = [];
 
@@ -1147,6 +1391,12 @@ class RfkV2Controller extends Controller
             $opds = Opd::where('rfk_code', '!=', '')->get();
         }
 
+        // Apply custom OPD sort order
+        $opdSortOrder = config('opd_sort_order');
+        $opds = $opds->sortBy(function ($opd) use ($opdSortOrder) {
+            return $opdSortOrder[$opd->id] ?? 999;
+        })->values();
+
         $data = [];
 
         foreach ($opds as $opd) {
@@ -1220,6 +1470,12 @@ class RfkV2Controller extends Controller
             // Admin RFK: Only their own OPD
             $opds = Opd::where('id', $user->id_opd)->get();
         }
+
+        // Apply custom OPD sort order
+        $opdSortOrder = config('opd_sort_order');
+        $opds = $opds->sortBy(function ($opd) use ($opdSortOrder) {
+            return $opdSortOrder[$opd->id] ?? 999;
+        })->values();
 
         $data = [];
 

@@ -285,5 +285,146 @@ class RfkV2HierarchyService
             'year' => $previousDate->format('Y'),
         ])->first();
     }
+
+    /**
+     * Automatically ensure month data is populated from previous month or synchronized
+     *
+     * @param int $current_rfk_id
+     * @param int $opd_id
+     * @param string $month
+     * @param string $year
+     * @return void
+     */
+    public static function ensureAndAutoSyncMonthData($current_rfk_id, $opd_id, $month, $year)
+    {
+        $previousRfk = self::getPreviousMonthRfk($month, $year, $opd_id);
+        if (!$previousRfk) {
+            return;
+        }
+
+        $prevDetailCount = RfkV2Detail::where('id_rfk', $previousRfk->id)->count();
+        if ($prevDetailCount === 0) {
+            return;
+        }
+
+        $currentDetailCount = RfkV2Detail::where('id_rfk', $current_rfk_id)->count();
+        $isOnlyEmptyOpd = false;
+
+        if ($currentDetailCount <= 1) {
+            $onlyRecord = RfkV2Detail::where('id_rfk', $current_rfk_id)->first();
+            if (!$onlyRecord || ($onlyRecord->type === 'opd' && (float)$onlyRecord->pagu_anggaran == 0 && !$onlyRecord->children()->exists())) {
+                $isOnlyEmptyOpd = true;
+            }
+        }
+
+        if ($currentDetailCount === 0 || $isOnlyEmptyOpd) {
+            // Auto copy entire hierarchy from previous month
+            RfkV2Detail::where('id_rfk', $current_rfk_id)->delete();
+            self::copyMonthHierarchy($previousRfk->id, $current_rfk_id);
+        } else {
+            // Auto sync bulan_lalu from previous month's sd_bulan_ini
+            self::syncRfkDataWithPrevious($current_rfk_id, $previousRfk->id);
+        }
+    }
+
+    /**
+     * Sync a month's detail records with the previous month's cumulative realization
+     *
+     * @param int $current_rfk_id
+     * @param int $previous_rfk_id
+     * @return void
+     */
+    public static function syncRfkDataWithPrevious($current_rfk_id, $previous_rfk_id)
+    {
+        $currentDetails = RfkV2Detail::where('id_rfk', $current_rfk_id)->get();
+        if ($currentDetails->isEmpty()) {
+            return;
+        }
+
+        $prevDetails = RfkV2Detail::where('id_rfk', $previous_rfk_id)->get()->keyBy('code');
+        if ($prevDetails->isEmpty()) {
+            return;
+        }
+
+        $changed = false;
+
+        foreach ($currentDetails as $detail) {
+            if ($detail->code && isset($prevDetails[$detail->code])) {
+                $prev = $prevDetails[$detail->code];
+                $newBulanLalu = (float)$prev->sd_bulan_ini;
+
+                // Check if bulan_lalu differs from previous month's sd_bulan_ini
+                if (abs((float)$detail->bulan_lalu - $newBulanLalu) > 0.001) {
+                    $bulanIni = (float)$detail->bulan_ini;
+                    $pagu = (float)$detail->pagu_anggaran;
+                    $newSdBulanIni = $newBulanLalu + $bulanIni;
+                    $newSisa = $pagu - $newSdBulanIni;
+                    $newKeu = $pagu > 0 ? ($newSdBulanIni / $pagu * 100) : 0;
+
+                    $detail->update([
+                        'bulan_lalu' => $newBulanLalu,
+                        'sd_bulan_ini' => $newSdBulanIni,
+                        'sisa_anggaran' => $newSisa,
+                        'keuangan' => $newKeu,
+                    ]);
+                    $changed = true;
+                }
+            }
+        }
+
+        if ($changed) {
+            // Re-aggregate parent levels (sub_kegiatan -> kegiatan -> program -> opd)
+            $subKegiatans = RfkV2Detail::where('id_rfk', $current_rfk_id)
+                ->where('type', 'sub_kegiatan')
+                ->whereNotNull('parent_id')
+                ->get();
+
+            $parentIds = [];
+            foreach ($subKegiatans as $sub) {
+                $parentIds[$sub->parent_id] = true;
+            }
+
+            foreach (array_keys($parentIds) as $pid) {
+                self::updateParentAggregatesRecursive($pid);
+            }
+        }
+    }
+
+    /**
+     * Cascade update subsequent months (e.g. Sep, Oct, Nov, Dec) when an earlier month is edited
+     *
+     * @param int $opd_id
+     * @param string $year
+     * @param int $fromMonthNum
+     * @return void
+     */
+    public static function cascadeUpdateSubsequentMonths($opd_id, $year, $fromMonthNum)
+    {
+        for ($m = $fromMonthNum + 1; $m <= 12; $m++) {
+            $monthStr = str_pad($m, 2, '0', STR_PAD_LEFT);
+            $currentRfk = RfkV2::where([
+                'id_opd' => $opd_id,
+                'month' => $monthStr,
+                'year' => $year,
+            ])->first();
+
+            if (!$currentRfk) {
+                continue;
+            }
+
+            $prevMonthStr = str_pad($m - 1, 2, '0', STR_PAD_LEFT);
+            $prevRfk = RfkV2::where([
+                'id_opd' => $opd_id,
+                'month' => $prevMonthStr,
+                'year' => $year,
+            ])->first();
+
+            if (!$prevRfk) {
+                continue;
+            }
+
+            self::syncRfkDataWithPrevious($currentRfk->id, $prevRfk->id);
+        }
+    }
 }
 

@@ -32,6 +32,36 @@ class EventServiceProvider extends ServiceProvider
     {
         Event::listen(BuildingMenu::class, function (BuildingMenu $event) {
             $user = User::find(Auth::id());
+            if (!$user) return;
+
+            if ($user->hasRole('eksekutif')) {
+                $event->menu->add([
+                    'text'   => 'Command Center (GIS)',
+                    'url'    => 'dashboard-v3',
+                    'icon'   => 'fas fa-fw fa-map-marked-alt',
+                    'active' => ['dashboard-v3', 'dashboard-v3*'],
+                ]);
+                $event->menu->add([
+                    'text'   => 'Monitoring Realisasi OPD',
+                    'url'    => 'dashboard-v2',
+                    'icon'   => 'fas fa-fw fa-chart-area',
+                    'active' => ['dashboard-v2', 'dashboard-v2*'],
+                ]);
+                $event->menu->add([
+                    'text'   => 'Dashboard Makro',
+                    'url'    => 'dashboard',
+                    'icon'   => 'fas fa-fw fa-tachometer-alt',
+                ]);
+                $event->menu->add('LAPORAN EKSEKUTIF');
+                $event->menu->add([
+                    'text'   => 'Cetak Executive Sheet (1 Lembar)',
+                    'url'    => 'dashboard-v3/executive-report',
+                    'icon'   => 'fas fa-fw fa-file-pdf',
+                    'target' => '_blank',
+                ]);
+                return;
+            }
+
             $event->menu->add([
                 'text'        => 'Dashboard',
                 'url'         => 'dashboard',
@@ -42,6 +72,12 @@ class EventServiceProvider extends ServiceProvider
                 'url'    => 'dashboard-v2',
                 'icon'   => 'fas fa-fw fa-chart-area',
                 'active' => ['dashboard-v2', 'dashboard-v2*'],
+            ]);
+            $event->menu->add([
+                'text'   => 'Dashboard V3 (GIS)',
+                'url'    => 'dashboard-v3',
+                'icon'   => 'fas fa-fw fa-map-marked-alt',
+                'active' => ['dashboard-v3', 'dashboard-v3*'],
             ]);
             $event->menu->add('MENU UTAMA');
             if ($user->hasAnyRole(['admin_opd'])) {
@@ -103,7 +139,13 @@ class EventServiceProvider extends ServiceProvider
                     'text'        => 'RFK',
                     'url'         => 'rfk-v2',
                     'icon'        => 'fas fa-fw fa-briefcase',
-                    'active'      => ['rfk-v2', 'rfk-v2' . '*', 'regex:@^' . 'rfk-v2' . '/[a-zA-Z]/[0-9]+$@'],
+                    'active'      => ['rfk-v2', 'rfk-v2' . '*'],
+                ]);
+                $event->menu->add([
+                    'key'         => 'rfk-v2-modern',
+                    'text'        => 'RFK Modern & Interaktif',
+                    'url'         => 'rfk-v2/modern',
+                    'icon'        => 'fas fa-fw fa-rocket',
                 ]);
             }
             if ($user->hasRole('superadmin')) {

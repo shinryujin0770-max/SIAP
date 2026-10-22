@@ -23,10 +23,15 @@ Auth::routes();
 // Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 Route::get('/dashboard/rfk-data', 'DashboardController@getRFKData')->name('dashboard.rfk-data');
+Route::get('/dashboard/export/excel', 'DashboardController@exportExcel')->name('dashboard.export.excel');
 
 Route::get('/dashboard-v2', 'DashboardV2Controller@index')->name('dashboard-v2');
 Route::get('/dashboard-v2/api-data', 'DashboardV2Controller@getApiData')->name('dashboard-v2.api-data');
 Route::get('/dashboard-v2/export/excel', 'DashboardV2Controller@exportExcel')->name('dashboard-v2.export.excel');
+
+Route::get('/dashboard-v3', 'DashboardV3Controller@index')->name('dashboard-v3');
+Route::get('/dashboard-v3/api-data', 'DashboardV3Controller@getApiData')->name('dashboard-v3.api-data');
+Route::get('/dashboard-v3/executive-report', 'DashboardV3Controller@executiveReport')->name('dashboard-v3.executive-report');
 
 // project
 Route::group(['middleware' => ['permission:project-write']], function () {
@@ -82,8 +87,11 @@ Route::group(['middleware' => ['role:admin_rfk|superadmin']], function () {
     Route::get('/rfk/modalImport', [App\Http\Controllers\RfkController::class, 'modalImport'])->name('rfk.modalImport');
     Route::post('/rfk/import', [App\Http\Controllers\RfkController::class, 'import'])->name('rfk.import');
 
+    Route::get('/rfk-v2/modern', [App\Http\Controllers\RfkV2Controller::class, 'modernIndex'])->name('rfk-v2.modern');
     Route::get('/rfk-v2', [App\Http\Controllers\RfkV2Controller::class, 'index'])->name('rfk-v2');
     Route::get('/rfk-v2/browse', [App\Http\Controllers\RfkV2Controller::class, 'browse'])->name('rfk-v2.browse');
+    Route::get('/rfk-v2/fetchTree', [App\Http\Controllers\RfkV2Controller::class, 'fetchTree'])->name('rfk-v2.fetchTree');
+    Route::get('/rfk-v2/paguHistory', [App\Http\Controllers\RfkV2Controller::class, 'paguHistory'])->name('rfk-v2.paguHistory');
     Route::get('/rfk-v2/fetchChildren', [App\Http\Controllers\RfkV2Controller::class, 'fetchChildren'])->name('rfk-v2.fetchChildren');
     Route::get('/rfk-v2/opd-average', [App\Http\Controllers\RfkV2Controller::class, 'getOpdAverage'])->name('rfk-v2.opdAverage');
     Route::get('/rfk-v2/modalAdd', [App\Http\Controllers\RfkV2Controller::class, 'modalAdd'])->name('rfk-v2.modalAdd');
