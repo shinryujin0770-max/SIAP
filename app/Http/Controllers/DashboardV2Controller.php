@@ -328,7 +328,11 @@ class DashboardV2Controller extends Controller
             $keuDiff = $item['keuangan'] - $targetExpectedPct;
             $fisikDiff = $item['fisik'] - $targetExpectedPct;
 
-            if ($item['pagu_anggaran'] > 0 && ($keuDiff < -10 || $fisikDiff < -10)) {
+            if ($item['pagu_anggaran'] > 0 && ($keuDiff < 0 || $fisikDiff < 0)) {
+                $status = 'Perhatian';
+                if ($keuDiff < -10 || $fisikDiff < -10) {
+                    $status = 'Deviasi Kritis';
+                }
                 $watchlistKritis[] = [
                     'opd_id' => $item['opd_id'],
                     'opd_name' => $item['opd_name'],
@@ -337,7 +341,7 @@ class DashboardV2Controller extends Controller
                     'fisik' => $item['fisik'],
                     'keu_diff' => round($keuDiff, 1),
                     'fisik_diff' => round($fisikDiff, 1),
-                    'status' => 'Deviasi Kritis',
+                    'status' => $status,
                 ];
             }
         }
@@ -441,7 +445,8 @@ class DashboardV2Controller extends Controller
                 ->whereIn('id_project', $opdProjects)
                 ->count(DB::raw('DISTINCT id_project, type'));
 
-            $avgPct = round(($totalDocsFilled / ($totalProj * 5)) * 100, 1);
+            $divider = ($totalProj * 5);
+            $avgPct = $divider > 0 ? round(($totalDocsFilled / $divider) * 100, 1) : 0;
 
             $documentMatrix[] = [
                 'opd_id' => $oId,

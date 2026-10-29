@@ -24,8 +24,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        // Reset RFK otomatis setiap tanggal 1 Januari jam 00:00
+        $schedule->command('rfk:reset-new-year')->yearlyOn(1, 1, '00:00');
     }
 
     /**

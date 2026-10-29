@@ -105,7 +105,7 @@ class RfkV2HierarchyService
      * @param int|null $new_parent_id
      * @return int Count of copied records
      */
-    public static function copyMonthHierarchy($from_rfk_id, $to_rfk_id, $parent_id = null, $new_parent_id = null)
+    public static function copyMonthHierarchy($from_rfk_id, $to_rfk_id, $parent_id = null, $new_parent_id = null, $resetFinancials = false)
     {
         $count = 0;
 
@@ -131,23 +131,36 @@ class RfkV2HierarchyService
             $newRecord->year = $record->year;
 
             // Copy financial data with adjustments
-            $newRecord->pagu_anggaran = $record->pagu_anggaran;
-            $newRecord->bulan_lalu = $record->sd_bulan_ini; // Last month's cumulative becomes this month's "bulan_lalu"
-            $newRecord->bulan_ini = 0; // Reset current month
-            $newRecord->sd_bulan_ini = $record->sd_bulan_ini; // Keep cumulative
-            $newRecord->sisa_anggaran = $record->pagu_anggaran - $record->sd_bulan_ini;
-            $newRecord->angkas = $record->angkas;
-            $newRecord->angkas_prosentase = $record->angkas_prosentase;
-            $newRecord->keuangan = $record->keuangan;
-            $newRecord->fisik = $record->fisik;
-            $newRecord->fisik_rupiah = $record->fisik_rupiah;
+            if ($resetFinancials) {
+                $newRecord->pagu_anggaran = 0;
+                $newRecord->bulan_lalu = 0;
+                $newRecord->bulan_ini = 0;
+                $newRecord->sd_bulan_ini = 0;
+                $newRecord->sisa_anggaran = 0;
+                $newRecord->angkas = 0;
+                $newRecord->angkas_prosentase = 0;
+                $newRecord->keuangan = 0;
+                $newRecord->fisik = 0;
+                $newRecord->fisik_rupiah = 0;
+            } else {
+                $newRecord->pagu_anggaran = $record->pagu_anggaran;
+                $newRecord->bulan_lalu = $record->sd_bulan_ini; // Last month's cumulative becomes this month's "bulan_lalu"
+                $newRecord->bulan_ini = 0; // Reset current month
+                $newRecord->sd_bulan_ini = $record->sd_bulan_ini; // Keep cumulative
+                $newRecord->sisa_anggaran = $record->pagu_anggaran - $record->sd_bulan_ini;
+                $newRecord->angkas = $record->angkas;
+                $newRecord->angkas_prosentase = $record->angkas_prosentase;
+                $newRecord->keuangan = $record->keuangan;
+                $newRecord->fisik = $record->fisik;
+                $newRecord->fisik_rupiah = $record->fisik_rupiah;
+            }
             $newRecord->keterangan = '';
 
             $newRecord->save();
             $count++;
 
             // Recursively copy children
-            $count += self::copyMonthHierarchy($from_rfk_id, $to_rfk_id, $record->id, $newRecord->id);
+            $count += self::copyMonthHierarchy($from_rfk_id, $to_rfk_id, $record->id, $newRecord->id, $resetFinancials);
         }
 
         return $count;
@@ -277,6 +290,13 @@ class RfkV2HierarchyService
     public static function getPreviousMonthRfk($month, $year, $opd_id)
     {
         $currentDate = \Carbon\Carbon::create($year, $month, 1);
+        
+        // If current month is January (01), there is no previous month in the same year.
+        // Also do not carry over realization from December of the previous year.
+        if ($currentDate->format('m') === '01') {
+            return null;
+        }
+
         $previousDate = $currentDate->subMonth();
 
         return RfkV2::where([
@@ -297,6 +317,39 @@ class RfkV2HierarchyService
      */
     public static function ensureAndAutoSyncMonthData($current_rfk_id, $opd_id, $month, $year)
     {
+        if ($month === '01') {
+            // Ensure January structure exists from Dec prev year for THIS specific OPD
+            $prevYear = (int)$year - 1;
+            $decRfk = RfkV2::where([
+                'id_opd' => $opd_id,
+                'month' => '12',
+                'year' => (string)$prevYear,
+            ])->first();
+
+            if (!$decRfk) {
+                return;
+            }
+
+            $currentDetailCount = RfkV2Detail::where('id_rfk', $current_rfk_id)->count();
+            $hasRealData = false;
+            if ($currentDetailCount > 0) {
+                $records = RfkV2Detail::where('id_rfk', $current_rfk_id)->get();
+                foreach ($records as $r) {
+                    if ((float)$r->pagu_anggaran > 0 || (float)$r->bulan_ini > 0 || (float)$r->angkas > 0) {
+                        $hasRealData = true;
+                        break;
+                    }
+                }
+            }
+
+            // If no real data exists for this OPD, copy structure from its December previous year with reset
+            if (!$hasRealData) {
+                RfkV2Detail::where('id_rfk', $current_rfk_id)->delete();
+                self::copyMonthHierarchy($decRfk->id, $current_rfk_id, null, null, true);
+            }
+            return;
+        }
+
         $previousRfk = self::getPreviousMonthRfk($month, $year, $opd_id);
         if (!$previousRfk) {
             return;
@@ -354,14 +407,16 @@ class RfkV2HierarchyService
                 $newBulanLalu = (float)$prev->sd_bulan_ini;
 
                 // Check if bulan_lalu differs from previous month's sd_bulan_ini
-                if (abs((float)$detail->bulan_lalu - $newBulanLalu) > 0.001) {
+                // OR pagu_anggaran differs
+                if (abs((float)$detail->bulan_lalu - $newBulanLalu) > 0.001 || abs((float)$detail->pagu_anggaran - (float)$prev->pagu_anggaran) > 0.001) {
                     $bulanIni = (float)$detail->bulan_ini;
-                    $pagu = (float)$detail->pagu_anggaran;
+                    $pagu = (float)$prev->pagu_anggaran;
                     $newSdBulanIni = $newBulanLalu + $bulanIni;
                     $newSisa = $pagu - $newSdBulanIni;
                     $newKeu = $pagu > 0 ? ($newSdBulanIni / $pagu * 100) : 0;
 
                     $detail->update([
+                        'pagu_anggaran' => $pagu,
                         'bulan_lalu' => $newBulanLalu,
                         'sd_bulan_ini' => $newSdBulanIni,
                         'sisa_anggaran' => $newSisa,
@@ -400,6 +455,7 @@ class RfkV2HierarchyService
      */
     public static function cascadeUpdateSubsequentMonths($opd_id, $year, $fromMonthNum)
     {
+        \Log::info("Cascade update triggered", ['opd' => $opd_id, 'year' => $year, 'month' => $fromMonthNum]);
         for ($m = $fromMonthNum + 1; $m <= 12; $m++) {
             $monthStr = str_pad($m, 2, '0', STR_PAD_LEFT);
             $currentRfk = RfkV2::where([
@@ -423,6 +479,7 @@ class RfkV2HierarchyService
                 continue;
             }
 
+            \Log::info("Syncing month {$monthStr} with prev {$prevMonthStr}");
             self::syncRfkDataWithPrevious($currentRfk->id, $prevRfk->id);
         }
     }

@@ -13,4 +13,14 @@ class Project extends Model implements HasMedia
 
     protected $table = 'projects';
     public $guarded = [];
+
+    public function progressReports()
+    {
+        return $this->hasMany(ProgressReport::class, 'project_id');
+    }
+
+    public function latestProgress()
+    {
+        return $this->hasOne(ProgressReport::class, 'project_id')->latest('week_number');
+    }
 }

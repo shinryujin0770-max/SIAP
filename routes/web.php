@@ -14,6 +14,9 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/public-dashboard', 'PublicDashboardController@index')->name('public.dashboard');
+Route::get('/public-dashboard/data', 'PublicDashboardController@getData')->name('public.data');
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -91,6 +94,7 @@ Route::group(['middleware' => ['role:admin_rfk|superadmin']], function () {
     Route::get('/rfk-v2', [App\Http\Controllers\RfkV2Controller::class, 'index'])->name('rfk-v2');
     Route::get('/rfk-v2/browse', [App\Http\Controllers\RfkV2Controller::class, 'browse'])->name('rfk-v2.browse');
     Route::get('/rfk-v2/fetchTree', [App\Http\Controllers\RfkV2Controller::class, 'fetchTree'])->name('rfk-v2.fetchTree');
+    Route::get('/rfk-v2/rekapOpd', [App\Http\Controllers\RfkV2Controller::class, 'rekapOpd'])->name('rfk-v2.rekapOpd');
     Route::get('/rfk-v2/paguHistory', [App\Http\Controllers\RfkV2Controller::class, 'paguHistory'])->name('rfk-v2.paguHistory');
     Route::get('/rfk-v2/fetchChildren', [App\Http\Controllers\RfkV2Controller::class, 'fetchChildren'])->name('rfk-v2.fetchChildren');
     Route::get('/rfk-v2/opd-average', [App\Http\Controllers\RfkV2Controller::class, 'getOpdAverage'])->name('rfk-v2.opdAverage');
@@ -148,3 +152,17 @@ Route::group(['middleware' => ['permission:pengaturan-all']], function () {
 // Ajax
 Route::get('/partner/ajax/{id}', [App\Http\Controllers\PartnerController::class, 'ajax'])->name('partner.ajax');
 Route::get('/ajax/kelurahan/{id_kecamatan}', [App\Http\Controllers\AjaxController::class, 'kelurahan'])->name('ajax.kelurahan');
+
+// ================= PROGRESS & GEOFENCING MODULE =================
+Route::group(['middleware' => ['auth']], function () {
+    // Peta & Pelacakan (Semua role ter-auth bisa view)
+    Route::get('/progress/map', [App\Http\Controllers\ProgressReportController::class, 'mapIndex'])->name('progress.map');
+
+    // Input Laporan Mingguan (Pengawas)
+    Route::get('/progress/create/{projectId}', [App\Http\Controllers\ProgressReportController::class, 'create'])->name('progress.create');
+    Route::post('/progress/store/{projectId}', [App\Http\Controllers\ProgressReportController::class, 'store'])->name('progress.store');
+
+    // Dashboard Superadmin
+    Route::get('/progress/superadmin', [App\Http\Controllers\ProgressReportController::class, 'superadminDashboard'])
+        ->name('progress.superadmin')->middleware('role:superadmin|admin_opd');
+});

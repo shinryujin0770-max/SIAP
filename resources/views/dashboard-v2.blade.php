@@ -1270,7 +1270,7 @@
                         <h6 class="dv2-chart-title text-danger">
                             <i class="fas fa-exclamation-triangle mr-2"></i>Early Warning System (EWS) - OPD Deviasi Kritis
                         </h6>
-                        <div class="dv2-chart-subtitle">Daftar OPD dengan realisasi keuangan/fisik minus >10% dari target bulanan</div>
+                        <div class="dv2-chart-subtitle">Daftar OPD dengan realisasi keuangan/fisik di bawah target kumulatif bulan berjalan (deviasi minus)</div>
                     </div>
                     <span class="badge badge-danger badge-pill px-3 py-2" id="ews-count-badge">0 OPD</span>
                 </div>
@@ -2912,12 +2912,14 @@
             }
 
             watchlist.forEach(function(item) {
+                var badgeClass = item.status === 'Deviasi Kritis' ? 'badge-danger' : 'badge-warning text-dark';
+                var iconClass = item.status === 'Deviasi Kritis' ? 'fa-arrow-down' : 'fa-exclamation';
                 var tr = $('<tr>');
                 tr.append('<td class="font-weight-bold" style="font-size:0.85rem;">' + item.opd_name + '</td>');
                 tr.append('<td class="text-right small">' + fmtMoney(item.pagu_anggaran) + '</td>');
                 tr.append('<td class="text-center font-weight-bold text-danger small">' + fmtPct(item.keuangan) + '</td>');
                 tr.append('<td class="text-center font-weight-bold text-purple small">' + fmtPct(item.fisik) + '</td>');
-                tr.append('<td class="text-center"><span class="badge badge-danger px-2 py-1"><i class="fas fa-arrow-down mr-1"></i>' + item.keu_diff + '%</span></td>');
+                tr.append('<td class="text-center"><span class="badge ' + badgeClass + ' px-2 py-1"><i class="fas ' + iconClass + ' mr-1"></i>' + item.keu_diff + '% (' + item.status + ')</span></td>');
                 tbody.append(tr);
             });
         }
@@ -2936,8 +2938,16 @@
         var gisMapInstance = null;
         var gisMarkersGroup = null;
 
+        var pendingGisProjects = [];
+
         function renderGisMap(projects) {
             if (!document.getElementById('dv2-gis-map')) return;
+
+            // Check if tab-gis is active, else store and return
+            if (!$('#tab-gis').hasClass('active')) {
+                pendingGisProjects = projects;
+                return;
+            }
 
             if (!gisMapInstance) {
                 gisMapInstance = L.map('dv2-gis-map').setView([-8.0664, 111.9015], 11);
@@ -3103,10 +3113,16 @@
             $('#' + targetTab).addClass('active');
 
             // Invalidate Leaflet GIS map size if tab-gis is activated
-            if (targetTab === 'tab-gis' && gisMapInstance) {
-                setTimeout(function() {
-                    gisMapInstance.invalidateSize();
-                }, 200);
+            if (targetTab === 'tab-gis') {
+                if (pendingGisProjects.length > 0) {
+                    renderGisMap(pendingGisProjects);
+                    pendingGisProjects = [];
+                }
+                if (gisMapInstance) {
+                    setTimeout(function() {
+                        gisMapInstance.invalidateSize();
+                    }, 200);
+                }
             }
         });
     });

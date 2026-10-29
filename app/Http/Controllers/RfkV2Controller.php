@@ -528,7 +528,7 @@ class RfkV2Controller extends Controller
 
         // Basic validation rules for all types
         $rules = [
-            'code' => 'required',
+            'code' => 'nullable',
             'uraian' => 'required',
             'type' => 'required|in:opd,program,kegiatan,sub_kegiatan',
         ];
@@ -756,15 +756,51 @@ class RfkV2Controller extends Controller
             // Reload the saved record with fresh data
             $rfk_detail->refresh();
 
+            // Calculate history fields
+            $prevPagu = 0;
+            $prevMonthInt = (int)$bulan - 1;
+            if ($prevMonthInt > 0) {
+                $prevMonthStr = str_pad($prevMonthInt, 2, '0', STR_PAD_LEFT);
+                $prevRfk = RfkV2::where(['id_opd' => $id_opd, 'month' => $prevMonthStr, 'year' => $tahun])->first();
+                if ($prevRfk) {
+                    $prevRecord = RfkV2Detail::where('id_rfk', $prevRfk->id)
+                        ->where('code', $rfk_detail->code)
+                        ->first();
+                    if ($prevRecord) {
+                        $prevPagu = (float)$prevRecord->pagu_anggaran;
+                    }
+                }
+            }
+            $paguDelta = (float)$rfk_detail->pagu_anggaran - $prevPagu;
+
             // Convert saved data to array and add has_children
             $savedDataArray = $rfk_detail->toArray();
             $savedDataArray['has_children'] = $rfk_detail->children()->exists();
+            $savedDataArray['prev_pagu'] = $prevPagu;
+            $savedDataArray['pagu_delta'] = $paguDelta;
 
             // Convert updated parents to arrays with has_children
             $updatedParentsArray = [];
             foreach ($updatedParents as $parent) {
+                // Also get prev_pagu and pagu_delta for parents
+                $pPrevPagu = 0;
+                if ($prevMonthInt > 0) {
+                    $prevMonthStr = str_pad($prevMonthInt, 2, '0', STR_PAD_LEFT);
+                    $prevRfk = RfkV2::where(['id_opd' => $id_opd, 'month' => $prevMonthStr, 'year' => $tahun])->first();
+                    if ($prevRfk) {
+                        $pPrevRecord = RfkV2Detail::where('id_rfk', $prevRfk->id)
+                            ->where('code', $parent->code)
+                            ->first();
+                        if ($pPrevRecord) {
+                            $pPrevPagu = (float)$pPrevRecord->pagu_anggaran;
+                        }
+                    }
+                }
+                
                 $parentArray = $parent->toArray();
                 $parentArray['has_children'] = $parent->children()->exists();
+                $parentArray['prev_pagu'] = $pPrevPagu;
+                $parentArray['pagu_delta'] = (float)$parent->pagu_anggaran - $pPrevPagu;
                 $updatedParentsArray[] = $parentArray;
             }
 
@@ -1045,6 +1081,58 @@ class RfkV2Controller extends Controller
         }
 
         return response($data);
+    }
+
+    public function rekapOpd(Request $request)
+    {
+        $date = $request->input('month');
+        $periodDate = Carbon::parse($date)->startOfMonth();
+        $bulan = $periodDate->format('m');
+        $tahun = $periodDate->format('Y');
+
+        $opds = Opd::where('rfk_code', '!=', '')->get();
+        $opdSortOrder = config('opd_sort_order');
+        $opds = $opds->sortBy(function ($opd) use ($opdSortOrder) {
+            return $opdSortOrder[$opd->id] ?? 999;
+        })->values();
+
+        $rows = [];
+        foreach ($opds as $opd) {
+            $rfkOpd = RfkV2Detail::select(
+                'rfk_v2_detail.*'
+            )
+            ->leftJoin('rfk_v2', 'rfk_v2_detail.id_rfk', '=', 'rfk_v2.id')
+            ->where('rfk_v2.id_opd', $opd->id)
+            ->where('rfk_v2.month', $bulan)
+            ->where('rfk_v2.year', $tahun)
+            ->where('rfk_v2_detail.type', 'opd')
+            ->whereNull('rfk_v2_detail.parent_id')
+            ->first();
+
+            if ($rfkOpd) {
+                $item = $rfkOpd->toArray();
+                $item['opd_id'] = $opd->id;
+                $item['opd_name'] = $opd->name;
+                $rows[] = $item;
+            } else {
+                $rows[] = [
+                    'opd_id' => $opd->id,
+                    'opd_name' => $opd->name,
+                    'code' => $opd->rfk_code,
+                    'uraian' => strtoupper($opd->name),
+                    'pagu_anggaran' => 0,
+                    'bulan_lalu' => 0,
+                    'bulan_ini' => 0,
+                    'sd_bulan_ini' => 0,
+                    'sisa_anggaran' => 0,
+                    'keuangan' => 0,
+                    'fisik' => 0,
+                    'keterangan' => 'Belum ada data',
+                ];
+            }
+        }
+
+        return response()->json(['data' => $rows]);
     }
 
     public function getOpdAverage(Request $request)

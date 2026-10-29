@@ -82,7 +82,7 @@
                 <div class="col-md-4">
                     <label class="small text-muted mb-1">OPD</label>
                     <select id="filter-opd" class="form-control form-control-sm select2">
-                        <option value="">Pilih OPD</option>
+                        <option value="all">-- Semua OPD --</option>
                         @foreach($opds as $opd)
                         <option value="{{ $opd->id }}">{{ $opd->name }}</option>
                         @endforeach
@@ -92,8 +92,25 @@
                     <input type="hidden" id="filter-opd" value="{{ $id_opd }}">
                 @endif
                 <div class="col-md-3">
-                    <label class="small text-muted mb-1">Periode</label>
-                    <input type="month" id="filter-month" class="form-control form-control-sm" value="{{ date('Y-m', strtotime('-1 month')) }}">
+                    <label class="small text-muted mb-1">Bulan & Tahun</label>
+                    <div class="input-group input-group-sm">
+                        <select id="filter-month-select" class="form-control">
+                            <option value="01">Januari</option>
+                            <option value="02">Februari</option>
+                            <option value="03">Maret</option>
+                            <option value="04">April</option>
+                            <option value="05">Mei</option>
+                            <option value="06">Juni</option>
+                            <option value="07">Juli</option>
+                            <option value="08">Agustus</option>
+                            <option value="09">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                        <select id="filter-year-select" class="form-control"></select>
+                    </div>
+                    <input type="hidden" id="filter-month" value="{{ date('Y-m', strtotime('-1 month')) }}">
                 </div>
                 <div class="col-md-5">
                     <label class="small text-muted mb-1">Cari Uraian</label>
@@ -111,18 +128,31 @@
     <!-- Table -->
     <div class="card border-0 shadow-sm rounded-lg" id="table-card">
         <div class="card-header bg-white border-bottom py-3">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 12px;">
                 <div>
-                    <h5 class="font-weight-bold mb-0" id="card-title-opd">Pilih OPD</h5>
-                    <small class="text-muted" id="card-title-period">&nbsp;</small>
+                    <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
+                        <h5 class="font-weight-bold mb-0" id="card-title-opd">Pilih OPD</h5>
+                        <span id="countdown-badge" class="badge font-weight-bold px-2.5 py-1.5" style="display:none; font-size: 0.78rem;"></span>
+                    </div>
+                    <small class="text-muted d-block mt-1" id="card-title-period">&nbsp;</small>
                 </div>
-                <div class="text-center">
-                    <span id="load-status" class="badge badge-light border text-muted" style="display:none;">
+                <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap: 8px;">
+                    <span id="load-status" class="badge badge-light border text-muted px-2.5 py-2" style="display:none; font-size: 0.8rem; line-height: 1.2;">
                         <i class="fas fa-circle-notch fa-spin mr-1"></i> Memuat data...
                     </span>
-                    <button id="btn-toggle-overtime" class="btn btn-warning btn-xs ml-2 font-weight-bold" style="display:none;" onclick="toggleOvertimeAccess()">
+                    <button id="btn-toggle-overtime" class="btn btn-warning btn-sm font-weight-bold shadow-sm" style="display:none; border-radius: 6px;" onclick="toggleOvertimeAccess()">
                         <i class="fas fa-lock-open mr-1"></i> Buka Kunci Akses OPD
                     </button>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-primary dropdown-toggle font-weight-bold shadow-sm" style="border-radius: 6px;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-download mr-1"></i> Download Laporan
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right shadow border-0" style="border-radius: 8px;">
+                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="downloadLaporan(2)"><i class="fas fa-list-ul mr-2 text-primary"></i> Laporan Rekap</a>
+                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="downloadLaporan(3)"><i class="fas fa-sitemap mr-2 text-success"></i> Laporan per Program</a>
+                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="downloadLaporan(1)"><i class="fas fa-file-alt mr-2 text-dark"></i> Laporan Lengkap</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -143,6 +173,8 @@
                         <th style="min-width: 110px;">Bulan Ini</th>
                         <th style="min-width: 120px;">s.d. Bulan Ini</th>
                         <th style="min-width: 120px;">Sisa Anggaran</th>
+                        <th style="min-width: 140px;">Target Realisasi s.d. Bulan Ini</th>
+                        <th style="min-width: 120px;">Selisih</th>
                         <th style="width: 100px;">Keuangan</th>
                         <th style="width: 88px;">Fisik</th>
                         <th style="min-width: 150px;">Keterangan</th>
@@ -174,8 +206,8 @@
                     <input type="hidden" id="edit-type" name="type">
                     <input type="hidden" id="edit-parent-id" name="parent_id">
                     <div class="form-group mb-3">
-                        <label class="small text-muted mb-1">Uraian</label>
-                        <p id="edit-uraian-text" class="font-weight-bold mb-0"></p>
+                        <label class="small font-weight-bold">Uraian</label>
+                        <input type="text" class="form-control" id="edit-uraian" name="uraian">
                     </div>
                     <div class="row">
                         <div class="col-md-6">
@@ -226,6 +258,15 @@
                                 <div class="input-group input-group-merge border rounded overflow-hidden">
                                     <div class="input-group-prepend"><span class="input-group-text bg-light border-0">Rp</span></div>
                                     <input type="text" class="form-control border-0 bg-light" id="edit-sisa" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="edit-angkas-container">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold">Target Realisasi s.d. Bulan Ini</label>
+                                <div class="input-group input-group-merge border border-success rounded overflow-hidden">
+                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-0 text-success">Rp</span></div>
+                                    <input type="text" class="form-control border-0 uang-input font-weight-bold" id="edit-angkas" name="angkas">
                                 </div>
                             </div>
                         </div>
@@ -327,7 +368,7 @@
     .bg-info-soft    { background: #e5f6fb; }
     .bg-danger-soft  { background: #fdeaea; }
 
-    .rfk-scroll { max-height: 68vh; overflow: auto; }
+    .rfk-scroll { max-height: calc(100vh - 90px); overflow: auto; }
     #modern-table thead th {
         position: sticky;
         top: 0;
@@ -379,12 +420,39 @@
     let loadSeq = 0;
 
     $(document).ready(function() {
-        if (IS_SUPERADMIN) {
-            $('.select2').select2({ width: '100%' });
-            if (!$('#filter-opd').val()) {
-                const firstOpt = $('#filter-opd option').eq(1).val();
-                if (firstOpt) $('#filter-opd').val(firstOpt);
+        // Input formatter for currency
+        $(document).on('focus', '.uang-input', function() {
+            let val = $(this).val().replace(/\./g, '');
+            $(this).val(val);
+        }).on('blur', '.uang-input', function() {
+            let val = $(this).val().replace(/[^0-9]/g, '');
+            if (val) {
+                $(this).val(new Intl.NumberFormat('id-ID').format(val));
             }
+        });
+
+        // Populate Year dropdowns
+        const currentYearNum = new Date().getFullYear();
+        let yearOpts = '';
+        for (let y = currentYearNum - 3; y <= currentYearNum + 1; y++) {
+            yearOpts += `<option value="${y}">${y}</option>`;
+        }
+        $('#filter-year-select').html(yearOpts);
+
+        // Set initial values based on hidden #filter-month
+        const initialVal = $('#filter-month').val() || '{{ date("Y-m", strtotime("-1 month")) }}';
+        const [initY, initM] = initialVal.split('-');
+        $('#filter-year-select').val(initY);
+        $('#filter-month-select').val(initM);
+
+        $('#filter-month-select, #filter-year-select').on('change', function() {
+            const y = $('#filter-year-select').val();
+            const m = $('#filter-month-select').val();
+            $('#filter-month').val(y + '-' + m).trigger('change');
+        });
+
+        if (IS_SUPERADMIN) {
+            $('.select2').select2({ width: '100%', allowClear: true });
         } else if (DEFAULT_OPD_ID) {
             $('#filter-opd').val(String(DEFAULT_OPD_ID));
         }
@@ -400,7 +468,12 @@
             renderTable();
         });
 
-        $('#filter-opd, #filter-month').on('change', getListData);
+        $('#filter-opd, #filter-month').on('change', function() {
+            getListData();
+            updateDeadlineCountdown();
+        });
+        updateDeadlineCountdown();
+        setInterval(updateDeadlineCountdown, 60000); // Update setiap menit
 
         $('#quick-edit-form').on('submit', function(e) { e.preventDefault(); saveData(); });
         $('#add-form').on('submit', function(e) { e.preventDefault(); saveNew(); });
@@ -414,14 +487,132 @@
         $('#add-pagu, #add-bulan-ini').on('input', function() { formatMoneyInput(this); });
     });
 
+    function updateDeadlineCountdown() {
+        const selectedMonthVal = $('#filter-month').val();
+        if (!selectedMonthVal) return;
+
+        const now = new Date();
+        const [selYear, selMonth] = selectedMonthVal.split('-').map(Number);
+        
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+
+        const badge = $('#countdown-badge');
+
+        // Batas input: Tanggal 7 tiap bulan
+        const deadline = new Date(selYear, selMonth - 1, 7, 23, 59, 59);
+        
+        if (selYear < currentYear || (selYear === currentYear && selMonth < currentMonth)) {
+            badge.attr('class', 'badge badge-secondary px-2.5 py-1.5 font-weight-bold')
+                 .html('<i class="fas fa-check-circle mr-1"></i> Periode Selesai')
+                 .show();
+            return;
+        }
+
+        if (selYear > currentYear || (selYear === currentYear && selMonth > currentMonth)) {
+            badge.attr('class', 'badge badge-info px-2.5 py-1.5 font-weight-bold')
+                 .html('<i class="fas fa-calendar-alt mr-1"></i> Periode Belum Dibuka')
+                 .show();
+            return;
+        }
+
+        const diffMs = deadline - now;
+        if (diffMs > 0) {
+            const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            
+            if (days === 0) {
+                badge.attr('class', 'badge badge-danger px-2.5 py-1.5 font-weight-bold')
+                     .html(`<i class="fas fa-exclamation-triangle mr-1"></i> Batas Input ${hours} Jam Lagi`)
+                     .show();
+            } else if (days <= 2) {
+                badge.attr('class', 'badge badge-warning text-dark px-2.5 py-1.5 font-weight-bold')
+                     .html(`<i class="fas fa-clock mr-1"></i> ${days} Hari ${hours} Jam Lagi`)
+                     .show();
+            } else {
+                badge.attr('class', 'badge badge-info px-2.5 py-1.5 font-weight-bold')
+                     .html(`<i class="fas fa-clock mr-1"></i> ${days} Hari Lagi`)
+                     .show();
+            }
+        } else {
+            badge.attr('class', 'badge badge-danger px-2.5 py-1.5 font-weight-bold')
+                 .html('<i class="fas fa-lock mr-1"></i> Akses Terkunci')
+                 .show();
+        }
+    }
+
+    function currentOpdValue() {
+        const val = $('#filter-opd').val();
+        return (val === 'all' || !val) ? '' : val;
+    }
+
     async function getListData() {
-        const opd = $('#filter-opd').val();
         const month = $('#filter-month').val();
         const seq = ++loadSeq;
 
+        const opd = currentOpdValue();
         if (!opd) {
+            $('#card-title-opd').text('Semua OPD');
+            $('#card-title-period').text(formatMonthLabel(month));
             $('#modern-tbody').empty();
-            $('#table-card').hide();
+            $('#load-status').show().html('<i class="fas fa-spinner fa-spin mr-1"></i> Memuat rekap OPD...');
+            
+            $.ajax({
+                url: "{{ route('rfk-v2.rekapOpd') }}",
+                method: 'GET',
+                data: { month: month },
+                success: function(res) {
+                    $('#load-status').hide();
+                    let rows = '';
+                    let totalPagu = 0;
+                    let totalSdBulanIni = 0;
+                    let totalSisa = 0;
+                    let totalFisikRupiah = 0;
+
+                    res.data.forEach(r => {
+                        const pagu = parseFloat(r.pagu_anggaran || 0);
+                        const sdBulanIni = parseFloat(r.sd_bulan_ini || 0);
+                        const sisa = parseFloat(r.sisa_anggaran || 0);
+                        const fisik = parseFloat(r.fisik || 0);
+
+                        totalPagu += pagu;
+                        totalSdBulanIni += sdBulanIni;
+                        totalSisa += sisa;
+                        totalFisikRupiah += (fisik / 100) * pagu;
+
+                        rows += `<tr style="cursor:pointer" onclick="$('#filter-opd').val('${r.opd_id}').trigger('change');">
+                            <td class="text-center">-</td>
+                            <td class="text-center"><button class="btn btn-primary btn-xs" type="button" onclick="event.stopPropagation(); $('#filter-opd').val('${r.opd_id}').trigger('change');">Pilih</button></td>
+                            <td>${r.code || ''}</td>
+                            <td>${r.opd_name}</td>
+                            <td class="text-right">${formatCurrency(r.pagu_anggaran)}</td>
+                            <td class="text-center pagu-history-td" style="display:${showPaguHistory ? '' : 'none'}">-</td>
+                            <td class="text-right">${formatCurrency(r.bulan_lalu)}</td>
+                            <td class="text-right">${formatCurrency(r.bulan_ini)}</td>
+                            <td class="text-right">${formatCurrency(r.sd_bulan_ini)}</td>
+                            <td class="text-right">${formatCurrency(r.sisa_anggaran)}</td>
+                            <td class="text-right font-weight-bold text-muted">${formatCurrency(r.angkas || 0)}</td>
+                            <td class="text-right font-weight-bold">${renderSelisihTarget({ type: 'opd', sd_bulan_ini: r.sd_bulan_ini, angkas: r.angkas })}</td>
+                            <td class="text-center">${moneyPill(r.keuangan)}</td>
+                            <td class="text-center">${fisikPill(r.fisik)}</td>
+                            <td>${r.keterangan || ''}</td>
+                        </tr>`;
+                    });
+
+                    const totalKeuPct = totalPagu > 0 ? (totalSdBulanIni / totalPagu) * 100 : 0;
+                    const totalFisikPct = totalPagu > 0 ? (totalFisikRupiah / totalPagu) * 100 : 0;
+
+                    updateStatsFromSummary({
+                        pagu_anggaran: totalPagu,
+                        keuangan: totalKeuPct,
+                        fisik: totalFisikPct,
+                        sisa_anggaran: totalSisa
+                    });
+
+                    $('#modern-tbody').append(rows);
+                    $('#table-card').show();
+                }
+            });
             return;
         }
 
@@ -570,12 +761,16 @@
 
     function updateStats() {
         if (!opdSummary) return;
-        $('#stat-total-pagu').text(formatCurrency(opdSummary.pagu_anggaran));
-        $('#stat-keu-percent').text(parseFloat(opdSummary.keuangan).toFixed(2) + '%');
-        $('#stat-keu-progress').css('width', Math.min(opdSummary.keuangan, 100) + '%');
-        $('#stat-fisik-percent').text(parseFloat(opdSummary.fisik).toFixed(2) + '%');
-        $('#stat-fisik-progress').css('width', Math.min(opdSummary.fisik, 100) + '%');
-        $('#stat-sisa-anggaran').text(formatCurrency(opdSummary.sisa_anggaran));
+        updateStatsFromSummary(opdSummary);
+    }
+
+    function updateStatsFromSummary(summary) {
+        $('#stat-total-pagu').text(formatCurrency(summary.pagu_anggaran));
+        $('#stat-keu-percent').text(parseFloat(summary.keuangan).toFixed(2) + '%');
+        $('#stat-keu-progress').css('width', Math.min(summary.keuangan, 100) + '%');
+        $('#stat-fisik-percent').text(parseFloat(summary.fisik).toFixed(2) + '%');
+        $('#stat-fisik-progress').css('width', Math.min(summary.fisik, 100) + '%');
+        $('#stat-sisa-anggaran').text(formatCurrency(summary.sisa_anggaran));
     }
 
     // ================= RENDER =================
@@ -584,17 +779,17 @@
         const tbody = $('#modern-tbody');
         tbody.empty();
 
-        if (!treeData.length) {
-            tbody.html('<tr><td colspan="12" class="text-center text-muted py-4">Belum ada data program pada periode ini.</td></tr>');
+        if (!opdSummary) {
+            tbody.html('<tr><td colspan="15" class="text-center text-muted py-4">Data RFK belum tersedia.</td></tr>');
             return;
         }
 
-        if (opdSummary) {
-            tbody.append(renderRow(opdSummary, 0, search));
-        }
+        // Render OPD Row
+        tbody.append(renderRow(opdSummary, 0, search));
 
+        // Render OPD Children
         let visible = 0;
-        treeData.forEach(program => {
+        (opdSummary.children || []).forEach(program => {
             const rows = renderSubtree(program, 1, search, true);
             if (rows) {
                 tbody.append(rows.html);
@@ -602,8 +797,10 @@
             }
         });
 
-        if (visible === 0) {
-            tbody.append('<tr><td colspan="12" class="text-center text-muted py-4">Tidak ada data yang cocok dengan pencarian/filter.</td></tr>');
+        if (visible === 0 && !search) {
+            tbody.append('<tr><td colspan="15" class="text-center text-muted py-4">Belum ada data program pada periode ini.</td></tr>');
+        } else if (visible === 0) {
+            tbody.append('<tr><td colspan="15" class="text-center text-muted py-4">Tidak ada data yang cocok dengan pencarian/filter.</td></tr>');
         }
     }
 
@@ -656,6 +853,10 @@
 
         const bold = hasChildren ? 'font-weight-bold' : '';
 
+        const angkasDisplay = node.type === 'opd' 
+            ? formatCurrency(node.angkas || 0) 
+            : '-';
+
         return `
             <tr class="row-level-${node.type}" data-id="${node.id}">
                 <td class="text-center" onclick="toggleRow(${node.id}, event)">${expander}</td>
@@ -668,11 +869,30 @@
                 <td class="text-right">${formatCurrency(node.bulan_ini)}</td>
                 <td class="text-right">${formatCurrency(node.sd_bulan_ini)}</td>
                 <td class="text-right">${formatCurrency(node.sisa_anggaran)}</td>
+                <td class="text-right font-weight-bold text-muted">${angkasDisplay}</td>
+                <td class="text-right font-weight-bold">${renderSelisihTarget(node)}</td>
                 <td class="text-center">${moneyPill(node.keuangan)}</td>
                 <td class="text-center">${fisikPill(node.fisik)}</td>
                 <td class="text-muted ket-td" title="${escapeAttr(node.keterangan || '')}">${escapeHtml(node.keterangan || '')}</td>
             </tr>
         `;
+    }
+
+    function renderSelisihTarget(node) {
+        // Jika bukan tipe OPD, tampilkan strip
+        if (node.type !== 'opd') return '<span class="text-muted">-</span>';
+
+        const realisasi = parseFloat(node.sd_bulan_ini) || 0;
+        const target = parseFloat(node.angkas) || 0;
+        const selisih = realisasi - target;
+        
+        if (target === 0) return '<span class="text-muted">-</span>';
+        
+        if (selisih < 0) {
+            return `<span class="text-danger" title="Kurang dari Target"><i class="fas fa-arrow-down mr-1"></i>${formatCurrency(selisih)}</span>`;
+        } else {
+            return `<span class="text-success" title="Memenuhi Target"><i class="fas fa-arrow-up mr-1"></i>+${formatCurrency(selisih)}</span>`;
+        }
     }
 
     function actionButtons(node) {
@@ -691,8 +911,9 @@
             html += `<button class="btn btn-success btn-xs mr-1${dClass}" title="${lockTitle || 'Tambah Sub Kegiatan'}" ${dAttr} onclick="openAdd(${node.id}, 'kegiatan', event)"><i class="fa fa-plus"></i></button>`;
         }
 
+        html += `<button class="btn btn-info btn-xs mr-1${dClass}" title="${lockTitle || 'Edit'}" ${dAttr} onclick="openEditById(${node.id}, event)"><i class="fa fa-edit"></i></button>`;
+
         if (node.type !== 'opd') {
-            html += `<button class="btn btn-info btn-xs mr-1${dClass}" title="${lockTitle || 'Edit'}" ${dAttr} onclick="openEditById(${node.id}, event)"><i class="fa fa-edit"></i></button>`;
             html += `<button class="btn btn-danger btn-xs${dClass}" title="${lockTitle || 'Hapus'}" ${dAttr} onclick="removeNode(${node.id}, event)"><i class="fa fa-trash"></i></button>`;
         }
 
@@ -727,7 +948,9 @@
             return;
         }
 
-        if (node.type === 'opd') return;
+        if (node.type === 'opd') {
+            // OPD can be edited by anyone (user opd can edit target angkas)
+        }
 
         openEdit(node);
     }
@@ -738,7 +961,7 @@
         $('#edit-code').val(item.code || '');
         $('#edit-type').val(item.type);
         $('#edit-parent-id').val(item.parent_id || '');
-        $('#edit-uraian-text').text(item.uraian || '');
+        $('#edit-uraian').val(item.uraian || '');
         $('#edit-modal-title').text('Edit ' + typeLabel(item.type));
         $('#edit-modal-breadcrumb').text(buildBreadcrumb(item));
         $('#edit-bulan-lalu').val(formatToCurrencyInput(item.bulan_lalu));
@@ -746,6 +969,14 @@
         $('#edit-pagu').val(formatToCurrencyInput(item.pagu_anggaran));
         $('#edit-fisik').val(parseFloat(item.fisik) || 0);
         $('#edit-keterangan').val(item.keterangan || '');
+        $('#edit-angkas').val(formatToCurrencyInput(item.angkas || 0));
+        
+        if (item.type === 'opd') {
+            $('#edit-angkas-container').show();
+        } else {
+            $('#edit-angkas-container').hide();
+        }
+
         $('#edit-modal-title').data('original', item);
 
         calculateSd();
@@ -787,12 +1018,13 @@
         const payload = {
             id: original.id,
             code: original.code || '',
-            uraian: original.uraian || '',
+            uraian: $('#edit-uraian').val() || '',
             type: original.type,
             parent_id: original.parent_id || null,
             pagu_anggaran: pagu || '0',
             bulan_lalu: bulanLalu || '0',
             bulan_ini: bulanIni || '0',
+            angkas: original.type === 'opd' ? (parseCurrency($('#edit-angkas').val()) || '0') : '0',
             fisik: parseFloat($('#edit-fisik').val()) || '0',
             keterangan: $('#edit-keterangan').val() || '',
             month: $('#filter-month').val(),
@@ -821,12 +1053,41 @@
                     // Update local node store from saved server response (no full reload)
                     if (res.data) {
                         const saved = res.data;
+                        if (!nodeStore[saved.id]) {
+                            // New record, fetch fresh data
+                            if (onSuccess) onSuccess();
+                            getListData();
+                            return;
+                        }
                         const target = nodeStore[saved.id];
                         if (target) {
-                            ['code','uraian','type','parent_id','pagu_anggaran','bulan_lalu','bulan_ini','sd_bulan_ini','sisa_anggaran','keuangan','fisik','keterangan','angkas','angkas_prosentase','fisik_rupiah'].forEach(function(k) {
+                            ['code','uraian','type','parent_id','pagu_anggaran','bulan_lalu','bulan_ini','sd_bulan_ini','sisa_anggaran','keuangan','fisik','keterangan','angkas','angkas_prosentase','fisik_rupiah','prev_pagu','pagu_delta','has_children'].forEach(function(k) {
                                 if (typeof saved[k] !== 'undefined') target[k] = saved[k];
                             });
                         }
+                        // Update opdSummary if it matches
+                        if (opdSummary && opdSummary.id == saved.id) {
+                            ['pagu_anggaran','bulan_lalu','bulan_ini','sd_bulan_ini','sisa_anggaran','keuangan','fisik','prev_pagu','pagu_delta'].forEach(function(k) {
+                                if (typeof saved[k] !== 'undefined') opdSummary[k] = saved[k];
+                            });
+                        }
+                    }
+
+                    // Update parents if any
+                    if (res.updated_parents) {
+                        res.updated_parents.forEach(function(p) {
+                            const targetP = nodeStore[p.id];
+                            if (targetP) {
+                                ['pagu_anggaran','bulan_lalu','bulan_ini','sd_bulan_ini','sisa_anggaran','keuangan','fisik','fisik_rupiah','prev_pagu','pagu_delta'].forEach(function(k) {
+                                    if (typeof p[k] !== 'undefined') targetP[k] = p[k];
+                                });
+                            }
+                            if (opdSummary && opdSummary.id == p.id) {
+                                ['pagu_anggaran','bulan_lalu','bulan_ini','sd_bulan_ini','sisa_anggaran','keuangan','fisik','prev_pagu','pagu_delta'].forEach(function(k) {
+                                    if (typeof p[k] !== 'undefined') opdSummary[k] = p[k];
+                                });
+                            }
+                        });
                     }
                     
                     // Refresh UI only
@@ -884,7 +1145,7 @@
         }
 
         const payload = {
-            code: '',
+            code: $('#add-code').val() || '',
             uraian: uraian,
             type: $('#add-type').val(),
             parent_id: $('#add-parent-id').val(),
@@ -968,6 +1229,16 @@
 
     function hideLoadingOverlay() {
         $('#loading-overlay').hide();
+    }
+
+    function downloadLaporan(type) {
+        const month = $('#filter-month').val();
+        const rawOpd = $('#filter-opd').val();
+        const opd = (rawOpd === 'all' || !rawOpd) ? '' : rawOpd;
+        let url = "{{ route('rfk-v2.export', ':type') }}".replace(':type', type);
+        url += '?month=' + encodeURIComponent(month);
+        if (opd) url += '&opd=' + encodeURIComponent(opd);
+        window.open(url, '_blank');
     }
 
     function toggleOvertimeAccess() {
